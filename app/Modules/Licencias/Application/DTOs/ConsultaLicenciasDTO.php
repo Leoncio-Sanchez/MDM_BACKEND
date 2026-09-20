@@ -5,6 +5,6 @@ final readonly class ConsultaLicenciasDTO {
     public function __construct(public ?string $numeroLicencia) {}
     /** @param array<string, mixed> $data */
     public static function fromArray(array $data): self {
-        return new self(numeroLicencia: isset($data['numero_licencia']) ? (string) $data['numero_licencia'] : null);
+        return new self(numeroLicencia: isset($data['numero']) ? (string) $data['numero'] : null);
     }
 }

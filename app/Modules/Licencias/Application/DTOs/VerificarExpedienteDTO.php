@@ -11,7 +11,7 @@ final readonly class VerificarExpedienteDTO {
     /** @param array<string, mixed> $data */
     public static function fromArray(array $data): self {
         return new self(
-            numero: (string) ($data['numero'] ?? ''),
+            numero: (string) ($data['numero_expediente'] ?? ''),
             anio: (string) ($data['anio'] ?? '')
         );
     }

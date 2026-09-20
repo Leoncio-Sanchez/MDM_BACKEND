@@ -2,27 +2,34 @@
 declare(strict_types=1);
 namespace App\Modules\Licencias\Application\DTOs;
 
-final readonly class ModificarLicenciaDTO {
+use Carbon\CarbonImmutable;
+
+final readonly class ModificarLicenciaDTO
+{
     public function __construct(
         public int $licenciaId,
+        public int $numeroLicencia,
         public string $nombreComercial,
         public int $tipoLicenciaId,
-        public ?int $titularId,
-        public ?int $expedienteId,
-        public ?int $nivelRiesgoId,
-        public ?int $zonificacionId
+        public int $titularId,
+        public int $conductorId,
+        public int $expedienteId,
+        public int $nivelRiesgoId,
+        public int $zonificacionId,
+        public ?int $licenciaPrincipalId = null,
+        public bool $esVigenciaIndeterminada = true,
+        public ?CarbonImmutable $fechaInicioVigencia = null,
+        public ?CarbonImmutable $fechaFinVigencia = null,
+        public string $actividad = '',
+        public string $direccion = '',
+        public int $horaDesde = 0,
+        public int $horaHasta = 0,
+        public string $resolucionNumero = '',
+        public float $area = 0.0,
+        public string $numeroReciboPago = '',
+        public ?string $observaciones = null,
+        public bool $sePuedePublicar = false,
+        /** @var int[] */
+        public array $giros = [],
     ) {}
-
-    /** @param array<string, mixed> $data */
-    public static function fromArray(array $data): self {
-        return new self(
-            licenciaId: (int) ($data['licencia_id'] ?? 0),
-            nombreComercial: (string) ($data['nombre_comercial'] ?? ''),
-            tipoLicenciaId: (int) ($data['tipo_licencia_id'] ?? 0),
-            titularId: isset($data['titular_id']) ? (int) $data['titular_id'] : null,
-            expedienteId: isset($data['expediente_id']) ? (int) $data['expediente_id'] : null,
-            nivelRiesgoId: isset($data['nivel_riesgo_id']) ? (int) $data['nivel_riesgo_id'] : null,
-            zonificacionId: isset($data['zonificacion_id']) ? (int) $data['zonificacion_id'] : null
-        );
-    }
 }

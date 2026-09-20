@@ -17,6 +17,8 @@ use Illuminate\Support\ServiceProvider;
 
 final class LicenciasServiceProvider extends ServiceProvider {
     public function register(): void {
+        $this->app->bind(\App\Modules\Licencias\Domain\Contracts\LicenciaGiroRepositoryInterface::class, \App\Modules\Licencias\Infrastructure\Persistence\Repositories\EloquentLicenciaGiroRepository::class);
+        $this->app->bind(\App\Modules\Licencias\Domain\Contracts\LicenciaArchivoRepositoryInterface::class, \App\Modules\Licencias\Infrastructure\Persistence\Repositories\EloquentLicenciaArchivoRepository::class);
         $this->app->bind(LicenciaRepositoryInterface::class, EloquentLicenciaRepository::class);
         $this->app->bind(ExpedienteReadRepositoryInterface::class, EloquentExpedienteReadRepository::class);
         $this->app->bind(PersonaReadRepositoryInterface::class, EloquentPersonaReadRepository::class);

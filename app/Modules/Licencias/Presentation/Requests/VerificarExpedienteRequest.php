@@ -7,7 +7,7 @@ final class VerificarExpedienteRequest extends FormRequest {
     /** @return array<string, mixed> */
     public function rules(): array {
         return [
-            'numero' => ['required', 'string'],
+            'numero_expediente' => ['required', 'string'],
             'anio' => ['required', 'string'],
     ];
     }

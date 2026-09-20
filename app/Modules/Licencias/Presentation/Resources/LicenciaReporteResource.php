@@ -1,16 +1,30 @@
 <?php
 declare(strict_types=1);
 namespace App\Modules\Licencias\Presentation\Resources;
-use Illuminate\Http\Resources\Json\JsonResource;
+
 use Illuminate\Http\Request;
-/** @property \App\Modules\Licencias\Domain\Entities\Licencia $resource */
-final class LicenciaReporteResource extends JsonResource {
-    /** @return array<string, mixed> */
-    public function toArray(Request $request): array {
+use Illuminate\Http\Resources\Json\JsonResource;
+use App\Modules\Licencias\Domain\Entities\Licencia;
+
+class LicenciaReporteResource extends JsonResource
+{
+    public function toArray(Request $request): array
+    {
+        if ($this->resource instanceof Licencia) {
+            return [
+                'id' => $this->resource->id,
+                'numero_licencia' => $this->resource->numeroLicencia->value,
+                'nombre_comercial' => $this->resource->nombreComercial->value,
+                'fecha_emision' => $this->resource->fechaEmision->toDateString(),
+            ];
+        }
+
+        $arr = (array) $this->resource;
         return [
-            'numero_licencia' => $this->resource->numeroLicencia->value,
-            'fecha_emision' => $this->resource->fechaEmision->toDateString(),
-            'estado' => $this->resource->estado->value,
-    ];
+            'id' => $arr['id'] ?? null,
+            'numero_licencia' => $arr['numero_licencia'] ?? null,
+            'nombre_comercial' => $arr['nombre_comercial'] ?? null,
+            'fecha_emision' => $arr['fecha_emision'] ?? null,
+        ];
     }
 }

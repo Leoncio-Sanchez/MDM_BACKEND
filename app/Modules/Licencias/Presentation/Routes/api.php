@@ -14,5 +14,4 @@ Route::middleware('api')->prefix('api/lf-itse')->group(function () {
     Route::delete('licencias-funcionamiento/{pk}', [LicenciaController::class, 'destroy'])->whereNumber('pk');
     Route::post('licencias-funcionamiento/{pk}/notificacion', [LicenciaController::class, 'notificar'])->whereNumber('pk');
     Route::get('licencias-funcionamiento/{pk}/estados', [LicenciaController::class, 'listarEstados'])->whereNumber('pk');
-    Route::get('tipos-licencia', [TipoLicenciaController::class, 'index']);
 });

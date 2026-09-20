@@ -1,9 +1,7 @@
 <?php
 declare(strict_types=1);
-
 namespace App\Modules\Licencias\Domain\ValueObjects;
-
-use App\Modules\Licencias\Domain\Exceptions\LicenciaInvalida;
+use App\Modules\Licencias\Domain\Exceptions\NombreComercialInvalido;
 
 final readonly class NombreComercial
 {
@@ -13,11 +11,16 @@ final readonly class NombreComercial
     {
         $value = trim($value);
         if ($value === '') {
-            throw new LicenciaInvalida('El nombre comercial no puede estar vacío');
+            throw new NombreComercialInvalido('El nombre comercial no puede estar vacío.');
         }
-        if (strlen($value) > 255) {
-            throw new LicenciaInvalida('El nombre comercial excede 255 caracteres');
+        if (mb_strlen($value) > 250) {
+            throw new NombreComercialInvalido('El nombre comercial no puede exceder los 250 caracteres.');
         }
         return new self($value);
+    }
+
+    public function equals(self $other): bool
+    {
+        return $this->value === $other->value;
     }
 }

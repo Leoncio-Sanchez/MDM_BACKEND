@@ -1,8 +1,11 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Modules\TipoLicencia\Application\DTOs;
 
-final readonly class GuardarTipoLicenciaDTO {
+final readonly class GuardarTipoLicenciaDTO
+{
     public function __construct(
         public string $codigo,
         public string $nombre,
@@ -10,7 +13,8 @@ final readonly class GuardarTipoLicenciaDTO {
     ) {}
 
     /** @param array<string, mixed> $data */
-    public static function fromArray(array $data): self {
+    public static function fromArray(array $data): self
+    {
         return new self(
             codigo: (string) ($data['codigo'] ?? ''),
             nombre: (string) ($data['nombre'] ?? ''),

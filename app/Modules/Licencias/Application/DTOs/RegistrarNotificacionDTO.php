@@ -1,18 +1,23 @@
 <?php
 declare(strict_types=1);
+
 namespace App\Modules\Licencias\Application\DTOs;
 
-final readonly class RegistrarNotificacionDTO {
+use Carbon\CarbonImmutable;
+
+final readonly class RegistrarNotificacionDTO
+{
     public function __construct(
         public int $licenciaId,
-        public string $fecha
+        public CarbonImmutable $fechaNotificacion,
     ) {}
 
     /** @param array<string, mixed> $data */
-    public static function fromArray(array $data): self {
+    public static function fromArray(array $data): self
+    {
         return new self(
-            licenciaId: (int) ($data['licencia_id'] ?? 0),
-            fecha: (string) ($data['fecha'] ?? '')
+            licenciaId: (int) $data['licencia_id'],
+            fechaNotificacion: CarbonImmutable::parse($data['fecha_notificacion']),
         );
     }
 }

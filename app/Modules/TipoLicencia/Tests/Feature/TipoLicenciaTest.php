@@ -1,17 +1,9 @@
 <?php
+declare(strict_types=1);
+
 use App\Modules\TipoLicencia\Infrastructure\Persistence\Models\TipoLicenciaModel;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Schema;
 
-beforeEach(function () {
-    Schema::dropIfExists('tipos_licencia');
-    Schema::create('tipos_licencia', function($table) {
-        $table->integer('id')->primary();
-        $table->string('codigo');
-        $table->string('nombre');
-        $table->boolean('esta_activo')->default(true);
-    });
-});
 
 it('can list tipos licencia', function () {
     TipoLicenciaModel::create(['id' => 1, 'codigo' => 'EST', 'nombre' => 'ESTANDAR', 'esta_activo' => true]);

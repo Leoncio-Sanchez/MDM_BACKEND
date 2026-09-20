@@ -1,23 +1,22 @@
 <?php
 declare(strict_types=1);
-
 namespace App\Modules\Licencias\Domain\ValueObjects;
-
 use App\Modules\Licencias\Domain\Exceptions\NumeroLicenciaInvalido;
 
 final readonly class NumeroLicencia
 {
-    private function __construct(public string $value) {}
+    private function __construct(public int $value) {}
 
-    public static function fromString(string $value): self
+    public static function fromInt(int $value): self
     {
-        $value = trim($value);
-        if ($value === '') {
-            throw new NumeroLicenciaInvalido('El número de licencia no puede estar vacío');
-        }
-        if (strlen($value) > 50) {
-            throw new NumeroLicenciaInvalido('El número excede 50 caracteres');
+        if ($value <= 0) {
+            throw new NumeroLicenciaInvalido('El número de licencia debe ser un entero positivo.');
         }
         return new self($value);
+    }
+
+    public function equals(self $other): bool
+    {
+        return $this->value === $other->value;
     }
 }

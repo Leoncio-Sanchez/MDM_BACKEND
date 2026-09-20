@@ -26,12 +26,24 @@ final readonly class EloquentLicenciaRepository implements LicenciaRepositoryInt
     }
 
     /** @return Licencia[] */
+    public function buscarPorExpedienteId(int $expedienteId): ?\App\Modules\Licencias\Domain\Entities\Licencia
+    {
+        $model = \App\Modules\Licencias\Infrastructure\Persistence\Models\LicenciaModel::where("expediente_id", $expedienteId)->first();
+        return $model ? \App\Modules\Licencias\Application\Mappers\LicenciaMapper::toDomain($model) : null;
+    }
+
+    public function buscarParaReporte(string $fechaInicio, string $fechaFin): array
+    {
+        $models = \App\Modules\Licencias\Infrastructure\Persistence\Models\LicenciaModel::query()->whereBetween("fecha_emision", [$fechaInicio, $fechaFin])->get();
+        return $models->map(fn ($m) => $this->mapper->toDomain($m))->all();
+    }
+
     public function buscarPorFiltro(string $filtro, string $valor): array {
         $query = LicenciaModel::query();
         match ($filtro) {
             'NUMERO_LICENCIA' => $query->where('numero_licencia', (int) $valor),
             'NOMBRE_COMERCIAL' => $query->where('nombre_comercial', 'ILIKE', "%{$valor}%"),
-            'EXPEDIENTE' => $query->where('expediente_id', (int) $valor),
+            'EXPEDIENTE' => $query->whereIn('expediente_id', \Illuminate\Support\Facades\DB::table('expedientes')->where('numero_expediente', (int) $valor)->pluck('id')),
             default => $query->whereRaw('1 = 0'),
         };
         /** @var \Illuminate\Database\Eloquent\Collection<int, LicenciaModel> $models */
@@ -66,4 +78,82 @@ final readonly class EloquentLicenciaRepository implements LicenciaRepositoryInt
         $model->update(['estado' => 'INACTIVA']);
         return $this->mapper->toDomain($model->refresh());
     }
+
+
+    public function existeNumeroLicencia(int $numero, ?int $exceptoId = null): bool
+    {
+        $query = \App\Modules\Licencias\Infrastructure\Persistence\Models\LicenciaModel::where('numero_licencia', $numero);
+        if ($exceptoId !== null) {
+            $query->where('id', '!=', $exceptoId);
+        }
+        return $query->exists();
+    }
+
+    public function existeReciboPago(string $numero, ?int $exceptoId = null): bool
+    {
+        $query = \App\Modules\Licencias\Infrastructure\Persistence\Models\LicenciaModel::where('numero_recibo_pago', $numero);
+        if ($exceptoId !== null) {
+            $query->where('id', '!=', $exceptoId);
+        }
+        return $query->exists();
+    }
+
+    public function tieneLicenciasDependientes(int $id): bool
+    {
+        return \App\Modules\Licencias\Infrastructure\Persistence\Models\LicenciaModel::where('licencia_principal_id', $id)->exists();
+    }
+
+    public function listarEstados(int $licenciaId): array
+    {
+        $sql = "
+            SELECT
+                lfe.id,
+                lfe.licencia_funcionamiento_id,
+                lfe.estado_id,
+                lfe.fecha_estado,
+                lfe.documento,
+                lfe.observaciones,
+                lfe.usuario_id,
+                lfe.fecha_digitacion,
+                e.nombre AS estado_nombre,
+                e.es_para_lf,
+                e.es_para_itse,
+                e.esta_activo
+            FROM licencias_funcionamiento_estados lfe
+            INNER JOIN estados e ON e.id = lfe.estado_id
+            WHERE lfe.licencia_funcionamiento_id = ?
+            ORDER BY lfe.fecha_digitacion DESC
+        ";
+
+        return array_map(
+            fn ($row) => (array) $row,
+            \Illuminate\Support\Facades\DB::select($sql, [$licenciaId]),
+        );
+    }
+
+    public function existeEstado(int $licenciaId, int $estadoId): bool
+    {
+        return \Illuminate\Support\Facades\DB::table('licencias_funcionamiento_estados')
+            ->where('licencia_funcionamiento_id', $licenciaId)
+            ->where('estado_id', $estadoId)
+            ->exists();
+    }
+
+    public function insertarEstado(int $licenciaId, int $estadoId, string $fecha, string $documento, string $observaciones): void
+    {
+        \Illuminate\Support\Facades\DB::table('licencias_funcionamiento_estados')->insert([
+            'licencia_funcionamiento_id' => $licenciaId,
+            'estado_id' => $estadoId,
+            'fecha_estado' => $fecha,
+            'documento' => $documento,
+            'observaciones' => $observaciones,
+            'fecha_digitacion' => now(),
+        ]);
+    }
+
+    public function actualizarFechaNotificacion(int $licenciaId, string $fecha): void
+    {
+        \App\Modules\Licencias\Infrastructure\Persistence\Models\LicenciaModel::where('id', $licenciaId)->update(['fecha_notificacion' => $fecha]);
+    }
+
 }
