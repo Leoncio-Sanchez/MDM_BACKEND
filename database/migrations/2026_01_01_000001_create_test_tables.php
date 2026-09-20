@@ -124,6 +124,30 @@ $table->string('codigo', 10)->unique();
                     $table->foreignId('usuario_id')->constrained('auth_user');
                 });
 
+                
+                
+                Schema::create('unidades_organicas', function (Blueprint $table) {
+                    $table->id();
+                    $table->string('codigo', 20)->unique();
+                    $table->string('nombre', 100);
+                    $table->boolean('esta_activo')->default(true);
+                });
+
+                Schema::create('tipos_procedimiento_tupa', function (Blueprint $table) {
+                    $table->id();
+                    $table->string('codigo', 30)->unique();
+                    $table->string('nombre', 200);
+                    $table->integer('plazo_atencion_dias');
+                    $table->integer('dias_alerta_vencimiento');
+                    $table->boolean('esta_activo')->default(true);
+                    $table->boolean('requiere_lf')->default(false);
+                    $table->boolean('requiere_itse')->default(false);
+                    $table->timestamp('fecha_digitacion');
+                    $table->foreignId('usuario_id')->constrained('auth_user');
+                    $table->foreignId('unidad_organica_id')->constrained('unidades_organicas');
+                    $table->decimal('monto', 18, 2)->nullable();
+                });
+
                 Schema::create('licencias_funcionamiento_giros', function (Blueprint $table) {
                     $table->id();
                     $table->foreignId('licencia_funcionamiento_id');

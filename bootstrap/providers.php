@@ -6,6 +6,7 @@ use App\Modules\Estados\Infrastructure\Providers\EstadosServiceProvider;
 use App\Providers\AppServiceProvider;
 
 return [
+    App\Modules\TipoProcedimientoTupa\Infrastructure\Providers\TipoProcedimientoTupaServiceProvider::class,
     App\Modules\Giros\Infrastructure\Providers\GirosServiceProvider::class,
     App\Modules\TipoDocumentoIdentidad\Infrastructure\Providers\TipoDocumentoIdentidadServiceProvider::class,
     App\Modules\Zonificacion\Infrastructure\Providers\ZonificacionServiceProvider::class,
