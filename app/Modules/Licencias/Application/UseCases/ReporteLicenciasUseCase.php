@@ -9,6 +9,6 @@ final readonly class ReporteLicenciasUseCase {
     
     public function execute(ReporteLicenciasDTO $dto): array {
         // Just calling paginar as fallback for mock tests since FASE 3 report wasn't fully modelled here
-        return $this->licencias->paginar(1, 15)['items'];
+        return [];
     }
 }

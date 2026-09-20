@@ -5,73 +5,116 @@ namespace App\Modules\Licencias\Presentation\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Modules\Licencias\Domain\Entities\Licencia;
+use App\Modules\Licencias\Infrastructure\Persistence\Models\LicenciaModel;
+use Illuminate\Support\Facades\DB;
 
 class LicenciaResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $id = null;
         if ($this->resource instanceof Licencia) {
-            return [
-                'id' => $this->resource->id,
-                'uuid' => $this->resource->uuid,
-                'numero_licencia' => $this->resource->numeroLicencia->value,
-                'nombre_comercial' => $this->resource->nombreComercial->value,
-                'fecha_emision' => $this->resource->fechaEmision->toDateString(),
-                'titular' => $this->resource->titularId,
-                'conductor' => $this->resource->conductorId,
-                'licencia_principal' => $this->resource->licenciaPrincipalId,
-                'expediente' => $this->resource->expedienteId,
-                'tipo_licencia' => $this->resource->tipoLicenciaId,
-                'nivel_riesgo' => $this->resource->nivelRiesgoId,
-                'zonificacion' => $this->resource->zonificacionId,
-                'es_vigencia_indeterminada' => $this->resource->esVigenciaIndeterminada,
-                'fecha_inicio_vigencia' => $this->resource->fechaInicioVigencia?->toDateString(),
-                'fecha_fin_vigencia' => $this->resource->fechaFinVigencia?->toDateString(),
-                'actividad' => $this->resource->actividad,
-                'direccion' => $this->resource->direccion,
-                'hora_desde' => $this->resource->horaDesde,
-                'hora_hasta' => $this->resource->horaHasta,
-                'resolucion_numero' => $this->resource->resolucionNumero,
-                'area' => $this->resource->area,
-                'numero_recibo_pago' => $this->resource->numeroReciboPago,
-                'observaciones' => $this->resource->observaciones,
-                'se_puede_publicar' => $this->resource->sePuedePublicar,
-                'fecha_notificacion' => $this->resource->fechaNotificacion?->toDateTimeString(),
-                'estado' => $this->resource->estado?->value,
-                'giros' => [],
-                'archivos' => [],
-                'historial_estados' => [],
-            ];
+            $id = $this->resource->id;
+        } else {
+            $arr = (array) $this->resource;
+            $id = $arr['id'] ?? null;
         }
 
-        $arr = (array) $this->resource;
+        $giros = [];
+        $archivos = [];
+        $historial_estados = [];
+
+        if ($id) {
+            $giros = DB::table('licencias_funcionamiento_giros')
+                ->where('licencia_funcionamiento_id', $id)
+                ->select([
+                    'id',
+                    'licencia_funcionamiento_id as licencia_funcionamiento',
+                    'giro_id as giro',
+                    'usuario_id as usuario',
+                    'fecha_digitacion'
+                ])
+                ->get()
+                ->map(function ($g) {
+                    $g->fecha_digitacion = \Carbon\Carbon::parse($g->fecha_digitacion)->setTimezone('America/Lima')->format('Y-m-dTH:i:s.uP');
+                    return $g;
+                })
+                ->toArray();
+
+            $archivos = DB::table('licencias_funcionamiento_archivos')
+                ->where('licencia_funcionamiento_id', $id)
+                ->select([
+                    'id',
+                    'uuid',
+                    'licencia_funcionamiento_id as licencia_funcionamiento',
+                    'nombre_original',
+                    'nombre_archivo',
+                    'ruta_archivo',
+                    'extension',
+                    'tamanio_bytes',
+                    'usuario_id as usuario',
+                    'fecha_digitacion'
+                ])
+                ->get()
+                ->map(function ($a) {
+                    $a->fecha_digitacion = \Carbon\Carbon::parse($a->fecha_digitacion)->setTimezone('America/Lima')->format('Y-m-dTH:i:s.uP');
+                    return $a;
+                })
+                ->toArray();
+
+            $historial_estados = DB::table('licencias_funcionamiento_estados')
+                ->where('licencia_funcionamiento_id', $id)
+                ->select([
+                    'id',
+                    'licencia_funcionamiento_id as licencia_funcionamiento',
+                    'estado_id as estado',
+                    'fecha_estado',
+                    'documento',
+                    'observaciones',
+                    'usuario_id as usuario',
+                    'fecha_digitacion'
+                ])
+                ->get()
+                ->map(function ($h) {
+                    $h->fecha_digitacion = \Carbon\Carbon::parse($h->fecha_digitacion)->setTimezone('America/Lima')->format('Y-m-dTH:i:s.uP');
+                    return $h;
+                })
+                ->toArray();
+        }
+
+        $model = LicenciaModel::find($id);
+
         return [
-            'id' => $arr['id'] ?? null,
-            'uuid' => $arr['uuid'] ?? null,
-            'numero_licencia' => $arr['numero_licencia'] ?? null,
-            'nombre_comercial' => $arr['nombre_comercial'] ?? null,
-            'fecha_emision' => $arr['fecha_emision'] ?? null,
-            'titular' => $arr['titular_id'] ?? $arr['titular'] ?? null,
-            'conductor' => $arr['conductor_id'] ?? $arr['conductor'] ?? null,
-            'licencia_principal' => $arr['licencia_principal_id'] ?? $arr['licencia_principal'] ?? null,
-            'expediente' => $arr['expediente_id'] ?? $arr['expediente'] ?? null,
-            'tipo_licencia' => $arr['tipo_licencia_id'] ?? $arr['tipo_licencia'] ?? null,
-            'nivel_riesgo' => $arr['nivel_riesgo_id'] ?? $arr['nivel_riesgo'] ?? null,
-            'zonificacion' => $arr['zonificacion_id'] ?? $arr['zonificacion'] ?? null,
-            'es_vigencia_indeterminada' => (bool)($arr['es_vigencia_indeterminada'] ?? false),
-            'fecha_inicio_vigencia' => $arr['fecha_inicio_vigencia'] ?? null,
-            'fecha_fin_vigencia' => $arr['fecha_fin_vigencia'] ?? null,
-            'actividad' => $arr['actividad'] ?? null,
-            'direccion' => $arr['direccion'] ?? null,
-            'hora_desde' => $arr['hora_desde'] ?? null,
-            'hora_hasta' => $arr['hora_hasta'] ?? null,
-            'resolucion_numero' => $arr['resolucion_numero'] ?? null,
-            'area' => (float)($arr['area'] ?? 0),
-            'numero_recibo_pago' => $arr['numero_recibo_pago'] ?? null,
-            'observaciones' => $arr['observaciones'] ?? null,
-            'se_puede_publicar' => (bool)($arr['se_puede_publicar'] ?? false),
-            'fecha_notificacion' => $arr['fecha_notificacion'] ?? null,
-            'estado' => $arr['estado'] ?? null,
+            'id' => $model->id,
+            'uuid' => $model->uuid,
+            'expediente' => $model->expediente_id,
+            'tipo_licencia' => $model->tipo_licencia_id,
+            'numero_licencia' => $model->numero_licencia,
+            'fecha_emision' => $model->fecha_emision ? \Carbon\Carbon::parse($model->fecha_emision)->toDateString() : null,
+            'titular' => $model->titular_id,
+            'conductor' => $model->conductor_id,
+            'licencia_principal' => $model->licencia_principal_id,
+            'nombre_comercial' => $model->nombre_comercial,
+            'es_vigencia_indeterminada' => (bool) $model->es_vigencia_indeterminada,
+            'fecha_inicio_vigencia' => $model->fecha_inicio_vigencia ? \Carbon\Carbon::parse($model->fecha_inicio_vigencia)->toDateString() : null,
+            'fecha_fin_vigencia' => $model->fecha_fin_vigencia ? \Carbon\Carbon::parse($model->fecha_fin_vigencia)->toDateString() : null,
+            'nivel_riesgo' => $model->nivel_riesgo_id,
+            'actividad' => $model->actividad,
+            'direccion' => $model->direccion,
+            'hora_desde' => (int) $model->hora_desde,
+            'hora_hasta' => (int) $model->hora_hasta,
+            'resolucion_numero' => $model->resolucion_numero,
+            'zonificacion' => $model->zonificacion_id,
+            'area' => number_format((float) $model->area, 2, '.', ''),
+            'numero_recibo_pago' => $model->numero_recibo_pago,
+            'observaciones' => $model->observaciones,
+            'se_puede_publicar' => (bool) $model->se_puede_publicar,
+            'fecha_notificacion' => $model->fecha_notificacion ? \Carbon\Carbon::parse($model->fecha_notificacion)->toIso8601String() : null,
+            'usuario' => $model->usuario_id,
+            'fecha_digitacion' => $model->fecha_digitacion ? \Carbon\Carbon::parse($model->fecha_digitacion)->setTimezone('America/Lima')->format('Y-m-dTH:i:s.uP') : null,
+            'archivos' => $archivos,
+            'historial_estados' => $historial_estados,
+            'giros' => $giros,
         ];
     }
 }

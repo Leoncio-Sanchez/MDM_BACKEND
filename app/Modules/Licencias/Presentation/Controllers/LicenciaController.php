@@ -3,48 +3,60 @@ declare(strict_types=1);
 
 namespace App\Modules\Licencias\Presentation\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Modules\Licencias\Application\DTOs\{
-    BuscarLicenciasDTO, ConsultaLicenciasDTO, CrearLicenciaDTO, InactivarLicenciaDTO,
-    ModificarLicenciaDTO, RegistrarNotificacionDTO, ReporteLicenciasDTO,
-    VerificarExpedienteDTO, ListarEstadosDTO
-};
-use App\Modules\Licencias\Application\UseCases\{
-    BuscarLicenciasUseCase, ConsultaLicenciasUseCase, CrearLicenciaUseCase, EliminarLicenciaUseCase,
-    ListarEstadosLicenciaUseCase, ModificarLicenciaUseCase,
-    RegistrarInactivacionUseCase, RegistrarNotificacionUseCase,
-    ReporteLicenciasUseCase, VerificarNumeroExpedienteUseCase
-};
-use App\Modules\Licencias\Presentation\Requests\{
-    BuscarLicenciasRequest, ConsultaLicenciasRequest, CrearLicenciaRequest, InactivarLicenciaRequest,
-    ModificarLicenciaRequest, RegistrarNotificacionRequest,
-    ReporteLicenciasRequest, VerificarExpedienteRequest, ListarEstadosRequest
-};
-use App\Modules\Licencias\Presentation\Resources\{
-    LicenciaListResource, LicenciaReporteResource, LicenciaResource
-};
+use App\Modules\Licencias\Application\DTOs\BuscarLicenciasDTO;
+use App\Modules\Licencias\Application\DTOs\ConsultaLicenciasDTO;
+use App\Modules\Licencias\Application\DTOs\CrearLicenciaDTO;
+use App\Modules\Licencias\Application\DTOs\EliminarLicenciaDTO;
+use App\Modules\Licencias\Application\DTOs\InactivarLicenciaDTO;
+use App\Modules\Licencias\Application\DTOs\ListarEstadosDTO;
+use App\Modules\Licencias\Application\DTOs\ModificarLicenciaDTO;
+use App\Modules\Licencias\Application\DTOs\RegistrarNotificacionDTO;
+use App\Modules\Licencias\Application\DTOs\ReporteLicenciasDTO;
+use App\Modules\Licencias\Application\DTOs\VerificarExpedienteDTO;
+use App\Modules\Licencias\Application\UseCases\BuscarLicenciasUseCase;
+use App\Modules\Licencias\Application\UseCases\ConsultaLicenciasUseCase;
+use App\Modules\Licencias\Application\UseCases\CrearLicenciaUseCase;
+use App\Modules\Licencias\Application\UseCases\EliminarLicenciaUseCase;
+use App\Modules\Licencias\Application\UseCases\ListarEstadosLicenciaUseCase;
+use App\Modules\Licencias\Application\UseCases\ModificarLicenciaUseCase;
+use App\Modules\Licencias\Application\UseCases\RegistrarInactivacionUseCase;
+use App\Modules\Licencias\Application\UseCases\RegistrarNotificacionUseCase;
+use App\Modules\Licencias\Application\UseCases\ReporteLicenciasUseCase;
+use App\Modules\Licencias\Application\UseCases\VerificarNumeroExpedienteUseCase;
+use App\Modules\Licencias\Presentation\Requests\BuscarLicenciasRequest;
+use App\Modules\Licencias\Presentation\Requests\ConsultaLicenciasRequest;
+use App\Modules\Licencias\Presentation\Requests\CrearLicenciaRequest;
+use App\Modules\Licencias\Presentation\Requests\InactivarLicenciaRequest;
+use App\Modules\Licencias\Presentation\Requests\ListarEstadosRequest;
+use App\Modules\Licencias\Presentation\Requests\ModificarLicenciaRequest;
+use App\Modules\Licencias\Presentation\Requests\RegistrarNotificacionRequest;
+use App\Modules\Licencias\Presentation\Requests\ReporteLicenciasRequest;
+use App\Modules\Licencias\Presentation\Requests\VerificarExpedienteRequest;
+use App\Modules\Licencias\Presentation\Resources\LicenciaListResource;
+use App\Modules\Licencias\Presentation\Resources\LicenciaReporteResource;
+use App\Modules\Licencias\Presentation\Resources\LicenciaResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
-final class LicenciaController extends Controller
+class LicenciaController
 {
     public function __construct(
         private readonly CrearLicenciaUseCase $crear,
-        private readonly BuscarLicenciasUseCase $buscar,
-        private readonly ConsultaLicenciasUseCase $consulta,
         private readonly ModificarLicenciaUseCase $modificar,
         private readonly EliminarLicenciaUseCase $eliminar,
+        private readonly BuscarLicenciasUseCase $buscar,
+        private readonly ConsultaLicenciasUseCase $consulta,
         private readonly ReporteLicenciasUseCase $reporte,
         private readonly VerificarNumeroExpedienteUseCase $verificar,
         private readonly RegistrarInactivacionUseCase $inactivar,
         private readonly RegistrarNotificacionUseCase $notificar,
-        private readonly ListarEstadosLicenciaUseCase $listarEstados,
+        private readonly ListarEstadosLicenciaUseCase $listarEstados
     ) {}
 
-    public function store(CrearLicenciaRequest $request): JsonResponse
+    public function store(CrearLicenciaRequest $request): LicenciaResource
     {
         $licencia = $this->crear->execute(CrearLicenciaDTO::fromArray($request->validated()));
-        return (new LicenciaResource($licencia))->response()->setStatusCode(201);
+        return new LicenciaResource($licencia);
     }
 
     public function buscar(BuscarLicenciasRequest $request): AnonymousResourceCollection
@@ -80,13 +92,13 @@ final class LicenciaController extends Controller
 
     public function destroy(int $pk): JsonResponse
     {
-        $this->eliminar->execute($pk);
+        $this->eliminar->execute(new EliminarLicenciaDTO($pk));
         return new JsonResponse(null, 204);
     }
 
     public function consulta(ConsultaLicenciasRequest $request): AnonymousResourceCollection {
         $resultados = $this->consulta->execute(ConsultaLicenciasDTO::fromArray($request->validated()));
-        return LicenciaListResource::collection($resultados);
+        return LicenciaResource::collection($resultados);
     }
 
     public function notificar(RegistrarNotificacionRequest $request): JsonResponse
