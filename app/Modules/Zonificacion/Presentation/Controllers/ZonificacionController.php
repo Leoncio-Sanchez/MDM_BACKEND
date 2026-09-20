@@ -36,11 +36,15 @@ class ZonificacionController
 
     public function store(GuardarZonificacionRequest $request): JsonResponse
     {
+        $user = $request->user('api');
+        if (! $user) {
+            return new JsonResponse(['message' => 'Unauthenticated'], 401);
+        }
         $dto = new GuardarZonificacionDTO(
             codigo: $request->codigo,
             nombre: $request->nombre,
             estaActivo: (bool) $request->esta_activo,
-            usuarioId: $request->user('api')->id ?? 1
+            usuarioId: $user->id
         );
         $entity = $this->crear->execute($dto);
 
@@ -49,11 +53,15 @@ class ZonificacionController
 
     public function update(GuardarZonificacionRequest $request, int $id): JsonResponse
     {
+        $user = $request->user('api');
+        if (! $user) {
+            return new JsonResponse(['message' => 'Unauthenticated'], 401);
+        }
         $dto = new GuardarZonificacionDTO(
             codigo: $request->codigo,
             nombre: $request->nombre,
             estaActivo: (bool) $request->esta_activo,
-            usuarioId: $request->user('api')->id ?? 1
+            usuarioId: $user->id
         );
         $entity = $this->actualizar->execute($id, $dto);
 
