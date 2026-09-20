@@ -114,6 +114,16 @@ $table->string('codigo', 10)->unique();
             }
 
             if (!Schema::hasTable('licencias_funcionamiento_giros')) {
+                
+                Schema::create('giros', function (Blueprint $table) {
+                    $table->id();
+                    $table->integer('ciiu_id')->nullable()->unique();
+                    $table->string('nombre', 200);
+                    $table->boolean('esta_activo')->default(true);
+                    $table->timestamp('fecha_digitacion')->useCurrent();
+                    $table->foreignId('usuario_id')->constrained('auth_user');
+                });
+
                 Schema::create('licencias_funcionamiento_giros', function (Blueprint $table) {
                     $table->id();
                     $table->foreignId('licencia_funcionamiento_id');
