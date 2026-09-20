@@ -1,0 +1,11 @@
+# FASE 1 - Progreso Módulo Estados
+- [x] Autorización FASE 1
+- [ ] 1. Estructura de carpetas
+- [x] 2. Domain (Entity, Contract, Exceptions)
+- [x] 3. Application (UseCases, DTOs, Mapper)
+- [x] 4. Infrastructure (Model, Repository, ServiceProvider)
+- [x] 5. Presentation (Controller, Requests, Resource, Routes)
+- [ ] 6. Auth & Configs
+- [ ] 7. Tests (Unit & Feature)
+- [ ] 8. QA (Pint, PHPStan, Pest)
+- [ ] 9. Diff JSON Validation

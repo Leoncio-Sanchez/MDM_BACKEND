@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/auditoria",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\Modules\\Auditoria\\": "app/",
+            "App\\Modules\\Auditoria\\Database\\Factories\\": "database/factories/",
+            "App\\Modules\\Auditoria\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "App\\Modules\\Auditoria\\Tests\\": "tests/"
+        }
+    }
+}

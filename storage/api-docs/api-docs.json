@@ -1,0 +1,180 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Muni API",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/lf-itse/estados/": {
+            "get": {
+                "tags": [
+                    "Estados"
+                ],
+                "summary": "Listar estados",
+                "operationId": "db8457486afefe33f19de1454f586dac",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operación exitosa"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Estados"
+                ],
+                "summary": "Crear estado",
+                "operationId": "6a56cf226e9e8507406522e1119bdeee",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nombre": {
+                                        "type": "string",
+                                        "example": "Registrado"
+                                    },
+                                    "es_para_lf": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "es_para_itse": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Creado"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/lf-itse/estados/{id}/": {
+            "get": {
+                "tags": [
+                    "Estados"
+                ],
+                "summary": "Obtener estado",
+                "operationId": "ce58a22d225289f8fdbb536bec42e553",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operación exitosa"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Estados"
+                ],
+                "summary": "Actualizar estado",
+                "operationId": "2fac4e9d690a9f698e2f725552dcd362",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nombre": {
+                                        "type": "string",
+                                        "example": "Registrado V2"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Actualizado"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Estados"
+                ],
+                "summary": "Eliminar estado",
+                "operationId": "effaece1f866ed2293ae15e80d727384",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Sin contenido"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "sanctum": {
+                "type": "http",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Estados",
+            "description": "Estados"
+        }
+    ]
+}

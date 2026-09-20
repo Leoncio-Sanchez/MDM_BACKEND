@@ -1,0 +1,13 @@
+{
+    "name": "Estados",
+    "alias": "estados",
+    "description": "Módulo de Estados",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "App\\Modules\\Estados\\Infrastructure\\Providers\\EstadosServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}
