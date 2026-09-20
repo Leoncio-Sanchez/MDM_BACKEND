@@ -1,28 +1,20 @@
 <?php
 declare(strict_types=1);
-
 namespace App\Modules\Licencias\Presentation\Resources;
-
-use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-
-final class LicenciaListResource extends JsonResource
-{
-    /**
-     * Disable the data wrapper
-     */
-    public static $wrap = null;
-
-    public function toArray(Request $request): array
-    {
+use Illuminate\Http\Request;
+/** @property \App\Modules\Licencias\Domain\Entities\Licencia $resource */
+final class LicenciaListResource extends JsonResource {
+    /** @return array<string, mixed> */
+    public function toArray(Request $request): array {
         return [
-            'id' => $this->id,
-            'uuid' => $this->uuid,
-            'numero_licencia' => $this->numero_licencia,
-            'fecha_emision' => $this->fecha_emision,
-            'nombre_comercial' => $this->nombre_comercial,
-            'titular' => $this->titular_id,
-            'expediente' => $this->expediente_id,
-        ];
+            'id' => $this->resource->id,
+            'uuid' => $this->resource->uuid,
+            'numero_licencia' => $this->resource->numeroLicencia->value,
+            'fecha_emision' => $this->resource->fechaEmision->toDateString(),
+            'nombre_comercial' => $this->resource->nombreComercial->value,
+            'titular' => $this->resource->titularId,
+            'expediente' => $this->resource->expedienteId,
+    ];
     }
 }

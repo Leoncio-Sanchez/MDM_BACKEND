@@ -1,19 +1,13 @@
 <?php
 declare(strict_types=1);
-
 namespace App\Modules\Licencias\Presentation\Controllers;
-
-use Illuminate\Http\JsonResponse;
-use Illuminate\Routing\Controller;
+use App\Http\Controllers\Controller;
 use App\Modules\Licencias\Infrastructure\Persistence\Models\TipoLicenciaReadModel;
 use App\Modules\Licencias\Presentation\Resources\TipoLicenciaResource;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
-final class TipoLicenciaController extends Controller
-{
-    public function index(): JsonResponse
-    {
-        $tipos = TipoLicenciaReadModel::all();
-        // Since we removed data wrapper, we return array directly
-        return response()->json(TipoLicenciaResource::collection($tipos));
+final class TipoLicenciaController extends Controller {
+    public function index(): AnonymousResourceCollection {
+        return TipoLicenciaResource::collection(TipoLicenciaReadModel::orderBy('id')->get());
     }
 }

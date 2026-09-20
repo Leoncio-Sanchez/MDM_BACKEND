@@ -102,3 +102,51 @@
 | 10 | Documental / Archivos | 2-3 días |
 
 **Total estimado: 6-8 semanas.**
+
+## Roadmap de Ejecución (post-auditoría)
+
+### Fase de preparación (1 día)
+- [x] Mover `node_modules/` + basura a `_archive/`.
+- [x] Resolver los 3 bugs de FASE 3.3 (Licencias).
+- [x] Decidir si se hace backup de `media/` (Se deja en Django read-only).
+
+### Fase 3.3-bis: Licencias (2-3 días)
+- [ ] Bug #1, #2, #3 resueltos.
+- [ ] Módulo Licencias en Laravel completo.
+- [ ] Diff JSON vacío vs Django.
+- [ ] Commit.
+
+### Fase 4: Seguridad (2-3 días)
+- [ ] Módulo Seguridad (usuarios, roles, permisos).
+- [ ] Migrar `services/usuario.py`.
+- [ ] Confirmar que Laravel controla roles (no Django).
+- [ ] Frontend actualizado.
+
+### Fase 5: Módulos maestros (5-7 días)
+- [ ] TipoLicencia
+- [ ] NivelRiesgo
+- [ ] Zonificacion
+- [ ] TipoDocumentoIdentidad
+- [ ] Giros
+- [ ] TipoProcedimientoTupa
+
+### Fase 6: Personas (2-3 días)
+- [ ] Módulo Personas.
+- [ ] Consultas RENIEC.
+
+### Fase 7: Licencias reales (3-5 días)
+- [ ] Módulo Licencias completo con dependencias reales.
+
+### Fase 8: ITSE (3-5 días)
+
+### Fase 9: Expedientes (4-6 días)
+
+### Fase 10: Interoperabilidad (3-4 días)
+
+### Fase 11: Archivos (2-3 días)
+
+### Fase 12: Cierre (1 semana)
+- [ ] Migración de `media/` a Laravel.
+- [ ] Apagar Django.
+- [ ] Deploy producción.
+- [ ] Monitoreo.

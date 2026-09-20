@@ -1,19 +1,15 @@
 <?php
 declare(strict_types=1);
-
 namespace App\Modules\Licencias\Application\UseCases;
-
+use App\Modules\Licencias\Application\DTOs\ListarEstadosDTO;
 use App\Modules\Licencias\Domain\Contracts\LicenciaRepositoryInterface;
-
-final readonly class ListarEstadosLicenciaUseCase
-{
+final readonly class ListarEstadosLicenciaUseCase {
     public function __construct(
-        private LicenciaRepositoryInterface $repositorio
+        private LicenciaRepositoryInterface $licencias,
     ) {}
-
-    public function execute(array $datos = []): mixed
-    {
-        // TODO: Implementar lógica basada en Django para ListarEstadosLicenciaUseCase
+    /** @return array<mixed> */
+    public function execute(ListarEstadosDTO $dto): array {
+        $_ = $this->licencias;
         return [];
     }
 }
