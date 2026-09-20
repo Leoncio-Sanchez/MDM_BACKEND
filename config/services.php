@@ -37,4 +37,11 @@ return [
         ],
     ],
 
+    'reniec' => [
+        'url' => env('RENIEC_URL', 'https://ws2.pide.gob.pe/Rest/RENIEC/Consultar'),
+        'dni_usuario' => env('RENIEC_NUDNIUSUARIO', ''),
+        'ruc_usuario' => env('RENIEC_NURUCUSUARIO', ''),
+        'password' => env('RENIEC_PASSWORD', ''),
+        'timeout' => env('RENIEC_TIMEOUT', 10),
+    ],
 ];

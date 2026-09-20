@@ -26,15 +26,20 @@ return new class extends Migration {
             if (!Schema::hasTable('personas')) {
                 Schema::create('personas', function (Blueprint $table) {
                     $table->id();
-                    $table->string('nombres');
-                    $table->string('apellido_paterno');
-                    $table->string('apellido_materno');
-                    $table->string('direccion')->nullable();
-                    $table->string('distrito')->nullable();
-                    $table->string('provincia')->nullable();
-                    $table->string('departamento')->nullable();
-                    $table->string('telefono')->nullable();
-                    $table->string('correo_electronico')->nullable();
+                    $table->string('tipo_persona', 1)->default('N');
+                    $table->string('sexo', 1)->default('X');
+                    $table->string('apellido_paterno', 50)->nullable();
+                    $table->string('apellido_materno', 50)->nullable();
+                    $table->string('nombres', 100);
+                    $table->string('direccion', 250)->nullable();
+                    $table->string('distrito', 100)->nullable();
+                    $table->string('provincia', 100)->nullable();
+                    $table->string('departamento', 100)->nullable();
+                    $table->string('telefono', 30)->nullable();
+                    $table->string('correo_electronico', 150)->nullable();
+                    $table->timestamp('fecha_creacion')->nullable();
+                    $table->timestamp('fecha_actualizacion')->nullable();
+                    $table->foreignId('user_id')->default(1);
                 });
             }
 
@@ -167,7 +172,26 @@ $table->string('codigo', 10)->unique();
             }
 
             if (!Schema::hasTable('auth_user')) {
-                Schema::create('auth_user', function (Blueprint $table) {
+
+                
+
+        if (!Schema::hasTable('personas_documentos')) {
+            Schema::create('personas_documentos', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('persona_id');
+                $table->foreignId('tipo_documento_identidad_id');
+                $table->string('numero_documento', 20);
+            });
+        }
+        if (!Schema::hasTable('expedientes')) {
+            Schema::create('expedientes', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('solicitante_id');
+                $table->foreignId('representante_id');
+            });
+        }
+
+        Schema::create('auth_user', function (Blueprint $table) {
                     $table->id();
                     $table->string('username')->unique();
                     $table->string('email')->nullable();
