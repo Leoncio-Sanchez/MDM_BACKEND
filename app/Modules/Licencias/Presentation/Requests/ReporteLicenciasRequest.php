@@ -7,8 +7,8 @@ final class ReporteLicenciasRequest extends FormRequest {
     /** @return array<string, mixed> */
     public function rules(): array {
         return [
-            'fecha_inicio' => ['required', 'date'],
-            'fecha_fin' => ['required', 'date', 'after_or_equal:fecha_inicio'],
+            'fecha_inicio' => ['nullable', 'date'],
+            'fecha_fin' => ['nullable', 'date', 'after_or_equal:fecha_inicio'],
     ];
     }
 }

@@ -1,7 +1,5 @@
 <?php
-
 declare(strict_types=1);
-
 namespace App\Modules\NivelRiesgo\Application\UseCases;
 
 use App\Modules\NivelRiesgo\Application\DTOs\GuardarNivelRiesgoDTO;
@@ -14,8 +12,7 @@ final readonly class CrearNivelRiesgoUseCase
 
     public function execute(GuardarNivelRiesgoDTO $dto): NivelRiesgo
     {
-        $entity = new NivelRiesgo(null, $dto->codigo, $dto->nombre, $dto->esta_activo);
-
+        $entity = NivelRiesgo::crear($dto->codigo, $dto->nombre, $dto->esta_activo);
         return $this->repository->guardar($entity);
     }
 }

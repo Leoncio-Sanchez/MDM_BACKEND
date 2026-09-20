@@ -50,8 +50,11 @@ $table->string('codigo', 10)->unique();
             if (!Schema::hasTable('zonificaciones')) {
                 Schema::create('zonificaciones', function (Blueprint $table) {
                     $table->id();
-                    $table->string('codigo');
-                    $table->string('descripcion');
+                    $table->string('codigo', 30)->unique();
+                    $table->string('nombre', 150);
+                    $table->boolean('esta_activo')->default(true);
+                    $table->timestampTz('fecha_digitacion')->useCurrent();
+                    $table->unsignedBigInteger('usuario_id')->default(1);
                 });
             }
 

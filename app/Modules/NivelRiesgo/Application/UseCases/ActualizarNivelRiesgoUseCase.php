@@ -1,7 +1,5 @@
 <?php
-
 declare(strict_types=1);
-
 namespace App\Modules\NivelRiesgo\Application\UseCases;
 
 use App\Modules\NivelRiesgo\Application\DTOs\GuardarNivelRiesgoDTO;
@@ -17,10 +15,10 @@ final readonly class ActualizarNivelRiesgoUseCase
     {
         $entity = $this->repository->buscarPorId($id);
         if (! $entity) {
-            throw new NivelRiesgoNoEncontrado;
+            throw new NivelRiesgoNoEncontrado();
         }
-        $updated = new NivelRiesgo($id, $dto->codigo, $dto->nombre, $dto->esta_activo);
 
+        $updated = $entity->actualizar($dto->codigo, $dto->nombre, $dto->esta_activo);
         return $this->repository->actualizar($updated);
     }
 }

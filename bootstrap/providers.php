@@ -6,6 +6,7 @@ use App\Modules\Estados\Infrastructure\Providers\EstadosServiceProvider;
 use App\Providers\AppServiceProvider;
 
 return [
+    App\Modules\Zonificacion\Infrastructure\Providers\ZonificacionServiceProvider::class,
     App\Modules\NivelRiesgo\Infrastructure\Providers\NivelRiesgoServiceProvider::class,
     AppServiceProvider::class,
     EstadosServiceProvider::class,
