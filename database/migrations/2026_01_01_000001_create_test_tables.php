@@ -41,7 +41,9 @@ return new class extends Migration {
             if (!Schema::hasTable('niveles_riesgo')) {
                 Schema::create('niveles_riesgo', function (Blueprint $table) {
                     $table->id();
-                    $table->string('nombre');
+$table->string('codigo', 10)->unique();
+                    $table->string('nombre', 50);
+                    $table->boolean('esta_activo')->default(true);
                 });
             }
 
