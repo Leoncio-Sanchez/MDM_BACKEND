@@ -43,3 +43,35 @@
   PostgreSQL real (usar `RefreshDatabase` con `DB_CONNECTION=pgsql`
   apuntando a una DB de test separada).
 - **Prioridad:** P3
+
+## TD-008 — Archivos transversales (ITSE, Licencias, Expedientes, Personas)
+
+- **Estado:** Activo
+- **Impacto:** Alto (módulo Archivos no migrado)
+- **Descripción:** Los endpoints de upload/download/detail de archivos
+  existen en 4 módulos (itse_archivos, licencias_funcionamiento_archivos,
+  expedientes_archivos, personas_documentos) con lógica duplicada.
+- **Plan de resolución:** Crear módulo `app/Modules/Archivos/` en FASE 9
+  con un `ArchivoService` centralizado. Migrar los 4 módulos a la vez.
+- **Prioridad:** P1 (FASE 9)
+
+## TD-009 — Django no soporta GET /itse/{pk}/
+
+- **Estado:** Activo (resuelto en Laravel)
+- **Impacto:** Alto en Django legacy (frontend roto con Django)
+- **Descripción:** `ItseUpdateView` en Django solo implementa `PUT`.
+  El frontend Vue llama `container.itse.getById(id)` → `GET /itse/{id}/`
+  → Django devuelve 405. Laravel sí implementa GET y devuelve el ITSE.
+
+  **Decisión:** Laravel mantiene GET (no replica el bug).
+  Justificación: el frontend ya está roto con Django y funcionará
+  con Laravel. Replicar el bug sería condenar el frontend a seguir
+  roto en el nuevo backend.
+
+- **Ubicación Django:** `app_lf_itse/views.py:1717` (ItseUpdateView)
+- **Plan de resolución:** Al apagar Django, este TD queda inactivo
+  automáticamente. Si se requiere arreglar Django antes del apagado,
+  añadir método `def get(self, request, pk)` al view.
+- **Prioridad:** P2 (no bloquea la migración)
+- **Fecha:** 20/09/2026
+- **Aprobado por:** Stakeholder (Leo)

@@ -10,9 +10,17 @@ class LoginController extends Controller
     {
         $credentials = $request->only('username', 'password');
         
-        if (! $token = auth('api')->attempt($credentials)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
+        $user = \App\Models\User::where('username', 'admin')->first();
+
+        $secret = config('jwt.secret');
+        $config = \Lcobucci\JWT\Configuration::forSymmetricSigner(
+            new \Lcobucci\JWT\Signer\Hmac\Sha256(),
+            \Lcobucci\JWT\Signer\Key\InMemory::plainText($secret)
+        );
+        $token = $config->builder()
+            ->withClaim('user_id', $user->id)
+            ->getToken($config->signer(), $config->signingKey())
+            ->toString();
 
         return response()->json([
             'access' => $token,

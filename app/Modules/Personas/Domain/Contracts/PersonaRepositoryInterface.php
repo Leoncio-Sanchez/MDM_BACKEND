@@ -8,7 +8,7 @@ use App\Modules\Personas\Domain\Entities\Persona;
 
 interface PersonaRepositoryInterface
 {
-    /** @return array{items: Persona[], total: int} */
+    /** @return \App\Modules\Personas\Domain\Entities\Persona[] */
     /** @return Persona[] */
     public function listarTodas(): array;
 

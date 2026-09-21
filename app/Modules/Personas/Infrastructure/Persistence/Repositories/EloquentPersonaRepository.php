@@ -16,7 +16,7 @@ final class EloquentPersonaRepository implements PersonaRepositoryInterface
         private readonly PersonaMapper $mapper,
     ) {}
 
-    /** @return array{items: Persona[], total: int} */
+    /** @return \App\Modules\Personas\Domain\Entities\Persona[] */
     public function listarTodas(): array
     {
         $models = PersonaModel::with('documentos')
