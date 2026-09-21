@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Personas\Infrastructure\Persistence\Models;
@@ -15,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class PersonaDocumentoModel extends Model
 {
     protected $table = 'personas_documentos';
+
     public $timestamps = false;
 
     protected $fillable = [

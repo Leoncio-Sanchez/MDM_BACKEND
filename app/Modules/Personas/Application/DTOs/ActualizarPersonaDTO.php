@@ -1,10 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Personas\Application\DTOs;
 
-use App\Modules\Personas\Domain\ValueObjects\TipoPersona;
 use App\Modules\Personas\Domain\ValueObjects\Sexo;
+use App\Modules\Personas\Domain\ValueObjects\TipoPersona;
 
 final readonly class ActualizarPersonaDTO
 {
@@ -35,10 +36,10 @@ final readonly class ActualizarPersonaDTO
             distrito: $data['distrito'] ?? null,
             provincia: $data['provincia'] ?? null,
             departamento: $data['departamento'] ?? null,
-            apellidoPaterno: array_key_exists('apellido_paterno', $data) ? $data['apellido_paterno'] : null,
-            apellidoMaterno: array_key_exists('apellido_materno', $data) ? $data['apellido_materno'] : null,
-            telefono: array_key_exists('telefono', $data) ? $data['telefono'] : null,
-            correoElectronico: array_key_exists('correo_electronico', $data) ? $data['correo_electronico'] : null,
+            apellidoPaterno: $data['apellido_paterno'] ?? null,
+            apellidoMaterno: $data['apellido_materno'] ?? null,
+            telefono: $data['telefono'] ?? null,
+            correoElectronico: $data['correo_electronico'] ?? null,
             documentos: isset($data['documentos']) ? array_map(
                 fn ($d) => DocumentoDTO::fromArray($d),
                 $data['documentos']

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Personas\Application\UseCases;
@@ -22,7 +23,7 @@ final readonly class ActualizarPersonaUseCase
     {
         return DB::transaction(function () use ($id, $dto): Persona {
             $persona = $this->personas->buscarPorId($id);
-            if (!$persona) {
+            if (! $persona) {
                 throw PersonaNoEncontrada::porId($id);
             }
 
@@ -56,7 +57,10 @@ final readonly class ActualizarPersonaUseCase
             }
 
             $ret = $this->personas->buscarPorId($id);
-            if (!$ret) throw PersonaNoEncontrada::porId($id);
+            if (! $ret) {
+                throw PersonaNoEncontrada::porId($id);
+            }
+
             return $ret;
         });
     }

@@ -29,3 +29,17 @@
 - **Ubicación:** `frontend-reversed-pro_vue/src/infrastructure/repositories/TiposDocumentoIdentidadRepository.impl.ts`
 - **Plan de resolución:** Añadir `tipo_persona` al método `getAll()` del repositorio de Vue. Actualizar los tests de la página.
 - **Prioridad:** P1 (ticket separado post-migración backend)
+
+## TD-007 — Tests de BuscarPersonasUseCase skipped en SQLite
+
+- **Estado:** Activo
+- **Impacto:** Bajo (SQL verificado con curl contra Django)
+- **Descripción:** 2 tests unitarios del `BuscarPersonasUseCase` están
+  skipped porque usan SQL crudo con `STRING_AGG` y casts `::text` que
+  no son compatibles con SQLite in-memory. La verificación se hizo
+  manualmente con `curl` contra Django + Laravel (diff ✅ IDÉNTICO).
+- **Ubicación:** `app/Modules/Personas/Tests/Unit/Application/BuscarPersonasUseCaseTest.php`
+- **Plan de resolución:** Convertir a test de integración con conexión
+  PostgreSQL real (usar `RefreshDatabase` con `DB_CONNECTION=pgsql`
+  apuntando a una DB de test separada).
+- **Prioridad:** P3

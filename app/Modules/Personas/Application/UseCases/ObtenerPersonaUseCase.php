@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Personas\Application\UseCases;
@@ -16,9 +17,10 @@ final readonly class ObtenerPersonaUseCase
     public function execute(int $id): Persona
     {
         $persona = $this->personas->buscarPorId($id);
-        if (!$persona) {
+        if (! $persona) {
             throw PersonaNoEncontrada::porId($id);
         }
+
         return $persona;
     }
 }

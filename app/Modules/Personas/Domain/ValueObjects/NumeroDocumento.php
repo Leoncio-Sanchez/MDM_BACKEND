@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Personas\Domain\ValueObjects;
@@ -15,6 +16,7 @@ final readonly class NumeroDocumento
         if ($valor === '') {
             throw DocumentoInvalido::vacio();
         }
+
         return new self($valor);
     }
 }

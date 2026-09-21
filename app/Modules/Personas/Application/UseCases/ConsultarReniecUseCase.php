@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Personas\Application\UseCases;
@@ -19,8 +20,8 @@ final readonly class ConsultarReniecUseCase
 
     public function execute(ConsultarReniecDTO $dto): PersonaReniecDTO
     {
-        if (!preg_match('/^\d{8}$/', $dto->dni)) {
-            throw new DocumentoInvalido("El DNI debe tener exactamente 8 dígitos numéricos.");
+        if (! preg_match('/^\d{8}$/', $dto->dni)) {
+            throw new DocumentoInvalido('El DNI debe tener exactamente 8 dígitos numéricos.');
         }
 
         $this->logger->info('Consultando RENIEC', ['dni' => $dto->dni]);

@@ -1,8 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Personas\Infrastructure\Persistence\Models;
 
+use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -19,14 +22,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $departamento
  * @property string|null $telefono
  * @property string|null $correo_electronico
- * @property \Carbon\CarbonImmutable $fecha_creacion
- * @property \Carbon\CarbonImmutable $fecha_actualizacion
+ * @property CarbonImmutable $fecha_creacion
+ * @property CarbonImmutable $fecha_actualizacion
  * @property int $user_id
- * @property \Illuminate\Database\Eloquent\Collection<int, PersonaDocumentoModel> $documentos
+ * @property Collection<int, PersonaDocumentoModel> $documentos
  */
 class PersonaModel extends Model
 {
     protected $table = 'personas';
+
     public $timestamps = false;
 
     protected $fillable = [

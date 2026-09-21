@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Personas\Application\UseCases;
@@ -47,8 +48,11 @@ final readonly class CrearPersonaUseCase
                 );
             }
 
-            $ret = $this->personas->buscarPorId((int)$persistida->id);
-            if (!$ret) throw new \RuntimeException('Persona no encontrada tras crear');
+            $ret = $this->personas->buscarPorId((int) $persistida->id);
+            if (! $ret) {
+                throw new \RuntimeException('Persona no encontrada tras crear');
+            }
+
             return $ret;
         });
     }

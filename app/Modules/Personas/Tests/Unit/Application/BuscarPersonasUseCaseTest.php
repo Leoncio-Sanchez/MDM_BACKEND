@@ -1,6 +1,8 @@
 <?php
-use App\Modules\Personas\Application\UseCases\BuscarPersonasUseCase;
+
+declare(strict_types=1);
 use App\Modules\Personas\Application\DTOs\BuscarPersonasDTO;
+use App\Modules\Personas\Application\UseCases\BuscarPersonasUseCase;
 use App\Modules\Personas\Domain\Contracts\PersonaRepositoryInterface;
 
 it('busca por filtro NOMBRE', function () {

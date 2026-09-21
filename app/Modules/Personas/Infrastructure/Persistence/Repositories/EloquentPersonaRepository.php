@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Personas\Infrastructure\Persistence\Repositories;
@@ -16,23 +17,21 @@ final class EloquentPersonaRepository implements PersonaRepositoryInterface
     ) {}
 
     /** @return array{items: Persona[], total: int} */
-    public function paginar(int $pagina, int $porPagina): array
+    public function listarTodas(): array
     {
-        $query = PersonaModel::with('documentos')->orderBy('id');
-        
-        $total = $query->count();
-        $models = $query->skip(($pagina - 1) * $porPagina)->take($porPagina)->get();
+        $models = PersonaModel::with('documentos')
+            ->orderBy('apellido_paterno')
+            ->orderBy('apellido_materno')
+            ->orderBy('nombres')
+            ->get();
 
-        return [
-            'items' => $models->map(fn (PersonaModel $m) => $this->mapper->toDomain($m))->all(),
-            'total' => $total,
-        ];
+        return $models->map(fn (PersonaModel $m) => $this->mapper->toDomain($m))->all();
     }
 
     public function buscarPorId(int $id): ?Persona
     {
         $model = PersonaModel::with('documentos')->find($id);
-        if (!$model) {
+        if (! $model) {
             return null;
         }
 
@@ -43,7 +42,7 @@ final class EloquentPersonaRepository implements PersonaRepositoryInterface
     public function buscarPorFiltro(string $filtro, string $valor): array
     {
         $filtro = strtoupper(trim($filtro));
-        
+
         $sqlNombre = "
             SELECT p.id AS persona_id
             FROM personas p
@@ -54,25 +53,25 @@ final class EloquentPersonaRepository implements PersonaRepositoryInterface
             ) ILIKE ?
         ";
 
-        $sqlDocumento = "
+        $sqlDocumento = '
             SELECT DISTINCT pd.persona_id
             FROM personas_documentos pd
             WHERE pd.numero_documento = ?
-        ";
+        ';
 
-        $sqlId = "
+        $sqlId = '
             SELECT ?::INTEGER AS persona_id
-        ";
+        ';
 
         $subquery = match ($filtro) {
             'NOMBRE' => $sqlNombre,
             'DOCUMENTO' => $sqlDocumento,
             'ID' => $sqlId,
-            default => throw new \InvalidArgumentException("Filtro no válido."),
+            default => throw new \InvalidArgumentException('Filtro no válido.'),
         };
 
         $valorParam = match ($filtro) {
-            'NOMBRE' => '%' . str_replace(' ', '%', $valor) . '%',
+            'NOMBRE' => '%'.str_replace(' ', '%', $valor).'%',
             default => $valor,
         };
 
@@ -84,8 +83,8 @@ final class EloquentPersonaRepository implements PersonaRepositoryInterface
             SELECT
                 pf.persona_id,
                 STRING_AGG(
-                    tdi.nombre || ' ' || pd.numero_documento,
-                    ', '
+                    (tdi.nombre || ' ' || pd.numero_documento)::text,
+                    ', '::text
                     ORDER BY tdi.nombre || ' ' || pd.numero_documento
                 ) AS documento_concatenado
             FROM personas_filtradas pf
@@ -134,6 +133,7 @@ final class EloquentPersonaRepository implements PersonaRepositoryInterface
     {
         $model = PersonaModel::create($this->mapper->toPersistence($persona));
         $model->load('documentos');
+
         return $this->mapper->toDomain($model);
     }
 
@@ -143,6 +143,7 @@ final class EloquentPersonaRepository implements PersonaRepositoryInterface
         $model = PersonaModel::findOrFail($persona->id);
         $model->update($this->mapper->toPersistence($persona));
         $model->load('documentos');
+
         return $this->mapper->toDomain($model);
     }
 
@@ -155,17 +156,17 @@ final class EloquentPersonaRepository implements PersonaRepositoryInterface
     {
         // Django model sets on_delete=PROTECT for Expediente (solicitante_id, representante_id)
         // Licencia (titular_id, conductor_id), ITSE (titular_id, conductor_id).
-        
+
         $hasExpedientes = DB::table('expedientes')
             ->where('solicitante_id', $id)
             ->orWhere('representante_id', $id)
             ->exists();
-            
+
         $hasLicencias = DB::table('licencias_funcionamiento')
             ->where('titular_id', $id)
             ->orWhere('conductor_id', $id)
             ->exists();
-            
+
         $hasItse = DB::table('itse')
             ->where('titular_id', $id)
             ->orWhere('conductor_id', $id)

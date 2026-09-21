@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Personas\Infrastructure\External;
@@ -33,13 +34,13 @@ final class ReniecHttpClient implements ReniecClientInterface
             throw ReniecNoDisponible::porDni($dni);
         }
 
-        if (!$response->successful()) {
+        if (! $response->successful()) {
             throw ReniecNoDisponible::porDni($dni);
         }
 
         $data = $response->json();
 
-        if (!is_array($data) || !isset($data['consultarResponse'])) {
+        if (! is_array($data) || ! isset($data['consultarResponse'])) {
             throw ReniecRespuestaInvalida::porDni($dni);
         }
 

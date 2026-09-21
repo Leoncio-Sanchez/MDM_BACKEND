@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Personas\Infrastructure\Providers;
@@ -31,8 +32,8 @@ class PersonasServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        if (file_exists(__DIR__ . '/../../Presentation/Routes/api.php')) {
-            $this->loadRoutesFrom(__DIR__ . '/../../Presentation/Routes/api.php');
+        if (file_exists(__DIR__.'/../../Presentation/Routes/api.php')) {
+            $this->loadRoutesFrom(__DIR__.'/../../Presentation/Routes/api.php');
         }
     }
 }

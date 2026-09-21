@@ -1,9 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Personas\Application\UseCases;
 
 use App\Modules\Personas\Domain\Contracts\PersonaRepositoryInterface;
+use App\Modules\Personas\Domain\Entities\Persona;
 
 final readonly class ListarPersonasUseCase
 {
@@ -11,9 +13,9 @@ final readonly class ListarPersonasUseCase
         private PersonaRepositoryInterface $personas,
     ) {}
 
-    /** @return array{items: \App\Modules\Personas\Domain\Entities\Persona[], total: int} */
-    public function execute(int $pagina = 1, int $porPagina = 10): array
+    /** @return Persona[] */
+    public function execute(): array
     {
-        return $this->personas->paginar($pagina, $porPagina);
+        return $this->personas->listarTodas();
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Personas\Application\UseCases;
@@ -15,6 +16,17 @@ final readonly class BuscarPersonasUseCase
     /** @return array<int, array<string, mixed>> */
     public function execute(BuscarPersonasDTO $dto): array
     {
-        return $this->personas->buscarPorFiltro($dto->filtro, $dto->valor);
+        $resultados = $this->personas->buscarPorFiltro($dto->filtro, $dto->valor);
+
+        return array_map(function ($row) {
+            if (isset($row['fecha_creacion'])) {
+                $row['fecha_creacion'] = str_replace('+00', 'Z', str_replace(' ', 'T', $row['fecha_creacion']));
+            }
+            if (isset($row['fecha_actualizacion'])) {
+                $row['fecha_actualizacion'] = str_replace('+00', 'Z', str_replace(' ', 'T', $row['fecha_actualizacion']));
+            }
+
+            return $row;
+        }, $resultados);
     }
 }

@@ -1,10 +1,13 @@
 <?php
-use App\Modules\Personas\Infrastructure\External\ReniecHttpClient;
+
+declare(strict_types=1);
 use App\Modules\Personas\Domain\Exceptions\ReniecNoDisponible;
 use App\Modules\Personas\Domain\Exceptions\ReniecRespuestaInvalida;
+use App\Modules\Personas\Infrastructure\External\ReniecHttpClient;
 use Illuminate\Support\Facades\Http;
+use Tests\TestCase;
 
-uses(\Tests\TestCase::class);
+uses(TestCase::class);
 
 it('consulta correctamente y mapea DTO', function () {
     Http::fake([
@@ -15,32 +18,32 @@ it('consulta correctamente y mapea DTO', function () {
                     'prenombres' => 'Juan',
                     'apePaterno' => 'Perez',
                     'apeMaterno' => 'Gomez',
-                ]
-            ]
-        ], 200)
+                ],
+            ],
+        ], 200),
     ]);
-    
+
     $client = new ReniecHttpClient('url', 'dni', 'ruc', 'pass', 10);
     $res = $client->consultarPorDni('12345678');
-    
+
     expect($res->dni)->toBe('12345678');
     expect($res->nombres)->toBe('Juan');
 });
 
 it('lanza excepcion si respuesta no es 200', function () {
     Http::fake([
-        '*' => Http::response([], 500)
+        '*' => Http::response([], 500),
     ]);
-    
+
     $client = new ReniecHttpClient('url', 'dni', 'ruc', 'pass', 10);
     $client->consultarPorDni('12345678');
 })->throws(ReniecNoDisponible::class);
 
 it('lanza excepcion si respuesta no tiene consultarResponse', function () {
     Http::fake([
-        '*' => Http::response(['data' => 'invalid'], 200)
+        '*' => Http::response(['data' => 'invalid'], 200),
     ]);
-    
+
     $client = new ReniecHttpClient('url', 'dni', 'ruc', 'pass', 10);
     $client->consultarPorDni('12345678');
 })->throws(ReniecRespuestaInvalida::class);
