@@ -161,6 +161,6 @@ it('busca por filtro', function () {
     $res1 = $this->repo->buscarPorFiltro('NUMERO', '999');
     expect($res1)->toHaveCount(1)->and($res1[0]['numero_itse'])->toBe(333);
     
-    $res3 = $this->repo->buscarPorFiltro('INVALID', 'X');
-    expect($res3)->toBeEmpty();
+    expect(fn () => $this->repo->buscarPorFiltro('INVALID', 'X'))
+        ->toThrow(\InvalidArgumentException::class);
 });

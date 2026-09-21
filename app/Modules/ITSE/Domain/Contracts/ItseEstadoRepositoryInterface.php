@@ -10,4 +10,12 @@ interface ItseEstadoRepositoryInterface
     public function crear(ItseEstado $estado): ItseEstado;
     public function tieneEstado(int $itseId, string $estadoNombre): bool;
     public function insertar(int $itseId, string $estado, string $fecha, string $observaciones, int $usuarioId): void;
+
+    /**
+     * Lista historial de estados usando el SQL de Django (_SQL_LISTAR_ESTADOS_ITSE).
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function listarPorItse(int $itseId): array;
 }
+

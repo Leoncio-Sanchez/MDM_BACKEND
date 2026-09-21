@@ -12,6 +12,8 @@ use App\Modules\ITSE\Domain\Exceptions\ExpedienteNoValidoItse;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 
+uses(Tests\TestCase::class);
+
 beforeEach(function () {
     $this->itses = Mockery::mock(ItseRepositoryInterface::class);
     $this->expedientes = Mockery::mock(ExpedienteReadRepositoryInterface::class);

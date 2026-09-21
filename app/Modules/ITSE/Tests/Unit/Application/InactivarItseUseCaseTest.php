@@ -10,6 +10,8 @@ use App\Modules\ITSE\Domain\Exceptions\ItseInvalido;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 
+uses(Tests\TestCase::class);
+
 beforeEach(function () {
     DB::shouldReceive('transaction')->andReturnUsing(function ($callback) {
         return $callback();

@@ -32,6 +32,12 @@ final readonly class Itse
         public int $nivelRiesgoId,
         public int $conductorId,
         public int $titularId,
+        /** @var array<int, mixed> */
+        public array $archivos = [],
+        /** @var array<int, array<string, mixed>> */
+        public array $historialEstados = [],
+        /** @var array<int, array<string, mixed>> */
+        public array $giros = [],
     ) {
         if ($fechaCaducidad < $fechaExpedicion) {
             throw ItseFechaInvalida::caducidadAntesDeExpedicion();

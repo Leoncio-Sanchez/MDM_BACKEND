@@ -267,8 +267,85 @@ final class EloquentItseRepository implements ItseRepositoryInterface
         }, $results);
     }
 
+    public function existePorId(int $id): bool
+    {
+        return ItseModel::where('id', $id)->exists();
+    }
+
+    /**
+     * Lista ITSEs filtrados por fecha_solicitud_renovacion.
+     * Replica ItseSerializer de Django (23 keys).
+     *
+     * @return array<int, Itse>
+     */
+    public function listarPorRenovar(?string $fechaDesde, ?string $fechaHasta): array
+    {
+        $query = ItseModel::query()->orderBy('fecha_solicitud_renovacion');
+
+        if ($fechaDesde !== null) {
+            $query->where('fecha_solicitud_renovacion', '>=', $fechaDesde);
+        }
+        if ($fechaHasta !== null) {
+            $query->where('fecha_solicitud_renovacion', '<=', $fechaHasta);
+        }
+
+        return $query->get()->map(fn ($m) => $this->toEntity($m))->values()->all();
+    }
+
+    /**
+     * Consulta rápida con filtro opcional por numero_itse.
+     * Replica ItseConsultaView de Django.
+     *
+     * @return array<int, Itse>
+     */
+    public function consultaRapida(?int $numeroItse): array
+    {
+        $query = ItseModel::query()->orderByDesc('id');
+
+        if ($numeroItse !== null) {
+            $query->where('numero_itse', $numeroItse);
+        }
+
+        return $query->get()->map(fn ($m) => $this->toEntity($m))->values()->all();
+    }
+
     private function toEntity(ItseModel $model): Itse
     {
+        $historialEstados = [];
+        $giros = [];
+        if ($model->id) {
+            $giros = DB::table('itse_giros')
+                ->where('itse_id', $model->id)
+                ->get()
+                ->map(fn ($g) => [
+                    'id' => (int) $g->id,
+                    'fecha_digitacion' => CarbonImmutable::parse($g->fecha_digitacion)
+                        ->setTimezone(new \DateTimeZone('America/Lima'))
+                        ->format('Y-m-d\TH:i:s.uP'),
+                    'itse' => (int) $g->itse_id,
+                    'giro' => (int) $g->giro_id,
+                    'usuario' => (int) $g->usuario_id,
+                ])
+                ->all();
+
+            $historialEstados = DB::table('itse_estados')
+                ->where('itse_id', $model->id)
+                ->get()
+                ->map(fn ($e) => [
+                    'id' => (int) $e->id,
+                    'fecha_estado' => CarbonImmutable::parse($e->fecha_estado)->format('Y-m-d'),
+                    'documento' => (string) $e->documento,
+                    'observaciones' => (string) $e->observaciones,
+                    'fecha_digitacion' => CarbonImmutable::parse($e->fecha_digitacion)
+                        ->setTimezone(new \DateTimeZone('America/Lima'))
+                        ->format('Y-m-d\TH:i:s.uP'),
+                    'itse' => (int) $e->itse_id,
+                    'estado' => (int) $e->estado_id,
+                    'usuario' => (int) $e->usuario_id,
+                ])
+                ->all();
+        }
+
         return new Itse(
             id: $model->id,
             uuid: $model->uuid,
@@ -293,6 +370,9 @@ final class EloquentItseRepository implements ItseRepositoryInterface
             nivelRiesgoId: $model->nivel_riesgo_id,
             conductorId: $model->conductor_id,
             titularId: $model->titular_id,
+            archivos: [],
+            historialEstados: $historialEstados,
+            giros: $giros,
         );
     }
 }

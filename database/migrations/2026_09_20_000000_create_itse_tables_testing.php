@@ -38,12 +38,23 @@ return new class extends Migration
             Schema::create('itse_estados', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('itse_id');
-                $table->string('estado', 50);
-                $table->date('fecha');
+                $table->foreignId('estado_id')->nullable();
+                $table->string('estado', 50)->nullable();
+                $table->date('fecha')->nullable();
+                $table->date('fecha_estado')->nullable();
+                $table->string('documento', 100)->nullable();
                 $table->string('observaciones', 1000)->nullable();
                 $table->foreignId('usuario_id');
+                $table->timestamp('fecha_digitacion')->nullable();
             });
-            
+
+            Schema::create('itse_giros', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('itse_id');
+                $table->foreignId('giro_id');
+                $table->foreignId('usuario_id')->nullable();
+                $table->timestamp('fecha_digitacion')->nullable();
+            });
         }
     }
 

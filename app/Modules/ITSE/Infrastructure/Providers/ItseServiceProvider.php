@@ -11,6 +11,9 @@ use App\Modules\ITSE\Infrastructure\Persistence\Repositories\EloquentItseReposit
 use App\Modules\ITSE\Domain\Contracts\ItseEstadoRepositoryInterface;
 use App\Modules\ITSE\Infrastructure\Persistence\Repositories\EloquentItseEstadoRepository;
 
+use App\Modules\ITSE\Domain\Contracts\ItseGiroRepositoryInterface;
+use App\Modules\ITSE\Infrastructure\Persistence\Repositories\EloquentItseGiroRepository;
+
 use App\Modules\ITSE\Domain\Contracts\ExpedienteReadRepositoryInterface;
 use App\Modules\ITSE\Infrastructure\Persistence\Repositories\EloquentExpedienteReadRepository;
 
@@ -33,6 +36,7 @@ final class ItseServiceProvider extends ServiceProvider
     {
         $this->app->bind(ItseRepositoryInterface::class, EloquentItseRepository::class);
         $this->app->bind(ItseEstadoRepositoryInterface::class, EloquentItseEstadoRepository::class);
+        $this->app->bind(ItseGiroRepositoryInterface::class, EloquentItseGiroRepository::class);
         $this->app->bind(ExpedienteReadRepositoryInterface::class, EloquentExpedienteReadRepository::class);
         $this->app->bind(PersonaReadRepositoryInterface::class, EloquentPersonaReadRepository::class);
         $this->app->bind(NivelRiesgoReadRepositoryInterface::class, EloquentNivelRiesgoReadRepository::class);

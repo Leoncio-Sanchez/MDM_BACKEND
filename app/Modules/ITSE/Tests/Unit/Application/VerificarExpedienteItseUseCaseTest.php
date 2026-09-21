@@ -20,7 +20,7 @@ it('verifica expediente existente', function () {
     $exp = (object)['id' => 1, 'numero_expediente' => 123];
     $this->expedientes->shouldReceive('buscarPorNumeroYAnio')->with(123, 2026)->once()->andReturn($exp);
     $this->improcedentes->shouldReceive('existe')->with(1, 'ITSE')->once()->andReturn(false);
-    $this->itses->shouldReceive('buscarPorFiltro')->with('EXPEDIENTE_ID', '1')->once()->andReturn([]);
+    $this->itses->shouldReceive('buscarPorFiltro')->with('EXPEDIENTE', '123')->once()->andReturn([]);
     
     $result = $this->useCase->execute($dto);
     

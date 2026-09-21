@@ -10,7 +10,8 @@ interface ItseRepositoryInterface
     public function crear(Itse $itse): Itse;
     public function actualizar(Itse $itse): Itse;
     public function buscarPorId(int $id): ?Itse;
-    
+    public function existePorId(int $id): bool;
+
     public function existeNumero(int $numero, ?int $excluirId = null): bool;
     public function existeRecibo(string $recibo, ?int $excluirId = null): bool;
 
@@ -20,4 +21,19 @@ interface ItseRepositoryInterface
      * @return array<int, array<string, mixed>>
      */
     public function buscarPorFiltro(string $filtro, string $valor): array;
+
+    /**
+     * Lista ITSEs filtrados por fecha_solicitud_renovacion (6B).
+     *
+     * @return array<int, Itse>
+     */
+    public function listarPorRenovar(?string $fechaDesde, ?string $fechaHasta): array;
+
+    /**
+     * Consulta rápida con filtro opcional por numero_itse (6B).
+     *
+     * @return array<int, Itse>
+     */
+    public function consultaRapida(?int $numeroItse): array;
 }
+

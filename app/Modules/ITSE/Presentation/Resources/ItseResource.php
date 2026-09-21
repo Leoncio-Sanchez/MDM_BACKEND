@@ -13,9 +13,9 @@ final class ItseResource extends JsonResource
     {
         return [
             'id' => $this->resource->id,
-            'archivos' => [],
-            'historial_estados' => [],
-            'giros' => [],
+            'archivos' => $this->resource->archivos,
+            'historial_estados' => $this->resource->historialEstados,
+            'giros' => $this->resource->giros,
             'uuid' => $this->resource->uuid,
             'tipo_itse_id' => $this->resource->tipoItseId,
             'numero_itse' => $this->resource->numeroItse,

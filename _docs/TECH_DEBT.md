@@ -75,3 +75,21 @@
 - **Prioridad:** P2 (no bloquea la migración)
 - **Fecha:** 20/09/2026
 - **Aprobado por:** Stakeholder (Leo)
+
+## TD-010 — ItseInspectoresView siempre retorna []
+
+- **Estado:** Activo (feature no implementada en Django)
+- **Impacto:** Bajo (frontend no usa este endpoint actualmente)
+- **Descripción:** `ItseInspectoresView` en Django siempre devuelve `[]`
+  aunque la tabla `itse_inspectores` existe con schema completo
+  (`FK a itse, inspector_id, usuario_id`). La feature nunca se implementó.
+
+  **Decisión:** Laravel retorna `[]` (replica el comportamiento de Django).
+  NO se implementa la query real para preservar el contrato.
+
+- **Ubicación Django:** `app_lf_itse/views.py` (ItseInspectoresView)
+- **Plan de resolución:** Al apagar Django, si la feature es requerida,
+  implementar en Laravel (modelo ya tiene el schema). Ticket separado.
+- **Prioridad:** P3
+- **Fecha:** 21/09/2026
+- **Aprobado por:** Stakeholder (Leo)
