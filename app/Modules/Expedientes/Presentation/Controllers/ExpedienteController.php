@@ -175,7 +175,7 @@ final class ExpedienteController extends Controller
         }
 
         if ($autorizacion === null) {
-            return new JsonResponse('null', 200, [], 0, true);
+            return new JsonResponse('', 200, [], 0, true);
         }
 
         return response()->json(

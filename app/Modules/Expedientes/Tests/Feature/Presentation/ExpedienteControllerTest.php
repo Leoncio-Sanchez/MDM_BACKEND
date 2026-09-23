@@ -281,7 +281,7 @@ it('GET /expedientes/{pk}/autorizacion-improcedente/ sin registro devuelve 200 c
         ->getJson('/api/lf-itse/expedientes/10/autorizacion-improcedente/?tipo=LF');
 
     $response->assertStatus(200);
-    expect($response->getContent())->toBe('null');
+    expect($response->getContent())->toBe('');
 });
 
 it('GET /expedientes/{pk}/autorizacion-improcedente/ con registro devuelve 200 con resource', function () {

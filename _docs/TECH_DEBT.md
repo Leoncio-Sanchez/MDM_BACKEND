@@ -164,3 +164,18 @@
 - **Prioridad:** P2
 - **Fecha:** 23/09/2026
 - **Aprobado por:** Leo (Stakeholder)
+
+## TD-015 — Replicar body vacío en respuestas "sin registro" de `autorizacion-improcedente` (Expedientes 7C)
+
+- **Estado:** Resuelto en Laravel (alineado 1:1 con Django DRF)
+- **Impacto:** Medio (evita SyntaxError en frontend o Axios `response.data`)
+- **Descripción:** 
+  1. En Django REST Framework, cuando no existe registro en `AutorizacionImprocedenteView`, el endpoint retorna `Response(None, status=status.HTTP_200_OK)`. El `JSONRenderer` de DRF serializa `None` como cuerpo vacío (`b''`) con cabecera `Content-Length: 0` y código HTTP 200.
+  2. En Laravel, un `response()->json(null, 200)` o `new JsonResponse(null, 200)` por defecto envía `{}` o `"null"`.
+  3. Para garantizar paridad byte-a-byte con Django y evitar inconsistencias en el frontend, `ExpedienteController::autorizacionImprocedente()` retorna `new JsonResponse('', 200, [], 0, true)`, emitiendo cuerpo vacío con código HTTP 200.
+- **Ubicación:**
+  - `app/Modules/Expedientes/Presentation/Controllers/ExpedienteController.php`
+- **Plan de resolución:** El comportamiento está completamente armonizado con Django DRF.
+- **Prioridad:** P2
+- **Fecha:** 23/09/2026
+- **Aprobado por:** Leo (Stakeholder)
