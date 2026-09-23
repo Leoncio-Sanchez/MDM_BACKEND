@@ -16,7 +16,7 @@ use App\Modules\Estados\Presentation\Requests\ListarEstadosRequest;
 use App\Modules\Estados\Presentation\Requests\CrearEstadoRequest;
 use App\Modules\Estados\Presentation\Requests\ActualizarEstadoRequest;
 use App\Modules\Estados\Presentation\Resources\EstadoResource;
-use App\Modules\Shared\Presentation\Resources\DjangoPaginatedResource;
+use App\Shared\Presentation\Resources\DjangoPaginatedResource;
 use Illuminate\Http\JsonResponse;
 use OpenApi\Attributes as OA;
 

@@ -1,17 +1,21 @@
 <?php
+
 declare(strict_types=1);
 
-namespace App\Modules\Shared\Presentation\Resources;
+namespace App\Shared\Presentation\Resources;
 
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
 class DjangoPaginatedResource extends ResourceCollection
 {
     private string $resourceClass;
+
     private int $total;
 
     /**
-     * @param array{items: mixed, total: int} $resource
+     * @param  array{items: mixed, total: int}  $resource
      */
     public function __construct(array $resource, string $resourceClass)
     {
@@ -21,18 +25,24 @@ class DjangoPaginatedResource extends ResourceCollection
     }
 
     /**
-     * @param \Illuminate\Http\Request $request
+     * @param  Request  $request
      * @return array<string, mixed>
      */
     public function toArray($request): array
     {
+        $items = $this->collection ?? collect();
+
         return [
             'count' => $this->total,
             'next' => null,
             'previous' => null,
-            'results' => $this->collection->map(function ($item) use ($request) {
-                return (new $this->resourceClass($item))->toArray($request);
-            }),
+            'results' => $items->map(function (mixed $item) use ($request): mixed {
+                $class = $this->resourceClass;
+                /** @var JsonResource $resource */
+                $resource = new $class($item);
+
+                return $resource->toArray($request);
+            })->all(),
         ];
     }
 }
