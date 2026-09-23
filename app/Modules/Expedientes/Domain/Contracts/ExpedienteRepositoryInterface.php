@@ -48,8 +48,11 @@ interface ExpedienteRepositoryInterface
     public function listarPendientes(): array;
 
     /**
-     * Consulta rápida de expedientes con filtro opcional por numero_expediente.
-     *
+     * @return array<int, Expediente>
+     */
+    public function consultar(?int $numeroExpediente): array;
+
+    /**
      * @return array<int, Expediente>
      */
     public function consultaRapida(?int $numeroExpediente): array;

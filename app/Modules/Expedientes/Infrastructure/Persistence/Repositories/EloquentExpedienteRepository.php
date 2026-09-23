@@ -154,9 +154,17 @@ final class EloquentExpedienteRepository implements ExpedienteRepositoryInterfac
     /**
      * @return array<int, Expediente>
      */
-    public function consultaRapida(?int $numeroExpediente): array
+    public function consultar(?int $numeroExpediente): array
     {
         return [];
+    }
+
+    /**
+     * @return array<int, Expediente>
+     */
+    public function consultaRapida(?int $numeroExpediente): array
+    {
+        return $this->consultar($numeroExpediente);
     }
 
     private function toDateTimeImmutable(\DateTimeInterface|string $date): DateTimeImmutable
