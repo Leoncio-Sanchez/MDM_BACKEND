@@ -60,4 +60,30 @@ final readonly class CalculadoraDiasHabilesService
 
         return !$this->feriados->esFeriado($fecha);
     }
+
+    public function diferenciaDiasHabiles(DateTimeImmutable $desde, DateTimeImmutable $hasta): int
+    {
+        // Normalizar a fechas (sin hora)
+        $desdeNorm = $desde->setTime(0, 0, 0);
+        $hastaNorm = $hasta->setTime(0, 0, 0);
+
+        if ($desdeNorm == $hastaNorm) {
+            return 0;
+        }
+
+        $avanzando = $hastaNorm > $desdeNorm;
+        $menor = $avanzando ? $desdeNorm : $hastaNorm;
+        $mayor = $avanzando ? $hastaNorm : $desdeNorm;
+
+        $conteo = 0;
+        $cursor = $menor;
+        while ($cursor < $mayor) {
+            $cursor = $cursor->modify('+1 day');
+            if ($this->esDiaHabil($cursor)) {
+                $conteo++;
+            }
+        }
+
+        return $avanzando ? $conteo : -$conteo;
+    }
 }

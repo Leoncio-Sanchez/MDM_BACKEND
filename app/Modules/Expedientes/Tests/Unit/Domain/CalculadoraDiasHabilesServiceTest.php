@@ -183,3 +183,71 @@ it('maneja feriados consecutivos correctamente', function () {
         ->and($resultado->format('Y-m-d'))->toBe('2025-08-01')
         ->and($resultado->format('N'))->toBe('5');
 });
+
+it('retorna 0 si las fechas son iguales', function () {
+    $this->feriados->shouldReceive('esFeriado')->andReturn(false);
+    $fecha = new DateTimeImmutable('2025-01-03');
+    expect($this->calc->diferenciaDiasHabiles($fecha, $fecha))->toBe(0);
+});
+
+it('cuenta días hábiles hacia adelante (exclusive inicio, inclusive fin)', function () {
+    $this->feriados->shouldReceive('esFeriado')->andReturn(false);
+    // Viernes 2025-01-03 → Viernes 2025-01-10
+    // Lun(6), Mar(7), Mié(8), Jue(9), Vie(10) = 5 días hábiles
+    $desde = new DateTimeImmutable('2025-01-03');
+    $hasta = new DateTimeImmutable('2025-01-10');
+    expect($this->calc->diferenciaDiasHabiles($desde, $hasta))->toBe(5);
+});
+
+it('retorna negativo cuando fecha_hasta < fecha_desde', function () {
+    $this->feriados->shouldReceive('esFeriado')->andReturn(false);
+    $desde = new DateTimeImmutable('2025-01-10');
+    $hasta = new DateTimeImmutable('2025-01-03');
+    expect($this->calc->diferenciaDiasHabiles($desde, $hasta))->toBe(-5);
+});
+
+it('excluye feriados recurrentes', function () {
+    $this->feriados->shouldReceive('esFeriado')->andReturnUsing(
+        fn (DateTimeImmutable $f) => $f->format('m-d') === '05-01'
+    );
+    // Con 05-01 feriado
+    $desde = new DateTimeImmutable('2025-04-28');  // Lunes
+    $hasta = new DateTimeImmutable('2025-05-06');  // Martes
+    // Días hábiles: 29, 30, [01 skip], 02, 05, 06 = 5
+    expect($this->calc->diferenciaDiasHabiles($desde, $hasta))->toBe(5);
+});
+
+it('maneja el día final si es inhábil', function () {
+    $this->feriados->shouldReceive('esFeriado')->andReturn(false);
+    // Viernes 2025-01-03 → Domingo 2025-01-05
+    // Sáb(4 skip), Dom(5 skip) = 0 días
+    $desde = new DateTimeImmutable('2025-01-03');
+    $hasta = new DateTimeImmutable('2025-01-05');
+    expect($this->calc->diferenciaDiasHabiles($desde, $hasta))->toBe(0);
+});
+
+it('maneja un rango con un solo día hábil', function () {
+    $this->feriados->shouldReceive('esFeriado')->andReturn(false);
+    // Jueves 2025-01-02 → Viernes 2025-01-03
+    $desde = new DateTimeImmutable('2025-01-02');
+    $hasta = new DateTimeImmutable('2025-01-03');
+    expect($this->calc->diferenciaDiasHabiles($desde, $hasta))->toBe(1);
+});
+
+it('NO muta los DateTimeImmutable originales', function () {
+    $this->feriados->shouldReceive('esFeriado')->andReturn(false);
+    $desde = new DateTimeImmutable('2025-01-03 14:30:00');
+    $hasta = new DateTimeImmutable('2025-01-10 18:00:00');
+    $this->calc->diferenciaDiasHabiles($desde, $hasta);
+    expect($desde->format('Y-m-d H:i:s'))->toBe('2025-01-03 14:30:00')
+        ->and($hasta->format('Y-m-d H:i:s'))->toBe('2025-01-10 18:00:00');
+});
+
+it('maneja rangos largos (>30 días)', function () {
+    $this->feriados->shouldReceive('esFeriado')->andReturn(false);
+    $desde = new DateTimeImmutable('2025-01-01');
+    $hasta = new DateTimeImmutable('2025-03-01');
+    // Contar días hábiles en 59 días calendario
+    $resultado = $this->calc->diferenciaDiasHabiles($desde, $hasta);
+    expect($resultado)->toBeGreaterThan(0)->toBeLessThan(60);
+});
