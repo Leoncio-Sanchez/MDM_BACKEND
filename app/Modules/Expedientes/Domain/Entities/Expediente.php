@@ -100,12 +100,14 @@ final readonly class Expediente
         );
     }
 
-    public function ampliarPlazo(
-        int $dias,
-        string $motivo,
-        int $usuarioId,
-        DateTimeImmutable $nuevaFechaVencimiento,
-        DateTimeImmutable $nuevaFechaAlerta,
+    public function conAmpliacion(
+        DateTimeImmutable $fechaSuspension,
+        int $diasAmpliacion,
+        string $motivoAmpliacion,
+        DateTimeImmutable $fechaVencimiento,
+        DateTimeImmutable $fechaAlerta,
+        int $usuarioAmpliacionId,
+        DateTimeImmutable $fechaDigitacionAmpliacion,
     ): self {
         return new self(
             id: $this->id,
@@ -116,13 +118,13 @@ final readonly class Expediente
             solicitanteId: $this->solicitanteId,
             representanteId: $this->representanteId,
             observaciones: $this->observaciones,
-            fechaVencimiento: $nuevaFechaVencimiento,
-            fechaAlerta: $nuevaFechaAlerta,
-            fechaSuspension: $this->fechaSuspension,
-            diasAmpliacion: $dias,
-            motivoAmpliacion: $motivo,
-            usuarioAmpliacionId: $usuarioId,
-            fechaDigitacionAmpliacion: new DateTimeImmutable,
+            fechaVencimiento: $fechaVencimiento,
+            fechaAlerta: $fechaAlerta,
+            fechaSuspension: $fechaSuspension,
+            diasAmpliacion: $diasAmpliacion,
+            motivoAmpliacion: $motivoAmpliacion,
+            usuarioAmpliacionId: $usuarioAmpliacionId,
+            fechaDigitacionAmpliacion: $fechaDigitacionAmpliacion,
             usuarioId: $this->usuarioId,
             fechaDigitacion: $this->fechaDigitacion,
             autorizacionesImprocedentes: $this->autorizacionesImprocedentes,

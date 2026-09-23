@@ -12,4 +12,9 @@ final class TipoProcedimientoNoValido extends DomainException
     {
         return new self("El tipo de procedimiento TUPA con ID {$id} no existe o no está activo.");
     }
+
+    public static function porId(int $id): self
+    {
+        return self::noExiste($id);
+    }
 }

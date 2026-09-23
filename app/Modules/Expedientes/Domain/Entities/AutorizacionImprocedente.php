@@ -23,6 +23,7 @@ final readonly class AutorizacionImprocedente
     public static function crear(
         int $expedienteId,
         TipoAutorizacion $tipo,
+        DateTimeImmutable $fechaRechazo,
         ?string $documento,
         ?string $observaciones,
         int $usuarioId,
@@ -33,7 +34,7 @@ final readonly class AutorizacionImprocedente
             id: null,
             expedienteId: $expedienteId,
             tipoAutorizacion: $tipo,
-            fechaRechazo: $now,
+            fechaRechazo: $fechaRechazo,
             documento: $documento,
             observaciones: $observaciones,
             usuarioId: $usuarioId,

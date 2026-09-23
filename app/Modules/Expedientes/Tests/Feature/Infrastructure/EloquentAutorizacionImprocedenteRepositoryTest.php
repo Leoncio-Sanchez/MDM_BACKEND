@@ -18,6 +18,7 @@ it('crea y busca una autorizacion improcedente por expediente y tipo', function 
     $auto = AutorizacionImprocedente::crear(
         expedienteId: 10,
         tipo: TipoAutorizacion::LF,
+        fechaRechazo: new DateTimeImmutable('2026-09-20'),
         documento: 'DOC-123.pdf',
         observaciones: 'Rechazo por falta de requisitos',
         usuarioId: 1,
@@ -45,6 +46,7 @@ it('verifica existencia de autorizacion improcedente', function () {
     $auto = AutorizacionImprocedente::crear(
         expedienteId: 20,
         tipo: TipoAutorizacion::ITSE,
+        fechaRechazo: new DateTimeImmutable('2026-09-20'),
         documento: null,
         observaciones: null,
         usuarioId: 1,
