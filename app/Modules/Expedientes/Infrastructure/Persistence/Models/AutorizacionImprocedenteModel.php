@@ -39,4 +39,9 @@ class AutorizacionImprocedenteModel extends Model
             'fecha_digitacion' => 'datetime',
         ];
     }
+
+    public function getDateFormat(): string
+    {
+        return 'Y-m-d H:i:sP';
+    }
 }

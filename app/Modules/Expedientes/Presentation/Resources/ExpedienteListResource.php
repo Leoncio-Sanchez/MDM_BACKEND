@@ -15,13 +15,16 @@ final class ExpedienteListResource extends JsonResource
     /** @return array<string, mixed> */
     public function toArray(Request $request): array
     {
+        $tz = new \DateTimeZone('America/Lima');
+        $fmtRecepcion = ((int) $this->fechaRecepcion->format('u')) > 0 ? 'Y-m-d\TH:i:s.uP' : 'Y-m-d\TH:i:sP';
+
         return [
             'id' => $this->id,
             'uuid' => $this->uuid,
             'numero_expediente' => $this->numeroExpediente,
             'fecha_recepcion' => $this->fechaRecepcion
-                ->setTimezone(new \DateTimeZone('America/Lima'))
-                ->format('Y-m-d\TH:i:s.uP'),
+                ->setTimezone($tz)
+                ->format($fmtRecepcion),
             'fecha_vencimiento' => $this->fechaVencimiento->format('Y-m-d'),
             'fecha_alerta' => $this->fechaAlerta->format('Y-m-d'),
             'tipo_procedimiento_tupa' => $this->tipoProcedimientoTupaId,

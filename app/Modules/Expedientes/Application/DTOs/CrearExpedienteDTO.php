@@ -24,7 +24,7 @@ final readonly class CrearExpedienteDTO
     {
         $fechaRecepcion = isset($data['fecha_recepcion']) && $data['fecha_recepcion'] instanceof DateTimeImmutable
             ? $data['fecha_recepcion']
-            : new DateTimeImmutable((string) ($data['fecha_recepcion'] ?? 'now'));
+            : new DateTimeImmutable((string) ($data['fecha_recepcion'] ?? 'now'), new \DateTimeZone('America/Lima'));
 
         return new self(
             numeroExpediente: isset($data['numero_expediente']) ? (int) $data['numero_expediente'] : null,

@@ -71,4 +71,9 @@ class ExpedienteModel extends Model
     {
         return $this->hasMany(AutorizacionImprocedenteModel::class, 'expediente_id');
     }
+
+    public function getDateFormat(): string
+    {
+        return 'Y-m-d H:i:sP';
+    }
 }

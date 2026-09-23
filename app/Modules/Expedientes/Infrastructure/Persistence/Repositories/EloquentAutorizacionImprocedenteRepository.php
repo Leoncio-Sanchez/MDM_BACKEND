@@ -27,11 +27,11 @@ final readonly class EloquentAutorizacionImprocedenteRepository implements Autor
         $model = new AutorizacionImprocedenteModel();
         $model->expediente_id = $autorizacion->expedienteId;
         $model->tipo_autorizacion = $autorizacion->tipoAutorizacion->value;
-        $model->fecha_rechazo = $autorizacion->fechaRechazo->format('Y-m-d H:i:s');
+        $model->fecha_rechazo = $autorizacion->fechaRechazo;
         $model->documento = $autorizacion->documento;
         $model->observaciones = $autorizacion->observaciones;
         $model->usuario_id = $autorizacion->usuarioId;
-        $model->fecha_digitacion = $autorizacion->fechaDigitacion->format('Y-m-d H:i:s');
+        $model->fecha_digitacion = $autorizacion->fechaDigitacion;
         $model->save();
 
         return $this->toEntity($model);
@@ -51,13 +51,13 @@ final readonly class EloquentAutorizacionImprocedenteRepository implements Autor
             ? $model->fecha_rechazo
             : ($model->fecha_rechazo instanceof \DateTimeInterface
                 ? DateTimeImmutable::createFromInterface($model->fecha_rechazo)
-                : new DateTimeImmutable((string) $model->fecha_rechazo));
+                : new DateTimeImmutable((string) $model->fecha_rechazo, new \DateTimeZone('America/Lima')));
 
         $fechaDigitacion = $model->fecha_digitacion instanceof DateTimeImmutable
             ? $model->fecha_digitacion
             : ($model->fecha_digitacion instanceof \DateTimeInterface
                 ? DateTimeImmutable::createFromInterface($model->fecha_digitacion)
-                : new DateTimeImmutable((string) $model->fecha_digitacion));
+                : new DateTimeImmutable((string) $model->fecha_digitacion, new \DateTimeZone('America/Lima')));
 
         return new AutorizacionImprocedente(
             id: (int) $model->id,

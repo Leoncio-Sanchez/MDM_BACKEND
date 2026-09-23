@@ -53,7 +53,7 @@ final class EloquentExpedienteRepository implements ExpedienteRepositoryInterfac
         $model = new ExpedienteModel();
         $model->uuid = $expediente->uuid;
         $model->numero_expediente = $expediente->numeroExpediente;
-        $model->fecha_recepcion = $expediente->fechaRecepcion->format('Y-m-d H:i:s');
+        $model->fecha_recepcion = $expediente->fechaRecepcion;
         $model->tipo_procedimiento_tupa_id = $expediente->tipoProcedimientoTupaId;
         $model->solicitante_id = $expediente->solicitanteId;
         $model->representante_id = $expediente->representanteId;
@@ -64,9 +64,9 @@ final class EloquentExpedienteRepository implements ExpedienteRepositoryInterfac
         $model->dias_ampliacion = $expediente->diasAmpliacion;
         $model->motivo_ampliacion = $expediente->motivoAmpliacion;
         $model->usuario_ampliacion = $expediente->usuarioAmpliacionId;
-        $model->fecha_digitacion_ampliacion = $expediente->fechaDigitacionAmpliacion?->format('Y-m-d H:i:s');
+        $model->fecha_digitacion_ampliacion = $expediente->fechaDigitacionAmpliacion;
         $model->usuario_id = $expediente->usuarioId;
-        $model->fecha_digitacion = $expediente->fechaDigitacion->format('Y-m-d H:i:s');
+        $model->fecha_digitacion = $expediente->fechaDigitacion;
         $model->save();
 
         return $this->toEntity($model);
@@ -77,7 +77,7 @@ final class EloquentExpedienteRepository implements ExpedienteRepositoryInterfac
         /** @var ExpedienteModel $model */
         $model = ExpedienteModel::findOrFail($expediente->id);
         $model->numero_expediente = $expediente->numeroExpediente;
-        $model->fecha_recepcion = $expediente->fechaRecepcion->format('Y-m-d H:i:s');
+        $model->fecha_recepcion = $expediente->fechaRecepcion;
         $model->tipo_procedimiento_tupa_id = $expediente->tipoProcedimientoTupaId;
         $model->solicitante_id = $expediente->solicitanteId;
         $model->representante_id = $expediente->representanteId;
@@ -88,7 +88,7 @@ final class EloquentExpedienteRepository implements ExpedienteRepositoryInterfac
         $model->dias_ampliacion = $expediente->diasAmpliacion;
         $model->motivo_ampliacion = $expediente->motivoAmpliacion;
         $model->usuario_ampliacion = $expediente->usuarioAmpliacionId;
-        $model->fecha_digitacion_ampliacion = $expediente->fechaDigitacionAmpliacion?->format('Y-m-d H:i:s');
+        $model->fecha_digitacion_ampliacion = $expediente->fechaDigitacionAmpliacion;
         $model->save();
 
         return $this->toEntity($model);
@@ -167,7 +167,7 @@ final class EloquentExpedienteRepository implements ExpedienteRepositoryInterfac
         if ($date instanceof \DateTimeInterface) {
             return DateTimeImmutable::createFromInterface($date);
         }
-        return new DateTimeImmutable($date);
+        return new DateTimeImmutable($date, new \DateTimeZone('America/Lima'));
     }
 
     private function toNullableDateTimeImmutable(\DateTimeInterface|string|null $date): ?DateTimeImmutable

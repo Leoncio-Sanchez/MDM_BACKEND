@@ -130,3 +130,21 @@
 - **Prioridad:** P2
 - **Fecha:** 21/09/2026
 - **Aprobado por:** Leo (Stakeholder)
+
+## TD-013 — Manejo de microsegundos y persistencia con timezone en fecha_recepcion y datetimes de Expedientes
+
+- **Estado:** Resuelto en Laravel (alineado 1:1 con Django DRF)
+- **Impacto:** Bajo (consistencia de contrato y serialización ISO-8601)
+- **Descripción:** 
+  1. En Django REST Framework, la serialización de `DateTimeField` (con `isoformat()`) omite la fracción de microsegundos si es `.000000` (e.g. `2025-02-03T10:00:00-05:00`), pero la incluye si `microseconds > 0`.
+  2. En Laravel Resources (`ExpedienteResource` y `ExpedienteListResource`), se replica exactamente esta lógica:
+     `((int) $this->fechaRecepcion->format('u')) > 0 ? 'Y-m-d\TH:i:s.uP' : 'Y-m-d\TH:i:sP'`.
+  3. En persistencia PostgreSQL (`timestamp with time zone`), Eloquent por defecto formatea fechas usando `Y-m-d H:i:s` sin offset de zona horaria, lo que provocaría discrepancias horarias en conexiones UTC. Se definió `getDateFormat(): string { return 'Y-m-d H:i:sP'; }` en los modelos Eloquent de Expedientes para preservar el offset explícito (`-05:00` en `America/Lima`) al persistir en PostgreSQL, garantizando simetría total de datos entre Django y Laravel.
+- **Ubicación:** 
+  - `app/Modules/Expedientes/Presentation/Resources/ExpedienteResource.php`
+  - `app/Modules/Expedientes/Presentation/Resources/ExpedienteListResource.php`
+  - `app/Modules/Expedientes/Infrastructure/Persistence/Models/ExpedienteModel.php`
+- **Plan de resolución:** El comportamiento está completamente armonizado. Al retirar Django, se mantendrá este estándar para interoperabilidad con el frontend Vue.
+- **Prioridad:** P2
+- **Fecha:** 23/09/2026
+- **Aprobado por:** Leo (Stakeholder)

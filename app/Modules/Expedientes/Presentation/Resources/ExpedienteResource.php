@@ -15,6 +15,13 @@ final class ExpedienteResource extends JsonResource
     /** @return array<string, mixed> */
     public function toArray(Request $request): array
     {
+        $tz = new \DateTimeZone('America/Lima');
+        $fmtRecepcion = ((int) $this->fechaRecepcion->format('u')) > 0 ? 'Y-m-d\TH:i:s.uP' : 'Y-m-d\TH:i:sP';
+        $fmtDigitacion = ((int) $this->fechaDigitacion->format('u')) > 0 ? 'Y-m-d\TH:i:s.uP' : 'Y-m-d\TH:i:sP';
+        $fmtDigitacionAmp = ($this->fechaDigitacionAmpliacion && ((int) $this->fechaDigitacionAmpliacion->format('u')) > 0)
+            ? 'Y-m-d\TH:i:s.uP'
+            : 'Y-m-d\TH:i:sP';
+
         return [
             'id' => $this->id,
             'archivos' => [],  // FASE 9
@@ -24,8 +31,8 @@ final class ExpedienteResource extends JsonResource
             'uuid' => $this->uuid,
             'numero_expediente' => $this->numeroExpediente,
             'fecha_recepcion' => $this->fechaRecepcion
-                ->setTimezone(new \DateTimeZone('America/Lima'))
-                ->format('Y-m-d\TH:i:s.uP'),
+                ->setTimezone($tz)
+                ->format($fmtRecepcion),
             'observaciones' => $this->observaciones,
             'fecha_vencimiento' => $this->fechaVencimiento->format('Y-m-d'),
             'fecha_alerta' => $this->fechaAlerta->format('Y-m-d'),
@@ -33,11 +40,11 @@ final class ExpedienteResource extends JsonResource
             'dias_ampliacion' => $this->diasAmpliacion,
             'motivo_ampliacion' => $this->motivoAmpliacion,
             'fecha_digitacion_ampliacion' => $this->fechaDigitacionAmpliacion
-                ?->setTimezone(new \DateTimeZone('America/Lima'))
-                ->format('Y-m-d\TH:i:s.uP'),
+                ?->setTimezone($tz)
+                ->format($fmtDigitacionAmp),
             'fecha_digitacion' => $this->fechaDigitacion
-                ->setTimezone(new \DateTimeZone('America/Lima'))
-                ->format('Y-m-d\TH:i:s.uP'),
+                ->setTimezone($tz)
+                ->format($fmtDigitacion),
             'tipo_procedimiento_tupa' => $this->tipoProcedimientoTupaId,
             'solicitante' => $this->solicitanteId,
             'representante' => $this->representanteId,

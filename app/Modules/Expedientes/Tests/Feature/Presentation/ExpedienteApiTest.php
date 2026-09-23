@@ -86,6 +86,7 @@ it('POST /api/lf-itse/expedientes/ crea un expediente correctamente y retorna 20
     foreach ($expectedKeys as $key) {
         expect(array_key_exists($key, $json))->toBeTrue("Falta key: {$key}");
     }
+    expect(count(array_keys($json)))->toBe(19);
 
     expect($json['numero_expediente'])->toBe(1)
         ->and($json['tipo_procedimiento_tupa'])->toBe(1)
