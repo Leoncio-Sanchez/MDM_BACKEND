@@ -51,9 +51,4 @@ interface ExpedienteRepositoryInterface
      * @return array<int, Expediente>
      */
     public function consultar(?int $numeroExpediente): array;
-
-    /**
-     * @return array<int, Expediente>
-     */
-    public function consultaRapida(?int $numeroExpediente): array;
 }

@@ -250,8 +250,39 @@ it('detecta ITSE asociadas', function () {
     expect($this->repo->tieneItse($id))->toBeTrue();
 });
 
-it('métodos diferidos retornan arrays vacíos', function () {
+it('ejecuta listarPendientes y buscarPorFiltro y consultar', function () {
     expect($this->repo->buscarPorFiltro('NUMERO', '10'))->toBeArray()
         ->and($this->repo->listarPendientes())->toBeArray()
-        ->and($this->repo->consultaRapida(null))->toBeArray();
+        ->and($this->repo->consultar(null))->toBeArray();
+});
+
+it('lanza excepcion en buscarPorFiltro con filtro no valido', function () {
+    expect(fn () => $this->repo->buscarPorFiltro('INVALIDO', '10'))
+        ->toThrow(\InvalidArgumentException::class);
+});
+
+it('consulta expedientes hidratados con o sin filtro de numero', function () {
+    $exp = Expediente::crear(
+        uuid: 'test-uuid-999',
+        numeroExpediente: 888,
+        fechaRecepcion: new DateTimeImmutable('2025-01-03 10:00:00'),
+        tipoProcedimientoTupaId: 1,
+        solicitanteId: 1,
+        usuarioId: 1,
+        fechaVencimiento: new DateTimeImmutable('2025-01-10'),
+        fechaAlerta: new DateTimeImmutable('2025-01-08'),
+    );
+    $this->repo->crear($exp);
+
+    $todos = $this->repo->consultar(null);
+    expect($todos)->toBeArray()
+        ->and(count($todos))->toBeGreaterThanOrEqual(1)
+        ->and($todos[0])->toBeInstanceOf(Expediente::class);
+
+    $filtrado = $this->repo->consultar(888);
+    expect($filtrado)->toHaveCount(1)
+        ->and($filtrado[0]->numeroExpediente)->toBe(888);
+
+    $inexistente = $this->repo->consultar(999999);
+    expect($inexistente)->toBeEmpty();
 });

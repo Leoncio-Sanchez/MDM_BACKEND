@@ -211,6 +211,17 @@ $table->string('codigo', 10)->unique();
 
             if (!Schema::hasTable('auth_user')) {
 
+        if (!Schema::hasTable('tipos_documento_identidad')) {
+            Schema::create('tipos_documento_identidad', function (Blueprint $table) {
+                $table->id();
+                $table->string('codigo', 20)->unique();
+                $table->string('nombre', 100);
+                $table->boolean('esta_activo')->default(true);
+                $table->boolean('es_para_natural')->default(true);
+                $table->boolean('es_para_juridica')->default(true);
+            });
+        }
+
         if (!Schema::hasTable('personas_documentos')) {
             Schema::create('personas_documentos', function (Blueprint $table) {
                 $table->id();
