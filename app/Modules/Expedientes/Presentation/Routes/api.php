@@ -18,6 +18,27 @@ Route::middleware('auth:api')->prefix('api/lf-itse')->group(function () {
     Route::get('expedientes/consulta/', [ExpedienteController::class, 'consulta'])
         ->name('expedientes.consulta');
 
+    // ── 7C Workflows ─────────────────────────────────────────────────────────
+    Route::get(
+        'expedientes/{pk}/autorizacion-improcedente/',
+        [ExpedienteController::class, 'autorizacionImprocedente'],
+    )->whereNumber('pk')->name('expedientes.autorizacion-improcedente');
+
+    Route::post(
+        'expedientes/{pk}/ampliacion-plazo/',
+        [ExpedienteController::class, 'ampliacionPlazo'],
+    )->whereNumber('pk')->name('expedientes.ampliacion-plazo');
+
+    Route::post(
+        'expedientes/{pk}/denegar-licencia/',
+        [ExpedienteController::class, 'denegarLicencia'],
+    )->whereNumber('pk')->name('expedientes.denegar-licencia');
+
+    Route::post(
+        'expedientes/{pk}/denegar-itse/',
+        [ExpedienteController::class, 'denegarItse'],
+    )->whereNumber('pk')->name('expedientes.denegar-itse');
+
     // ── 7A Dinámicas ──────────────────────────────────────────────────────────
     Route::get('expedientes/{pk}/', [ExpedienteController::class, 'show'])->whereNumber('pk');
     Route::put('expedientes/{pk}/', [ExpedienteController::class, 'update'])->whereNumber('pk');

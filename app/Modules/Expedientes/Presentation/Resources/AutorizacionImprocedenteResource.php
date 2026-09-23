@@ -16,6 +16,9 @@ final class AutorizacionImprocedenteResource extends JsonResource
     /** @return array<string, mixed> */
     public function toArray(Request $request): array
     {
+        $tz = new \DateTimeZone('America/Lima');
+        $fmtDigitacion = ((int) $this->fechaDigitacion->format('u')) > 0 ? 'Y-m-d\TH:i:s.uP' : 'Y-m-d\TH:i:sP';
+
         return [
             'id' => $this->id,
             'tipo_autorizacion' => $this->tipoAutorizacion->value,
@@ -23,8 +26,8 @@ final class AutorizacionImprocedenteResource extends JsonResource
             'documento' => $this->documento,
             'observaciones' => $this->observaciones,
             'fecha_digitacion' => $this->fechaDigitacion
-                ->setTimezone(new \DateTimeZone('America/Lima'))
-                ->format('Y-m-d\TH:i:s.uP'),
+                ->setTimezone($tz)
+                ->format($fmtDigitacion),
             'expediente' => $this->expedienteId,
             'usuario' => $this->usuarioId,
         ];
