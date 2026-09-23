@@ -40,7 +40,7 @@ it('ExpedientePendienteResource expone exactamente 11 keys', function () {
         ]);
 });
 
-it('ExpedienteBusquedaResource expone exactamente 26 keys', function () {
+it('ExpedienteBusquedaResource expone exactamente 27 keys', function () {
     $data = [
         'id' => 10,
         'tipo_procedimiento_tupa_id' => 2,
@@ -68,13 +68,14 @@ it('ExpedienteBusquedaResource expone exactamente 26 keys', function () {
         'licencia_pendiente' => false,
         'itse_pendiente' => true,
         'mostrar_alerta' => false,
+        'dias_habiles_restantes' => 10,
     ];
 
     $resource = new ExpedienteBusquedaResource($data);
     $result = $resource->toArray(Request::create('/test'));
 
     expect($result)->toBeArray()
-        ->and(count($result))->toBe(26)
+        ->and(count($result))->toBe(27)
         ->and(array_keys($result))->toBe([
             'id',
             'tipo_procedimiento_tupa_id',
@@ -102,6 +103,7 @@ it('ExpedienteBusquedaResource expone exactamente 26 keys', function () {
             'licencia_pendiente',
             'itse_pendiente',
             'mostrar_alerta',
+            'dias_habiles_restantes',
         ]);
 });
 
