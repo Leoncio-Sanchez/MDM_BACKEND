@@ -17,9 +17,42 @@ return new class extends Migration {
             if (!Schema::hasTable('expedientes')) {
                 Schema::create('expedientes', function (Blueprint $table) {
                     $table->id();
-                    $table->integer('numero');
-                    $table->date('fecha_ingreso');
+                    $table->uuid('uuid')->nullable();
+                    $table->integer('numero')->nullable();
+                    $table->integer('numero_expediente')->nullable();
+                    $table->dateTime('fecha_recepcion')->nullable();
+                    $table->date('fecha_ingreso')->nullable();
                     $table->foreignId('tipo_procedimiento_tupa_id')->nullable();
+                    $table->foreignId('solicitante_id')->nullable();
+                    $table->foreignId('representante_id')->nullable();
+                    $table->string('observaciones', 250)->nullable();
+                    $table->date('fecha_vencimiento')->nullable();
+                    $table->date('fecha_alerta')->nullable();
+                    $table->date('fecha_suspension')->nullable();
+                    $table->integer('dias_ampliacion')->nullable();
+                    $table->string('motivo_ampliacion', 250)->nullable();
+                    $table->foreignId('usuario_ampliacion')->nullable();
+                    $table->dateTime('fecha_digitacion_ampliacion')->nullable();
+                    $table->foreignId('usuario_id')->nullable();
+                    $table->dateTime('fecha_digitacion')->nullable();
+                });
+            }
+
+            if (!Schema::hasTable('feriados_recurrentes')) {
+                Schema::create('feriados_recurrentes', function (Blueprint $table) {
+                    $table->id();
+                    $table->smallInteger('dia');
+                    $table->smallInteger('mes');
+                    $table->unique(['dia', 'mes']);
+                });
+            }
+
+            if (!Schema::hasTable('feriados_anuales')) {
+                Schema::create('feriados_anuales', function (Blueprint $table) {
+                    $table->id();
+                    $table->date('feriado')->unique();
+                    $table->timestamp('fecha_digitacion')->nullable();
+                    $table->foreignId('user_id')->nullable();
                 });
             }
 
@@ -167,13 +200,16 @@ $table->string('codigo', 10)->unique();
                     $table->id();
                     $table->foreignId('expediente_id');
                     $table->string('tipo_autorizacion', 10);
+                    $table->timestamp('fecha_rechazo')->nullable();
+                    $table->string('documento', 100)->nullable();
+                    $table->string('observaciones', 250)->nullable();
+                    $table->foreignId('usuario_id')->nullable();
+                    $table->timestamp('fecha_digitacion')->nullable();
                     $table->boolean('esta_activo')->default(true);
                 });
             }
 
             if (!Schema::hasTable('auth_user')) {
-
-                
 
         if (!Schema::hasTable('personas_documentos')) {
             Schema::create('personas_documentos', function (Blueprint $table) {
@@ -181,13 +217,6 @@ $table->string('codigo', 10)->unique();
                 $table->foreignId('persona_id');
                 $table->foreignId('tipo_documento_identidad_id');
                 $table->string('numero_documento', 20);
-            });
-        }
-        if (!Schema::hasTable('expedientes')) {
-            Schema::create('expedientes', function (Blueprint $table) {
-                $table->id();
-                $table->foreignId('solicitante_id');
-                $table->foreignId('representante_id');
             });
         }
 

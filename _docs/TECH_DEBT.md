@@ -93,3 +93,40 @@
 - **Prioridad:** P3
 - **Fecha:** 21/09/2026
 - **Aprobado por:** Stakeholder (Leo)
+
+## TD-011 — Django no soporta GET /expedientes/
+
+- **Estado:** Activo (resuelto en Laravel)
+- **Impacto:** Alto en Django legacy (frontend roto con Django)
+- **Descripción:** `ExpedienteCreateView` en Django solo implementa `POST`. El
+  frontend Vue llama `container.expedientes.getAll()` → `GET /expedientes/`
+  → Django devuelve 405 Method Not Allowed. Laravel implementa GET → devuelve lista.
+
+  **Decisión:** Laravel mantiene GET. NO replicar el bug. Mismo criterio
+  que TD-009 (ITSE).
+
+- **Ubicación Django:** `app_lf_itse/views.py:149` (ExpedienteCreateView)
+- **Plan de resolución:** Al apagar Django, este TD queda inactivo
+  automáticamente. Si se requiere arreglar Django antes del apagado,
+  añadir método `def get(self, request)` al view.
+- **Prioridad:** P2
+- **Fecha:** 21/09/2026
+- **Aprobado por:** Leo (Stakeholder)
+
+## TD-012 — Django no soporta GET /expedientes/{pk}/
+
+- **Estado:** Activo (resuelto en Laravel)
+- **Impacto:** Alto en Django legacy (frontend roto con Django)
+- **Descripción:** `ExpedienteUpdateView` en Django solo implementa `PUT` y `DELETE`.
+  El frontend Vue llama `container.expedientes.getById(id)` → `GET /expedientes/{id}/`
+  → Django devuelve 405 Method Not Allowed. Laravel implementa GET y devuelve el detalle.
+
+  **Decisión:** Laravel mantiene GET. NO replicar el bug.
+
+- **Ubicación Django:** `app_lf_itse/views.py:186` (ExpedienteUpdateView)
+- **Plan de resolución:** Al apagar Django, este TD queda inactivo
+  automáticamente. Si se requiere arreglar Django antes del apagado,
+  añadir método `def get(self, request, pk)` al view.
+- **Prioridad:** P2
+- **Fecha:** 21/09/2026
+- **Aprobado por:** Leo (Stakeholder)

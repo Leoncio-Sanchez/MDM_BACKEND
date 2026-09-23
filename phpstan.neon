@@ -5,5 +5,5 @@ parameters:
     paths:
         - app/Modules/Estados
     excludePaths:
-        - app/Modules/Estados/Tests/*
+        - app/Modules/*/Tests/*
     level: 8

@@ -16,5 +16,6 @@ return [
     EstadosServiceProvider::class,
     App\Modules\Licencias\Infrastructure\Providers\LicenciasServiceProvider::class,
     App\Modules\ITSE\Infrastructure\Providers\ItseServiceProvider::class,
-        App\Modules\TipoLicencia\Infrastructure\Providers\TipoLicenciaServiceProvider::class,
+    App\Modules\TipoLicencia\Infrastructure\Providers\TipoLicenciaServiceProvider::class,
+    App\Modules\Expedientes\Infrastructure\Providers\ExpedienteServiceProvider::class,
 ];

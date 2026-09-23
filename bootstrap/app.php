@@ -25,4 +25,20 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (\App\Modules\ITSE\Domain\Exceptions\ItseNoEncontrado $e, Request $request) {
             return response()->json(['error' => $e->getMessage()], 404);
         });
+
+        $exceptions->render(function (\App\Modules\Expedientes\Domain\Exceptions\ExpedienteNoEncontrado $e, Request $request) {
+            return response()->json(['error' => $e->getMessage()], 404);
+        });
+
+        $exceptions->render(function (\App\Modules\Expedientes\Domain\Exceptions\ExpedienteDuplicadoError $e, Request $request) {
+            return response()->json(['error' => $e->getMessage()], 409);
+        });
+
+        $exceptions->render(function (\App\Modules\Expedientes\Domain\Exceptions\ExpedienteConLicenciaError $e, Request $request) {
+            return response()->json(['error' => $e->getMessage()], 409);
+        });
+
+        $exceptions->render(function (\App\Modules\Expedientes\Domain\Exceptions\ExpedienteConItseError $e, Request $request) {
+            return response()->json(['error' => $e->getMessage()], 409);
+        });
     })->create();
