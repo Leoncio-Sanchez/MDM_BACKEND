@@ -18,4 +18,5 @@ return [
     App\Modules\ITSE\Infrastructure\Providers\ItseServiceProvider::class,
     App\Modules\TipoLicencia\Infrastructure\Providers\TipoLicenciaServiceProvider::class,
     App\Modules\Expedientes\Infrastructure\Providers\ExpedienteServiceProvider::class,
+    App\Modules\Pide\Infrastructure\Providers\PideServiceProvider::class,
 ];

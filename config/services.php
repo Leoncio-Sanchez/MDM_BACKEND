@@ -44,4 +44,8 @@ return [
         'password' => env('RENIEC_PASSWORD', ''),
         'timeout' => env('RENIEC_TIMEOUT', 10),
     ],
+
+    'sunat' => [
+        'url' => env('SUNAT_URL', 'https://ws3.pide.gob.pe/Rest/Sunat/DatosPrincipales'),
+    ],
 ];
