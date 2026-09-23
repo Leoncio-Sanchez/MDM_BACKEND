@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Expedientes\Presentation\Controllers;
@@ -45,6 +46,7 @@ final class ExpedienteController extends Controller
             (int) $request->input('page', 1),
             (int) $request->input('per_page', 15)
         );
+
         return ExpedienteListResource::collection($resultado['items']);
     }
 
@@ -55,6 +57,7 @@ final class ExpedienteController extends Controller
         $dto = CrearExpedienteDTO::fromArray($request->validated(), (int) $user->id);
 
         $expediente = $this->crear->execute($dto);
+
         return (new ExpedienteResource($expediente))->response()->setStatusCode(201);
     }
 
@@ -73,6 +76,7 @@ final class ExpedienteController extends Controller
     public function destroy(int $pk): JsonResponse
     {
         $this->eliminar->execute($pk);
+
         return new JsonResponse(null, 204);
     }
 
@@ -88,7 +92,7 @@ final class ExpedienteController extends Controller
     public function buscar(Request $request): JsonResponse
     {
         $filtro = (string) $request->query('filtro', '');
-        $valor  = (string) $request->query('valor', '');
+        $valor = (string) $request->query('valor', '');
 
         if ($filtro === '') {
             return response()->json(

@@ -1,9 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Expedientes\Infrastructure\Persistence\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int $id
@@ -27,6 +29,7 @@ use Illuminate\Database\Eloquent\Model;
 class ExpedienteModel extends Model
 {
     protected $table = 'expedientes';
+
     public $timestamps = false;
 
     /** @var list<string> */
@@ -65,9 +68,9 @@ class ExpedienteModel extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany<AutorizacionImprocedenteModel, $this>
+     * @return HasMany<AutorizacionImprocedenteModel, $this>
      */
-    public function autorizacionesImprocedentes(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function autorizacionesImprocedentes(): HasMany
     {
         return $this->hasMany(AutorizacionImprocedenteModel::class, 'expediente_id');
     }

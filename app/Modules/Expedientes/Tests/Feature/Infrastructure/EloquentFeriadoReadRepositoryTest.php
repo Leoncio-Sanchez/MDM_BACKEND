@@ -1,14 +1,16 @@
 <?php
+
 declare(strict_types=1);
 
 use App\Modules\Expedientes\Infrastructure\Persistence\Repositories\EloquentFeriadoReadRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Tests\TestCase;
 
-uses(Tests\TestCase::class, RefreshDatabase::class);
+uses(TestCase::class, RefreshDatabase::class);
 
 beforeEach(function () {
-    $this->repo = new EloquentFeriadoReadRepository();
+    $this->repo = new EloquentFeriadoReadRepository;
 });
 
 it('detecta feriado recurrente (28-07)', function () {

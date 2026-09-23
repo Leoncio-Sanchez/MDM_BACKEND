@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Expedientes\Application\UseCases;
@@ -16,7 +17,7 @@ final readonly class ObtenerExpedienteUseCase
     public function execute(int $id): Expediente
     {
         $expediente = $this->expedientes->buscarPorId($id);
-        if (!$expediente) {
+        if (! $expediente) {
             throw ExpedienteNoEncontrado::porId($id);
         }
 

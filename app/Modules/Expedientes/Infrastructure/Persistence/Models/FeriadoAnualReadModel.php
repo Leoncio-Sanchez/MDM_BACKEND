@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Expedientes\Infrastructure\Persistence\Models;
@@ -11,8 +12,11 @@ final class FeriadoAnualReadModel extends Model
     use ReadOnlyTrait;
 
     protected $table = 'feriados_anuales';
+
     public $timestamps = false;
+
     public $incrementing = false;
+
     protected $guarded = ['*'];
 
     /** @return array<string, string> */

@@ -1,17 +1,18 @@
 <?php
+
 declare(strict_types=1);
 
 use App\Modules\Expedientes\Domain\Entities\Expediente;
-use App\Modules\Expedientes\Infrastructure\Persistence\Models\ExpedienteModel;
 use App\Modules\Expedientes\Infrastructure\Persistence\Repositories\EloquentExpedienteRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Ramsey\Uuid\Uuid;
+use Tests\TestCase;
 
-uses(Tests\TestCase::class, RefreshDatabase::class);
+uses(TestCase::class, RefreshDatabase::class);
 
 beforeEach(function () {
-    $this->repo = new EloquentExpedienteRepository();
+    $this->repo = new EloquentExpedienteRepository;
 });
 
 it('crea y busca un expediente por ID', function () {
@@ -96,7 +97,7 @@ it('lista y pagina expedientes', function () {
         $exp = Expediente::crear(
             uuid: Uuid::uuid4()->toString(),
             numeroExpediente: 10 + $i,
-            fechaRecepcion: new DateTimeImmutable('2025-01-0' . $i),
+            fechaRecepcion: new DateTimeImmutable('2025-01-0'.$i),
             tipoProcedimientoTupaId: 1,
             solicitanteId: 1,
             usuarioId: 1,
@@ -258,7 +259,7 @@ it('ejecuta listarPendientes y buscarPorFiltro y consultar', function () {
 
 it('lanza excepcion en buscarPorFiltro con filtro no valido', function () {
     expect(fn () => $this->repo->buscarPorFiltro('INVALIDO', '10'))
-        ->toThrow(\InvalidArgumentException::class);
+        ->toThrow(InvalidArgumentException::class);
 });
 
 it('consulta expedientes hidratados con o sin filtro de numero', function () {

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Expedientes\Domain\Entities;
@@ -8,7 +9,7 @@ use DateTimeImmutable;
 final readonly class Expediente
 {
     /**
-     * @param array<int, AutorizacionImprocedente> $autorizacionesImprocedentes
+     * @param  array<int, AutorizacionImprocedente>  $autorizacionesImprocedentes
      */
     public function __construct(
         public ?int $id,
@@ -43,7 +44,8 @@ final readonly class Expediente
         ?int $representanteId = null,
         ?string $observaciones = null,
     ): self {
-        $now = new DateTimeImmutable();
+        $now = new DateTimeImmutable;
+
         return new self(
             id: null,
             uuid: $uuid,
@@ -120,7 +122,7 @@ final readonly class Expediente
             diasAmpliacion: $dias,
             motivoAmpliacion: $motivo,
             usuarioAmpliacionId: $usuarioId,
-            fechaDigitacionAmpliacion: new DateTimeImmutable(),
+            fechaDigitacionAmpliacion: new DateTimeImmutable,
             usuarioId: $this->usuarioId,
             fechaDigitacion: $this->fechaDigitacion,
             autorizacionesImprocedentes: $this->autorizacionesImprocedentes,
@@ -128,7 +130,7 @@ final readonly class Expediente
     }
 
     /**
-     * @param array<int, AutorizacionImprocedente> $autorizaciones
+     * @param  array<int, AutorizacionImprocedente>  $autorizaciones
      */
     public function conAutorizaciones(array $autorizaciones): self
     {

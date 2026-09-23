@@ -1,12 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 use App\Modules\Expedientes\Application\DTOs\ConsultaExpedientesDTO;
 use App\Modules\Expedientes\Application\UseCases\ConsultaExpedientesUseCase;
 use App\Modules\Expedientes\Domain\Contracts\ExpedienteRepositoryInterface;
 use App\Modules\Expedientes\Domain\Entities\Expediente;
-use App\Modules\Expedientes\Domain\ValueObjects\NumeroExpediente;
-use App\Modules\Expedientes\Domain\ValueObjects\PlazoExpediente;
 
 beforeEach(function () {
     $this->repo = Mockery::mock(ExpedienteRepositoryInterface::class);

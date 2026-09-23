@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 use App\Models\User;
@@ -7,8 +8,9 @@ use App\Modules\Expedientes\Domain\Contracts\FeriadoReadRepositoryInterface;
 use App\Modules\Expedientes\Domain\Entities\Expediente;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Tests\TestCase;
 
-uses(Tests\TestCase::class, RefreshDatabase::class);
+uses(TestCase::class, RefreshDatabase::class);
 
 beforeEach(function () {
     DB::table('auth_user')->insert([

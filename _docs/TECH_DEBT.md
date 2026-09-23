@@ -148,3 +148,19 @@
 - **Prioridad:** P2
 - **Fecha:** 23/09/2026
 - **Aprobado por:** Leo (Stakeholder)
+
+## TD-014 — Formato ISO-8601 UTC ('Z') en endpoints de lectura con SQL crudo (Expedientes 7B)
+
+- **Estado:** Resuelto en Laravel (alineado 1:1 con Django DRF)
+- **Impacto:** Alto (compatibilidad de parsing de fechas en frontend JS / `new Date()`)
+- **Descripción:** 
+  1. En Django, las vistas `ExpedientesPendientesView` y `ExpedientesBuscarView` retornan diccionarios obtenidos directamente de `cursor.fetchall()`. Los campos de fecha y hora (`fecha_recepcion`, `fecha_digitacion`, etc.) son instancias de Python `datetime` en zona horaria UTC (`<UTC>`), las cuales son serializadas por `DjangoJSONEncoder` como ISO-8601 UTC con sufijo `Z` (ej. `2026-09-20T15:30:00Z`).
+  2. En Laravel, las consultas crudas con `DB::select()` devuelven cadenas crudas del driver PDO PostgreSQL con el formato nativo (ej. `2026-09-20 15:30:00+00`).
+  3. Para lograr paridad byte a byte, `ExpedientePendienteResource` y `ExpedienteBusquedaResource` implementan `formatUtcIso8601()`, parseando el valor a `DateTimeImmutable` en zona horaria UTC y serializándolo con sufijo `Z` (y milisegundos si aplican).
+- **Ubicación:**
+  - `app/Modules/Expedientes/Presentation/Resources/ExpedientePendienteResource.php`
+  - `app/Modules/Expedientes/Presentation/Resources/ExpedienteBusquedaResource.php`
+- **Plan de resolución:** El comportamiento está completamente armonizado. Al retirar Django, se mantendrá este estándar para interoperabilidad con el frontend Vue.
+- **Prioridad:** P2
+- **Fecha:** 23/09/2026
+- **Aprobado por:** Leo (Stakeholder)

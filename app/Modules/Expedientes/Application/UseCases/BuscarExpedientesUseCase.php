@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Expedientes\Application\UseCases;
@@ -30,9 +31,9 @@ final readonly class BuscarExpedientesUseCase
     {
         $filtro = strtoupper(trim($dto->filtro));
 
-        if (!in_array($filtro, self::FILTROS_VALIDOS, true)) {
+        if (! in_array($filtro, self::FILTROS_VALIDOS, true)) {
             throw new InvalidArgumentException(
-                "Filtro '{$dto->filtro}' no válido. Opciones: " . implode(', ', self::FILTROS_VALIDOS)
+                "Filtro '{$dto->filtro}' no válido. Opciones: ".implode(', ', self::FILTROS_VALIDOS)
             );
         }
 

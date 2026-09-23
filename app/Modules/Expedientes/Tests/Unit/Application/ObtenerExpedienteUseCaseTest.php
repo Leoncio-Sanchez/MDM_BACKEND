@@ -1,12 +1,14 @@
 <?php
+
 declare(strict_types=1);
 
 use App\Modules\Expedientes\Application\UseCases\ObtenerExpedienteUseCase;
 use App\Modules\Expedientes\Domain\Contracts\ExpedienteRepositoryInterface;
 use App\Modules\Expedientes\Domain\Entities\Expediente;
 use App\Modules\Expedientes\Domain\Exceptions\ExpedienteNoEncontrado;
+use Tests\TestCase;
 
-uses(Tests\TestCase::class);
+uses(TestCase::class);
 
 it('obtiene expediente existente por ID', function () {
     $expedientes = Mockery::mock(ExpedienteRepositoryInterface::class);

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 use App\Modules\Expedientes\Application\DTOs\CrearExpedienteDTO;
@@ -13,8 +14,9 @@ use App\Modules\Expedientes\Domain\Exceptions\SolicitanteNoValido;
 use App\Modules\Expedientes\Domain\Exceptions\TipoProcedimientoNoValido;
 use App\Modules\Expedientes\Domain\Services\CalculadoraDiasHabilesService;
 use Illuminate\Support\Facades\DB;
+use Tests\TestCase;
 
-uses(Tests\TestCase::class);
+uses(TestCase::class);
 
 beforeEach(function () {
     $this->expedientes = Mockery::mock(ExpedienteRepositoryInterface::class);

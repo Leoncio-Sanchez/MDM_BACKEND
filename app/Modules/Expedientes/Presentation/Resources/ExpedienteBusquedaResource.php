@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Expedientes\Presentation\Resources;
@@ -80,7 +81,8 @@ final class ExpedienteBusquedaResource extends JsonResource
         $micro = (int) $dt->format('u');
         if ($micro > 0) {
             $ms = substr($dt->format('u'), 0, 3);
-            return $dt->format('Y-m-d\TH:i:s.') . $ms . 'Z';
+
+            return $dt->format('Y-m-d\TH:i:s.').$ms.'Z';
         }
 
         return $dt->format('Y-m-d\TH:i:s\Z');

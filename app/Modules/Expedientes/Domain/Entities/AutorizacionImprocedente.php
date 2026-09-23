@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Expedientes\Domain\Entities;
@@ -26,7 +27,8 @@ final readonly class AutorizacionImprocedente
         ?string $observaciones,
         int $usuarioId,
     ): self {
-        $now = new DateTimeImmutable();
+        $now = new DateTimeImmutable;
+
         return new self(
             id: null,
             expedienteId: $expedienteId,

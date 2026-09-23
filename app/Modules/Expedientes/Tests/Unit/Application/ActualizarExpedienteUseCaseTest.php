@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 use App\Modules\Expedientes\Application\DTOs\ActualizarExpedienteDTO;
@@ -14,8 +15,9 @@ use App\Modules\Expedientes\Domain\Exceptions\SolicitanteNoValido;
 use App\Modules\Expedientes\Domain\Exceptions\TipoProcedimientoNoValido;
 use App\Modules\Expedientes\Domain\Services\CalculadoraDiasHabilesService;
 use Illuminate\Support\Facades\DB;
+use Tests\TestCase;
 
-uses(Tests\TestCase::class);
+uses(TestCase::class);
 
 beforeEach(function () {
     $this->expedientes = Mockery::mock(ExpedienteRepositoryInterface::class);
@@ -153,9 +155,9 @@ it('lanza ExpedienteNoEncontrado si expediente no existe', function () {
 })->throws(ExpedienteNoEncontrado::class);
 
 it('lanza TipoProcedimientoNoValido si tipo TUPA no existe', function () {
-    $existente = Expediente::crear('uuid-1', 1, new DateTimeImmutable(), 1, 1, 1, new DateTimeImmutable(), new DateTimeImmutable());
+    $existente = Expediente::crear('uuid-1', 1, new DateTimeImmutable, 1, 1, 1, new DateTimeImmutable, new DateTimeImmutable);
 
-    $dto = new ActualizarExpedienteDTO(1, 1, new DateTimeImmutable(), 999, 1);
+    $dto = new ActualizarExpedienteDTO(1, 1, new DateTimeImmutable, 999, 1);
 
     $this->expedientes->shouldReceive('buscarPorId')->with(1)->once()->andReturn($existente);
     $this->tipos->shouldReceive('buscarPorId')->with(999)->once()->andReturn(null);
@@ -164,9 +166,9 @@ it('lanza TipoProcedimientoNoValido si tipo TUPA no existe', function () {
 })->throws(TipoProcedimientoNoValido::class);
 
 it('lanza SolicitanteNoValido si solicitante no existe', function () {
-    $existente = Expediente::crear('uuid-1', 1, new DateTimeImmutable(), 1, 1, 1, new DateTimeImmutable(), new DateTimeImmutable());
+    $existente = Expediente::crear('uuid-1', 1, new DateTimeImmutable, 1, 1, 1, new DateTimeImmutable, new DateTimeImmutable);
 
-    $dto = new ActualizarExpedienteDTO(1, 1, new DateTimeImmutable(), 1, 999);
+    $dto = new ActualizarExpedienteDTO(1, 1, new DateTimeImmutable, 1, 999);
 
     $this->expedientes->shouldReceive('buscarPorId')->with(1)->once()->andReturn($existente);
     $this->tipos->shouldReceive('buscarPorId')->with(1)->once()->andReturn((object) ['id' => 1]);
@@ -176,9 +178,9 @@ it('lanza SolicitanteNoValido si solicitante no existe', function () {
 })->throws(SolicitanteNoValido::class);
 
 it('lanza SolicitanteNoValido si representante no existe', function () {
-    $existente = Expediente::crear('uuid-1', 1, new DateTimeImmutable(), 1, 1, 1, new DateTimeImmutable(), new DateTimeImmutable());
+    $existente = Expediente::crear('uuid-1', 1, new DateTimeImmutable, 1, 1, 1, new DateTimeImmutable, new DateTimeImmutable);
 
-    $dto = new ActualizarExpedienteDTO(1, 1, new DateTimeImmutable(), 1, 5, 888);
+    $dto = new ActualizarExpedienteDTO(1, 1, new DateTimeImmutable, 1, 5, 888);
 
     $this->expedientes->shouldReceive('buscarPorId')->with(1)->once()->andReturn($existente);
     $this->tipos->shouldReceive('buscarPorId')->with(1)->once()->andReturn((object) ['id' => 1]);
@@ -189,7 +191,7 @@ it('lanza SolicitanteNoValido si representante no existe', function () {
 })->throws(SolicitanteNoValido::class);
 
 it('lanza ExpedienteDuplicadoError si numero en anio ya existe en otro expediente', function () {
-    $existente = Expediente::crear('uuid-1', 1, new DateTimeImmutable('2025-01-01'), 1, 1, 1, new DateTimeImmutable(), new DateTimeImmutable());
+    $existente = Expediente::crear('uuid-1', 1, new DateTimeImmutable('2025-01-01'), 1, 1, 1, new DateTimeImmutable, new DateTimeImmutable);
 
     $dto = new ActualizarExpedienteDTO(1, 99, new DateTimeImmutable('2025-01-01'), 1, 1);
 

@@ -1,15 +1,17 @@
 <?php
+
 declare(strict_types=1);
 
 use App\Modules\Expedientes\Domain\Entities\AutorizacionImprocedente;
 use App\Modules\Expedientes\Domain\ValueObjects\TipoAutorizacion;
 use App\Modules\Expedientes\Infrastructure\Persistence\Repositories\EloquentAutorizacionImprocedenteRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
-uses(Tests\TestCase::class, RefreshDatabase::class);
+uses(TestCase::class, RefreshDatabase::class);
 
 beforeEach(function () {
-    $this->repo = new EloquentAutorizacionImprocedenteRepository();
+    $this->repo = new EloquentAutorizacionImprocedenteRepository;
 });
 
 it('crea y busca una autorizacion improcedente por expediente y tipo', function () {

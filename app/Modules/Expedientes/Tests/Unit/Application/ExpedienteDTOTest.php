@@ -1,7 +1,10 @@
 <?php
+
 declare(strict_types=1);
 
 use App\Modules\Expedientes\Application\DTOs\ActualizarExpedienteDTO;
+use App\Modules\Expedientes\Application\DTOs\BuscarExpedientesDTO;
+use App\Modules\Expedientes\Application\DTOs\ConsultaExpedientesDTO;
 use App\Modules\Expedientes\Application\DTOs\CrearExpedienteDTO;
 
 it('instancia CrearExpedienteDTO desde array', function () {
@@ -64,7 +67,7 @@ it('instancia ActualizarExpedienteDTO desde array', function () {
 });
 
 it('instancia BuscarExpedientesDTO desde array', function () {
-    $dto = \App\Modules\Expedientes\Application\DTOs\BuscarExpedientesDTO::fromArray([
+    $dto = BuscarExpedientesDTO::fromArray([
         'filtro' => 'NUMERO',
         'valor' => '1234',
     ]);
@@ -74,14 +77,14 @@ it('instancia BuscarExpedientesDTO desde array', function () {
 });
 
 it('instancia ConsultaExpedientesDTO desde array con y sin numero_expediente', function () {
-    $dtoConNumero = \App\Modules\Expedientes\Application\DTOs\ConsultaExpedientesDTO::fromArray([
+    $dtoConNumero = ConsultaExpedientesDTO::fromArray([
         'numero_expediente' => '500',
     ]);
     expect($dtoConNumero->numeroExpediente)->toBe(500);
 
-    $dtoVacio = \App\Modules\Expedientes\Application\DTOs\ConsultaExpedientesDTO::fromArray([]);
+    $dtoVacio = ConsultaExpedientesDTO::fromArray([]);
     expect($dtoVacio->numeroExpediente)->toBeNull();
 
-    $dtoNull = \App\Modules\Expedientes\Application\DTOs\ConsultaExpedientesDTO::fromArray(['numero_expediente' => null]);
+    $dtoNull = ConsultaExpedientesDTO::fromArray(['numero_expediente' => null]);
     expect($dtoNull->numeroExpediente)->toBeNull();
 });

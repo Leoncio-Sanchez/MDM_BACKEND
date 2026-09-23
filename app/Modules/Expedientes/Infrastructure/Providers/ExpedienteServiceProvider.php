@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Expedientes\Infrastructure\Providers;
@@ -31,7 +32,7 @@ final class ExpedienteServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $routesPath = __DIR__ . '/../../Presentation/Routes/api.php';
+        $routesPath = __DIR__.'/../../Presentation/Routes/api.php';
         if (file_exists($routesPath)) {
             $this->loadRoutesFrom($routesPath);
         }

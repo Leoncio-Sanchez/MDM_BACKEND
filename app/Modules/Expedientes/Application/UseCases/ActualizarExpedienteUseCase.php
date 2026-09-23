@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Expedientes\Application\UseCases;
@@ -28,23 +29,23 @@ final readonly class ActualizarExpedienteUseCase
     {
         return DB::transaction(function () use ($dto): Expediente {
             $existente = $this->expedientes->buscarPorId($dto->expedienteId);
-            if (!$existente) {
+            if (! $existente) {
                 throw ExpedienteNoEncontrado::porId($dto->expedienteId);
             }
 
             $tipo = $this->tipos->buscarPorId($dto->tipoProcedimientoTupaId);
-            if (!$tipo) {
+            if (! $tipo) {
                 throw TipoProcedimientoNoValido::noExiste($dto->tipoProcedimientoTupaId);
             }
 
             $solicitante = $this->personas->buscarPorId($dto->solicitanteId);
-            if (!$solicitante) {
+            if (! $solicitante) {
                 throw SolicitanteNoValido::noExiste($dto->solicitanteId);
             }
 
             if ($dto->representanteId !== null) {
                 $representante = $this->personas->buscarPorId($dto->representanteId);
-                if (!$representante) {
+                if (! $representante) {
                     throw SolicitanteNoValido::representanteNoExiste($dto->representanteId);
                 }
             }

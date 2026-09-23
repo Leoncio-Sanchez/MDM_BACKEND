@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Expedientes\Infrastructure\Persistence\Models;
@@ -18,6 +19,7 @@ use Illuminate\Database\Eloquent\Model;
 class AutorizacionImprocedenteModel extends Model
 {
     protected $table = 'autorizaciones_improcedentes';
+
     public $timestamps = false;
 
     /** @var list<string> */

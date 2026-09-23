@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Expedientes\Infrastructure\Persistence\Models;
@@ -11,7 +12,10 @@ final class TipoProcedimientoTupaReadModel extends Model
     use ReadOnlyTrait;
 
     protected $table = 'tipos_procedimiento_tupa';
+
     public $timestamps = false;
+
     public $incrementing = false;
+
     protected $guarded = ['*'];
 }

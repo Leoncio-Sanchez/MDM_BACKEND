@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Expedientes\Infrastructure\Persistence\Models;
@@ -11,7 +12,10 @@ final class PersonaReadModel extends Model
     use ReadOnlyTrait;
 
     protected $table = 'personas';
+
     public $timestamps = false;
+
     public $incrementing = false;
+
     protected $guarded = ['*'];
 }

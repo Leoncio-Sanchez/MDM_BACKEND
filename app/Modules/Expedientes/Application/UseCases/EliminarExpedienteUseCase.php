@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Expedientes\Application\UseCases;
@@ -19,7 +20,7 @@ final readonly class EliminarExpedienteUseCase
     {
         DB::transaction(function () use ($id): void {
             $expediente = $this->expedientes->buscarPorId($id);
-            if (!$expediente) {
+            if (! $expediente) {
                 throw ExpedienteNoEncontrado::porId($id);
             }
 

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Expedientes\Infrastructure\Persistence\Repositories;
@@ -24,7 +25,7 @@ final readonly class EloquentAutorizacionImprocedenteRepository implements Autor
 
     public function crear(AutorizacionImprocedente $autorizacion): AutorizacionImprocedente
     {
-        $model = new AutorizacionImprocedenteModel();
+        $model = new AutorizacionImprocedenteModel;
         $model->expediente_id = $autorizacion->expedienteId;
         $model->tipo_autorizacion = $autorizacion->tipoAutorizacion->value;
         $model->fecha_rechazo = $autorizacion->fechaRechazo;

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Expedientes\Domain\Services;
@@ -58,7 +59,7 @@ final readonly class CalculadoraDiasHabilesService
             return false;
         }
 
-        return !$this->feriados->esFeriado($fecha);
+        return ! $this->feriados->esFeriado($fecha);
     }
 
     public function diferenciaDiasHabiles(DateTimeImmutable $desde, DateTimeImmutable $hasta): int

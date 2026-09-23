@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 use App\Modules\Expedientes\Application\UseCases\EliminarExpedienteUseCase;
@@ -8,8 +9,9 @@ use App\Modules\Expedientes\Domain\Exceptions\ExpedienteConItseError;
 use App\Modules\Expedientes\Domain\Exceptions\ExpedienteConLicenciaError;
 use App\Modules\Expedientes\Domain\Exceptions\ExpedienteNoEncontrado;
 use Illuminate\Support\Facades\DB;
+use Tests\TestCase;
 
-uses(Tests\TestCase::class);
+uses(TestCase::class);
 
 beforeEach(function () {
     $this->expedientes = Mockery::mock(ExpedienteRepositoryInterface::class);

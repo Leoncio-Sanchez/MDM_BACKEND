@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 use App\Modules\Expedientes\Infrastructure\Persistence\Repositories\EloquentPersonaReadRepository;
@@ -6,11 +7,12 @@ use App\Modules\Expedientes\Infrastructure\Persistence\Repositories\EloquentTipo
 use App\Modules\Expedientes\Infrastructure\Persistence\Repositories\EloquentUsuarioReadRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Tests\TestCase;
 
-uses(Tests\TestCase::class, RefreshDatabase::class);
+uses(TestCase::class, RefreshDatabase::class);
 
 it('EloquentTipoProcedimientoTupaReadRepository busca por id y verifica existencia', function () {
-    $repo = new EloquentTipoProcedimientoTupaReadRepository();
+    $repo = new EloquentTipoProcedimientoTupaReadRepository;
 
     expect($repo->buscarPorId(1))->toBeNull()
         ->and($repo->existe(1))->toBeFalse();
@@ -56,7 +58,7 @@ it('EloquentTipoProcedimientoTupaReadRepository busca por id y verifica existenc
 });
 
 it('EloquentPersonaReadRepository busca por id y verifica existencia', function () {
-    $repo = new EloquentPersonaReadRepository();
+    $repo = new EloquentPersonaReadRepository;
 
     expect($repo->buscarPorId(10))->toBeNull()
         ->and($repo->existe(10))->toBeFalse();
@@ -78,7 +80,7 @@ it('EloquentPersonaReadRepository busca por id y verifica existencia', function 
 });
 
 it('EloquentUsuarioReadRepository busca por id y verifica existencia', function () {
-    $repo = new EloquentUsuarioReadRepository();
+    $repo = new EloquentUsuarioReadRepository;
 
     expect($repo->buscarPorId(5))->toBeNull()
         ->and($repo->existe(5))->toBeFalse();

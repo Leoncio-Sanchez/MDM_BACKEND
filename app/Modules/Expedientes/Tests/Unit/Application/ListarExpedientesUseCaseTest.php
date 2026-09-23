@@ -1,11 +1,13 @@
 <?php
+
 declare(strict_types=1);
 
 use App\Modules\Expedientes\Application\UseCases\ListarExpedientesUseCase;
 use App\Modules\Expedientes\Domain\Contracts\ExpedienteRepositoryInterface;
 use App\Modules\Expedientes\Domain\Entities\Expediente;
+use Tests\TestCase;
 
-uses(Tests\TestCase::class);
+uses(TestCase::class);
 
 it('retorna lista paginada de expedientes', function () {
     $expedientes = Mockery::mock(ExpedienteRepositoryInterface::class);

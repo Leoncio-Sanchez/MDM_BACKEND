@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Expedientes\Infrastructure\Persistence\Repositories;
@@ -10,6 +11,7 @@ use App\Modules\Expedientes\Domain\ValueObjects\TipoAutorizacion;
 use App\Modules\Expedientes\Infrastructure\Persistence\Models\AutorizacionImprocedenteModel;
 use App\Modules\Expedientes\Infrastructure\Persistence\Models\ExpedienteModel;
 use DateTimeImmutable;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 final readonly class EloquentExpedienteRepository implements ExpedienteRepositoryInterface
@@ -19,8 +21,9 @@ final readonly class EloquentExpedienteRepository implements ExpedienteRepositor
      */
     public function listar(): array
     {
-        /** @var \Illuminate\Database\Eloquent\Collection<int, ExpedienteModel> $models */
+        /** @var Collection<int, ExpedienteModel> $models */
         $models = ExpedienteModel::query()->orderBy('id', 'desc')->get();
+
         return $models->map(fn (ExpedienteModel $m): Expediente => $this->toEntity($m))->all();
     }
 
@@ -31,7 +34,7 @@ final readonly class EloquentExpedienteRepository implements ExpedienteRepositor
     {
         $query = ExpedienteModel::query()->orderBy('id', 'desc');
         $total = $query->count();
-        /** @var \Illuminate\Database\Eloquent\Collection<int, ExpedienteModel> $models */
+        /** @var Collection<int, ExpedienteModel> $models */
         $models = $query->skip(($pagina - 1) * $porPagina)->take($porPagina)->get();
         $items = $models->map(fn (ExpedienteModel $m): Expediente => $this->toEntity($m))->all();
 
@@ -45,12 +48,13 @@ final readonly class EloquentExpedienteRepository implements ExpedienteRepositor
     {
         /** @var ExpedienteModel|null $model */
         $model = ExpedienteModel::with('autorizacionesImprocedentes')->find($id);
+
         return $model ? $this->toEntity($model) : null;
     }
 
     public function crear(Expediente $expediente): Expediente
     {
-        $model = new ExpedienteModel();
+        $model = new ExpedienteModel;
         $model->uuid = $expediente->uuid;
         $model->numero_expediente = $expediente->numeroExpediente;
         $model->fecha_recepcion = $expediente->fechaRecepcion;
@@ -146,12 +150,12 @@ final readonly class EloquentExpedienteRepository implements ExpedienteRepositor
             'FECHA_RECEPCION' => ['WHERE expedientes.fecha_recepcion::date = ?', (string) $valor],
             'FECHA_VENCIMIENTO' => ['WHERE expedientes.fecha_vencimiento = ?', (string) $valor],
             'NOMBRE_SOLICITANTE' => [
-                "WHERE TRIM(\n" .
-                "    COALESCE(tsolicitante.apellido_paterno, '') || ' ' ||\n" .
-                "    COALESCE(tsolicitante.apellido_materno, '') || ' ' ||\n" .
-                "    COALESCE(tsolicitante.nombres, '')\n" .
-                ") ILIKE ?",
-                '%' . str_replace(' ', '%', $valor) . '%',
+                "WHERE TRIM(\n".
+                "    COALESCE(tsolicitante.apellido_paterno, '') || ' ' ||\n".
+                "    COALESCE(tsolicitante.apellido_materno, '') || ' ' ||\n".
+                "    COALESCE(tsolicitante.nombres, '')\n".
+                ') ILIKE ?',
+                '%'.str_replace(' ', '%', $valor).'%',
             ],
             'RUC_SOLICITANTE' => ['WHERE tsolicitante_ruc.numero_documento = ?', (string) $valor],
             default => throw new \InvalidArgumentException("Filtro '{$filtro}' no válido. Opciones: ID, NUMERO, FECHA_RECEPCION, FECHA_VENCIMIENTO, NOMBRE_SOLICITANTE, RUC_SOLICITANTE"),
@@ -326,7 +330,7 @@ SQL;
             $query->where('numero_expediente', $numeroExpediente);
         }
 
-        /** @var \Illuminate\Database\Eloquent\Collection<int, ExpedienteModel> $models */
+        /** @var Collection<int, ExpedienteModel> $models */
         $models = $query->get();
 
         return $models->map(fn (ExpedienteModel $m): Expediente => $this->toEntity($m))->all();
@@ -340,6 +344,7 @@ SQL;
         if ($date instanceof \DateTimeInterface) {
             return DateTimeImmutable::createFromInterface($date);
         }
+
         return new DateTimeImmutable($date, new \DateTimeZone('America/Lima'));
     }
 
@@ -348,6 +353,7 @@ SQL;
         if ($date === null) {
             return null;
         }
+
         return $this->toDateTimeImmutable($date);
     }
 
