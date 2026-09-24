@@ -37,4 +37,12 @@ final class ArchivosServiceProvider extends ServiceProvider
             EloquentLicenciaFuncionamientoArchivoRepository::class,
         );
     }
+
+    public function boot(): void
+    {
+        $routesPath = __DIR__.'/../../Presentation/Routes/api.php';
+        if (file_exists($routesPath)) {
+            $this->loadRoutesFrom($routesPath);
+        }
+    }
 }
