@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Controllers\EstadoController;
 use App\Controllers\GiroController;
 use App\Controllers\NivelRiesgoController;
+use App\Controllers\TipoDocumentoIdentidadController;
 use App\Controllers\TipoLicenciaController;
 use App\Controllers\ZonificacionController;
 use Illuminate\Support\Facades\Route;
@@ -33,6 +34,9 @@ Route::middleware('auth:api')->prefix('lf-itse')->group(function (): void {
     ]);
     Route::apiResource('zonificaciones', ZonificacionController::class)->parameters([
         'zonificaciones' => 'id',
+    ]);
+    Route::apiResource('tipos-documento-identidad', TipoDocumentoIdentidadController::class)->parameters([
+        'tipos-documento-identidad' => 'id',
     ]);
 });
 

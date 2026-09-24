@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Modules\TipoDocumentoIdentidad\Presentation\Requests;
+namespace App\Requests\TipoDocumentoIdentidad;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class GuardarTipoDocumentoIdentidadRequest extends FormRequest
+class StoreTipoDocumentoIdentidadRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -19,9 +19,9 @@ class GuardarTipoDocumentoIdentidadRequest extends FormRequest
         return [
             'codigo' => 'required|string|max:20',
             'nombre' => 'required|string|max:100',
-            'esta_activo' => 'required|boolean',
-            'es_para_natural' => 'required|boolean',
-            'es_para_juridica' => 'required|boolean',
+            'esta_activo' => 'nullable|boolean',
+            'es_para_natural' => 'nullable|boolean',
+            'es_para_juridica' => 'nullable|boolean',
         ];
     }
 }
