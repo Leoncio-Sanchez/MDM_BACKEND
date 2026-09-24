@@ -1,12 +1,16 @@
 <?php
+
+declare(strict_types=1);
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
-    public function up(): void {
+return new class extends Migration
+{
+    public function up(): void
+    {
         if (app()->environment('testing')) {
-            if (!Schema::hasTable('tipos_licencia')) {
+            if (! Schema::hasTable('tipos_licencia')) {
                 Schema::create('tipos_licencia', function (Blueprint $table) {
                     $table->id();
                     $table->string('nombre');
@@ -14,7 +18,7 @@ return new class extends Migration {
                 });
             }
 
-            if (!Schema::hasTable('expedientes')) {
+            if (! Schema::hasTable('expedientes')) {
                 Schema::create('expedientes', function (Blueprint $table) {
                     $table->id();
                     $table->uuid('uuid')->nullable();
@@ -38,7 +42,7 @@ return new class extends Migration {
                 });
             }
 
-            if (!Schema::hasTable('feriados_recurrentes')) {
+            if (! Schema::hasTable('feriados_recurrentes')) {
                 Schema::create('feriados_recurrentes', function (Blueprint $table) {
                     $table->id();
                     $table->smallInteger('dia');
@@ -47,7 +51,7 @@ return new class extends Migration {
                 });
             }
 
-            if (!Schema::hasTable('feriados_anuales')) {
+            if (! Schema::hasTable('feriados_anuales')) {
                 Schema::create('feriados_anuales', function (Blueprint $table) {
                     $table->id();
                     $table->date('feriado')->unique();
@@ -56,7 +60,7 @@ return new class extends Migration {
                 });
             }
 
-            if (!Schema::hasTable('personas')) {
+            if (! Schema::hasTable('personas')) {
                 Schema::create('personas', function (Blueprint $table) {
                     $table->id();
                     $table->string('tipo_persona', 1)->default('N');
@@ -76,16 +80,16 @@ return new class extends Migration {
                 });
             }
 
-            if (!Schema::hasTable('niveles_riesgo')) {
+            if (! Schema::hasTable('niveles_riesgo')) {
                 Schema::create('niveles_riesgo', function (Blueprint $table) {
                     $table->id();
-$table->string('codigo', 10)->unique();
+                    $table->string('codigo', 10)->unique();
                     $table->string('nombre', 50);
                     $table->boolean('esta_activo')->default(true);
                 });
             }
 
-            if (!Schema::hasTable('zonificaciones')) {
+            if (! Schema::hasTable('zonificaciones')) {
                 Schema::create('zonificaciones', function (Blueprint $table) {
                     $table->id();
                     $table->string('codigo', 30)->unique();
@@ -96,7 +100,7 @@ $table->string('codigo', 10)->unique();
                 });
             }
 
-            if (!Schema::hasTable('licencias_funcionamiento')) {
+            if (! Schema::hasTable('licencias_funcionamiento')) {
                 Schema::create('licencias_funcionamiento', function (Blueprint $table) {
                     $table->id();
                     $table->uuid('uuid')->unique();
@@ -127,7 +131,7 @@ $table->string('codigo', 10)->unique();
                 });
             }
 
-            if (!Schema::hasTable('licencias_funcionamiento_estados')) {
+            if (! Schema::hasTable('licencias_funcionamiento_estados')) {
                 Schema::create('licencias_funcionamiento_estados', function (Blueprint $table) {
                     $table->id();
                     $table->foreignId('licencia_funcionamiento_id');
@@ -140,19 +144,23 @@ $table->string('codigo', 10)->unique();
                 });
             }
 
-            if (!Schema::hasTable('licencias_funcionamiento_archivos')) {
+            if (! Schema::hasTable('licencias_funcionamiento_archivos')) {
                 Schema::create('licencias_funcionamiento_archivos', function (Blueprint $table) {
                     $table->id();
-                    $table->uuid('uuid');
-                    $table->foreignId('licencia_funcionamiento_id');
+                    $table->uuid('uuid')->unique();
                     $table->string('nombre_original', 255);
                     $table->string('nombre_archivo', 255);
                     $table->string('ruta_archivo', 500);
+                    $table->string('extension', 20);
+                    $table->bigInteger('tamanio_bytes');
+                    $table->timestamp('fecha_digitacion')->nullable();
+                    $table->foreignId('licencia_funcionamiento_id');
+                    $table->foreignId('usuario_id');
                 });
             }
 
-            if (!Schema::hasTable('licencias_funcionamiento_giros')) {
-                
+            if (! Schema::hasTable('licencias_funcionamiento_giros')) {
+
                 Schema::create('giros', function (Blueprint $table) {
                     $table->id();
                     $table->integer('ciiu_id')->nullable()->unique();
@@ -162,8 +170,6 @@ $table->string('codigo', 10)->unique();
                     $table->foreignId('usuario_id')->constrained('auth_user');
                 });
 
-                
-                
                 Schema::create('unidades_organicas', function (Blueprint $table) {
                     $table->id();
                     $table->string('codigo', 20)->unique();
@@ -195,7 +201,7 @@ $table->string('codigo', 10)->unique();
                 });
             }
 
-            if (!Schema::hasTable('autorizaciones_improcedentes')) {
+            if (! Schema::hasTable('autorizaciones_improcedentes')) {
                 Schema::create('autorizaciones_improcedentes', function (Blueprint $table) {
                     $table->id();
                     $table->foreignId('expediente_id');
@@ -209,29 +215,29 @@ $table->string('codigo', 10)->unique();
                 });
             }
 
-            if (!Schema::hasTable('auth_user')) {
+            if (! Schema::hasTable('auth_user')) {
 
-        if (!Schema::hasTable('tipos_documento_identidad')) {
-            Schema::create('tipos_documento_identidad', function (Blueprint $table) {
-                $table->id();
-                $table->string('codigo', 20)->unique();
-                $table->string('nombre', 100);
-                $table->boolean('esta_activo')->default(true);
-                $table->boolean('es_para_natural')->default(true);
-                $table->boolean('es_para_juridica')->default(true);
-            });
-        }
+                if (! Schema::hasTable('tipos_documento_identidad')) {
+                    Schema::create('tipos_documento_identidad', function (Blueprint $table) {
+                        $table->id();
+                        $table->string('codigo', 20)->unique();
+                        $table->string('nombre', 100);
+                        $table->boolean('esta_activo')->default(true);
+                        $table->boolean('es_para_natural')->default(true);
+                        $table->boolean('es_para_juridica')->default(true);
+                    });
+                }
 
-        if (!Schema::hasTable('personas_documentos')) {
-            Schema::create('personas_documentos', function (Blueprint $table) {
-                $table->id();
-                $table->foreignId('persona_id');
-                $table->foreignId('tipo_documento_identidad_id');
-                $table->string('numero_documento', 20);
-            });
-        }
+                if (! Schema::hasTable('personas_documentos')) {
+                    Schema::create('personas_documentos', function (Blueprint $table) {
+                        $table->id();
+                        $table->foreignId('persona_id');
+                        $table->foreignId('tipo_documento_identidad_id');
+                        $table->string('numero_documento', 20);
+                    });
+                }
 
-        Schema::create('auth_user', function (Blueprint $table) {
+                Schema::create('auth_user', function (Blueprint $table) {
                     $table->id();
                     $table->string('username')->unique();
                     $table->string('email')->nullable();
@@ -244,8 +250,8 @@ $table->string('codigo', 10)->unique();
                     $table->timestamps();
                 });
             }
-            
-            if (!Schema::hasTable('estados')) {
+
+            if (! Schema::hasTable('estados')) {
                 Schema::create('estados', function (Blueprint $table) {
                     $table->id();
                     $table->string('nombre');
@@ -256,5 +262,6 @@ $table->string('codigo', 10)->unique();
             }
         }
     }
+
     public function down(): void {}
 };

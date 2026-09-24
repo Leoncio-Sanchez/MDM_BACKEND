@@ -62,6 +62,13 @@ return [
             'report' => false,
         ],
 
+        'media' => [
+            'driver' => 'local',
+            'root' => '/home/leo/Documentos/Muni/backend/media',
+            'visibility' => 'private',
+            'throw' => true,
+        ],
+
     ],
 
     /*

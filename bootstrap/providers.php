@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Modules\Archivos\Infrastructure\Providers\ArchivosServiceProvider;
 use App\Modules\Estados\Infrastructure\Providers\EstadosServiceProvider;
 use App\Modules\Expedientes\Infrastructure\Providers\ExpedienteServiceProvider;
 use App\Modules\Giros\Infrastructure\Providers\GirosServiceProvider;
@@ -30,4 +31,5 @@ return [
     TipoLicenciaServiceProvider::class,
     ExpedienteServiceProvider::class,
     PideServiceProvider::class,
+    ArchivosServiceProvider::class,
 ];
