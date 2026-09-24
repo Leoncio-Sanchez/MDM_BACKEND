@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Auth\LoginController;
+declare(strict_types=1);
 
-Route::post('/auth/jwt/create/', [LoginController::class, 'store']);
+// Las rutas de los módulos se cargan desde sus respectivos ServiceProviders.
