@@ -14,7 +14,7 @@ interface ArchivoManagerInterface
      * NO persiste en BD. Eso lo hace el repositorio dentro de la transacción.
      *
      * @param  string  $carpeta  Carpeta relativa (ej: "expedientes/27").
-     * @return array{nombre_original: string, nombre_archivo: string, ruta_archivo: string, extension: string, tamanio_bytes: int}
+     * @return array{uuid: string, nombre_original: string, nombre_archivo: string, ruta_archivo: string, extension: string, tamanio_bytes: int}
      */
     public function guardar(UploadedFile $file, string $carpeta): array;
 
