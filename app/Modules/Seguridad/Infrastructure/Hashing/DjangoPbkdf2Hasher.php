@@ -49,6 +49,10 @@ final readonly class DjangoPbkdf2Hasher implements PasswordHasherInterface
 
     public function makeHash(string $plainPassword, int $iterations = 720000, ?string $salt = null): string
     {
+        if ($iterations < 1) {
+            $iterations = 720000;
+        }
+
         $salt ??= bin2hex(random_bytes(11));
 
         $binary = hash_pbkdf2(
