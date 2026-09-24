@@ -21,11 +21,12 @@ final class EloquentUsuarioRepository implements UsuarioRepositoryInterface
 
         if ($busqueda !== null && trim($busqueda) !== '') {
             $term = '%'.trim($busqueda).'%';
-            $query->where(function ($q) use ($term) {
-                $q->where('username', 'ILIKE', $term)
-                    ->orWhere('first_name', 'ILIKE', $term)
-                    ->orWhere('last_name', 'ILIKE', $term)
-                    ->orWhere('email', 'ILIKE', $term);
+            $op = DB::connection()->getDriverName() === 'pgsql' ? 'ILIKE' : 'LIKE';
+            $query->where(function ($q) use ($term, $op) {
+                $q->where('username', $op, $term)
+                    ->orWhere('first_name', $op, $term)
+                    ->orWhere('last_name', $op, $term)
+                    ->orWhere('email', $op, $term);
             });
         }
 
