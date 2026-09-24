@@ -195,3 +195,17 @@
 - **Fecha:** 23/09/2026
 - **Aprobado por:** Leo (Stakeholder)
 
+## TD-017 — Content-Type con charset=utf-8 en descargas Laravel (Archivos 8B)
+
+- **Estado:** Aceptado como diferencia benigna (comportamiento compatible)
+- **Impacto:** Bajo (los navegadores web y clientes HTTP parsean ambos como `text/plain` sin romper el frontend Vue)
+- **Descripción:** 
+  1. En Django REST Framework, la descarga de archivos de texto vía `FileResponse` emite la cabecera `Content-Type: text/plain` (obtenida mediante `mimetypes.guess_type()`) sin declarar codificación.
+  2. En Laravel, la respuesta streamed añade automáticamente `; charset=utf-8` a respuestas basadas en tipos de texto (`Content-Type: text/plain; charset=utf-8`).
+  3. Los navegadores y clientes HTTP procesan ambos de manera compatible, y el contenido binario (SHA-256) es 100% idéntico.
+- **Ubicación:**
+  - `app/Modules/Archivos/Presentation/Controllers/AbstractArchivoController.php`
+- **Plan de resolución:** Aceptado como estándar en Laravel. Si en algún momento se requiere paridad estricta sin sufijo charset, se puede forzar el encabezado exacto en la respuesta streamed.
+- **Prioridad:** P3
+- **Fecha:** 24/09/2026
+- **Aprobado por:** Leo (Stakeholder)
