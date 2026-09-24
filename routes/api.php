@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Controllers\EstadoController;
+use App\Controllers\GiroController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:api')->prefix('lf-itse')->group(function (): void {
@@ -19,4 +20,6 @@ Route::middleware('auth:api')->prefix('lf-itse')->group(function (): void {
     Route::post('estados', [EstadoController::class, 'store']);
     Route::put('estados/{id}', [EstadoController::class, 'update'])->whereNumber('id');
     Route::delete('estados/{id}', [EstadoController::class, 'destroy'])->whereNumber('id');
+
+    Route::apiResource('giros', GiroController::class);
 });

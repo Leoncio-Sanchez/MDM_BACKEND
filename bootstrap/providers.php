@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Modules\Archivos\Infrastructure\Providers\ArchivosServiceProvider;
 use App\Modules\Expedientes\Infrastructure\Providers\ExpedienteServiceProvider;
-use App\Modules\Giros\Infrastructure\Providers\GirosServiceProvider;
 use App\Modules\ITSE\Infrastructure\Providers\ItseServiceProvider;
 use App\Modules\Licencias\Infrastructure\Providers\LicenciasServiceProvider;
 use App\Modules\NivelRiesgo\Infrastructure\Providers\NivelRiesgoServiceProvider;
@@ -23,7 +22,6 @@ use App\Providers\AppServiceProvider;
 return [
     TipoProcedimientoTupaServiceProvider::class,
     PersonasServiceProvider::class,
-    GirosServiceProvider::class,
     TipoDocumentoIdentidadServiceProvider::class,
     ZonificacionServiceProvider::class,
     NivelRiesgoServiceProvider::class,

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Modules\Giros\Presentation\Requests;
+namespace App\Requests\Giros;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class CrearGiroRequest extends FormRequest
+class StoreGiroRequest extends FormRequest
 {
     public function authorize(): bool
     {
