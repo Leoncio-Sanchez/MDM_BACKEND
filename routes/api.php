@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Controllers\EstadoController;
 use App\Controllers\GiroController;
+use App\Controllers\TipoLicenciaController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:api')->prefix('lf-itse')->group(function (): void {
@@ -22,4 +23,8 @@ Route::middleware('auth:api')->prefix('lf-itse')->group(function (): void {
     Route::delete('estados/{id}', [EstadoController::class, 'destroy'])->whereNumber('id');
 
     Route::apiResource('giros', GiroController::class);
+    Route::apiResource('tipos-licencia', TipoLicenciaController::class)->parameters([
+        'tipos-licencia' => 'id',
+    ]);
 });
+

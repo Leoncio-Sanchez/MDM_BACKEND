@@ -11,7 +11,6 @@ use App\Modules\Personas\Infrastructure\Providers\PersonasServiceProvider;
 use App\Modules\Pide\Infrastructure\Providers\PideServiceProvider;
 use App\Modules\Seguridad\Infrastructure\Providers\SeguridadServiceProvider;
 use App\Modules\TipoDocumentoIdentidad\Infrastructure\Providers\TipoDocumentoIdentidadServiceProvider;
-use App\Modules\TipoLicencia\Infrastructure\Providers\TipoLicenciaServiceProvider;
 use App\Modules\TipoProcedimientoTupa\Infrastructure\Providers\TipoProcedimientoTupaServiceProvider;
 use App\Modules\Inspectores\Infrastructure\Providers\InspectoresServiceProvider;
 use App\Modules\UnidadesOrganicas\Infrastructure\Providers\UnidadesOrganicasServiceProvider;
@@ -28,7 +27,6 @@ return [
     AppServiceProvider::class,
     LicenciasServiceProvider::class,
     ItseServiceProvider::class,
-    TipoLicenciaServiceProvider::class,
     ExpedienteServiceProvider::class,
     PideServiceProvider::class,
     ArchivosServiceProvider::class,

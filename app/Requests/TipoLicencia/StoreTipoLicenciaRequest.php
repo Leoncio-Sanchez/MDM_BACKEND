@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Modules\TipoLicencia\Presentation\Requests;
+namespace App\Requests\TipoLicencia;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-final class GuardarTipoLicenciaRequest extends FormRequest
+class StoreTipoLicenciaRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -17,9 +17,9 @@ final class GuardarTipoLicenciaRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'codigo' => 'required|string|max:10',
-            'nombre' => 'required|string|max:100',
-            'esta_activo' => 'boolean',
+            'codigo' => 'required|string|max:20',
+            'nombre' => 'required|string|max:150',
+            'esta_activo' => 'nullable|boolean',
         ];
     }
 }
