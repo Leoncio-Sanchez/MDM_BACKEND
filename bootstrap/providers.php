@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Modules\Archivos\Infrastructure\Providers\ArchivosServiceProvider;
-use App\Modules\Estados\Infrastructure\Providers\EstadosServiceProvider;
 use App\Modules\Expedientes\Infrastructure\Providers\ExpedienteServiceProvider;
 use App\Modules\Giros\Infrastructure\Providers\GirosServiceProvider;
 use App\Modules\ITSE\Infrastructure\Providers\ItseServiceProvider;
@@ -29,7 +28,6 @@ return [
     ZonificacionServiceProvider::class,
     NivelRiesgoServiceProvider::class,
     AppServiceProvider::class,
-    EstadosServiceProvider::class,
     LicenciasServiceProvider::class,
     ItseServiceProvider::class,
     TipoLicenciaServiceProvider::class,
