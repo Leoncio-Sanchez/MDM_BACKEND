@@ -6,6 +6,7 @@ use App\Controllers\EstadoController;
 use App\Controllers\GiroController;
 use App\Controllers\NivelRiesgoController;
 use App\Controllers\TipoLicenciaController;
+use App\Controllers\ZonificacionController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:api')->prefix('lf-itse')->group(function (): void {
@@ -29,6 +30,9 @@ Route::middleware('auth:api')->prefix('lf-itse')->group(function (): void {
     ]);
     Route::apiResource('niveles-riesgo', NivelRiesgoController::class)->parameters([
         'niveles-riesgo' => 'id',
+    ]);
+    Route::apiResource('zonificaciones', ZonificacionController::class)->parameters([
+        'zonificaciones' => 'id',
     ]);
 });
 

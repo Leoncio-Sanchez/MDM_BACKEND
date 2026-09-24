@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Modules\Zonificacion\Presentation\Requests;
+namespace App\Requests\Zonificacion;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class GuardarZonificacionRequest extends FormRequest
+class StoreZonificacionRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -19,7 +19,7 @@ class GuardarZonificacionRequest extends FormRequest
         return [
             'codigo' => 'required|string|max:30',
             'nombre' => 'required|string|max:150',
-            'esta_activo' => 'required|boolean',
+            'esta_activo' => 'nullable|boolean',
         ];
     }
 }

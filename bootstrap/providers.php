@@ -14,14 +14,12 @@ use App\Modules\TipoProcedimientoTupa\Infrastructure\Providers\TipoProcedimiento
 use App\Modules\Inspectores\Infrastructure\Providers\InspectoresServiceProvider;
 use App\Modules\UnidadesOrganicas\Infrastructure\Providers\UnidadesOrganicasServiceProvider;
 use App\Modules\Usuarios\Infrastructure\Providers\UsuariosServiceProvider;
-use App\Modules\Zonificacion\Infrastructure\Providers\ZonificacionServiceProvider;
 use App\Providers\AppServiceProvider;
 
 return [
     TipoProcedimientoTupaServiceProvider::class,
     PersonasServiceProvider::class,
     TipoDocumentoIdentidadServiceProvider::class,
-    ZonificacionServiceProvider::class,
     AppServiceProvider::class,
     LicenciasServiceProvider::class,
     ItseServiceProvider::class,
