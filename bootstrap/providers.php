@@ -10,7 +10,6 @@ use App\Modules\Licencias\Infrastructure\Providers\LicenciasServiceProvider;
 use App\Modules\Personas\Infrastructure\Providers\PersonasServiceProvider;
 use App\Modules\Pide\Infrastructure\Providers\PideServiceProvider;
 use App\Modules\Seguridad\Infrastructure\Providers\SeguridadServiceProvider;
-use App\Modules\UnidadesOrganicas\Infrastructure\Providers\UnidadesOrganicasServiceProvider;
 use App\Modules\Usuarios\Infrastructure\Providers\UsuariosServiceProvider;
 use App\Providers\AppServiceProvider;
 
@@ -25,5 +24,4 @@ return [
     SeguridadServiceProvider::class,
     UsuariosServiceProvider::class,
     InspectoresServiceProvider::class,
-    UnidadesOrganicasServiceProvider::class,
 ];

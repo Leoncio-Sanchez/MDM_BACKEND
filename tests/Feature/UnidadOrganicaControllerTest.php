@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace App\Modules\UnidadesOrganicas\Tests\Feature;
+namespace Tests\Feature;
 
+use App\Models\UnidadOrganica;
 use App\Modules\Seguridad\Domain\Contracts\TokenServiceInterface;
 use App\Modules\Seguridad\Domain\ValueObjects\AuthenticatedUser;
-use App\Modules\UnidadesOrganicas\Infrastructure\Persistence\Models\UnidadOrganicaModel;
 use App\Modules\Usuarios\Infrastructure\Persistence\Models\UsuarioModel;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
-final class UnidadOrganicaApiTest extends TestCase
+final class UnidadOrganicaControllerTest extends TestCase
 {
     private string $token;
 
@@ -77,9 +77,9 @@ final class UnidadOrganicaApiTest extends TestCase
 
     public function test_lista_unidades_organicas(): void
     {
-        UnidadOrganicaModel::truncate();
+        UnidadOrganica::truncate();
 
-        UnidadOrganicaModel::create([
+        UnidadOrganica::create([
             'id' => 1,
             'codigo' => 'SGDEL',
             'nombre' => 'Sub Gerencia de Desarrollo Económico Local',
@@ -87,10 +87,10 @@ final class UnidadOrganicaApiTest extends TestCase
             'esta_activo' => true,
         ]);
 
-        UnidadOrganicaModel::create([
+        UnidadOrganica::create([
             'id' => 2,
             'codigo' => 'SGRD',
-            'nombre' => 'Sub Gerencia de Gestión de Riesgos de Desastres',
+            'nombre' => 'Oficina de Gestión de Riesgos de Desastres',
             'sigla' => 'SGRD',
             'esta_activo' => true,
         ]);
@@ -101,8 +101,10 @@ final class UnidadOrganicaApiTest extends TestCase
         $response->assertStatus(200);
         $data = $response->json();
         $this->assertCount(2, $data);
-        $this->assertSame('SGDEL', $data[0]['codigo']);
-        $this->assertSame('Sub Gerencia de Desarrollo Económico Local', $data[0]['nombre']);
+        // Debe ordenar por nombre ascendentemente (Oficina antes de Sub Gerencia)
+        $this->assertSame('Oficina de Gestión de Riesgos de Desastres', $data[0]['nombre']);
+        $this->assertSame('Sub Gerencia de Desarrollo Económico Local', $data[1]['nombre']);
+        $this->assertSame('SGRD', $data[0]['codigo']);
         $this->assertTrue($data[0]['esta_activo']);
     }
 
@@ -112,5 +114,36 @@ final class UnidadOrganicaApiTest extends TestCase
             ->getJson('/api/lf-itse/unidades-organicas/');
 
         $response->assertStatus(200);
+    }
+
+    public function test_puede_filtrar_por_esta_activo(): void
+    {
+        UnidadOrganica::truncate();
+
+        UnidadOrganica::create([
+            'id' => 1,
+            'codigo' => 'ACT01',
+            'nombre' => 'Activa',
+            'sigla' => 'ACT',
+            'esta_activo' => true,
+        ]);
+
+        UnidadOrganica::create([
+            'id' => 2,
+            'codigo' => 'INA01',
+            'nombre' => 'Inactiva',
+            'sigla' => 'INA',
+            'esta_activo' => false,
+        ]);
+
+        $resActivos = $this->withHeader('Authorization', 'Bearer '.$this->token)
+            ->getJson('/api/lf-itse/unidades-organicas?esta_activo=true');
+        $resActivos->assertStatus(200)->assertJsonCount(1);
+        $this->assertSame('ACT01', $resActivos->json('0.codigo'));
+
+        $resInactivos = $this->withHeader('Authorization', 'Bearer '.$this->token)
+            ->getJson('/api/lf-itse/unidades-organicas?esta_activo=false');
+        $resInactivos->assertStatus(200)->assertJsonCount(1);
+        $this->assertSame('INA01', $resInactivos->json('0.codigo'));
     }
 }

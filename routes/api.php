@@ -8,6 +8,7 @@ use App\Controllers\NivelRiesgoController;
 use App\Controllers\TipoDocumentoIdentidadController;
 use App\Controllers\TipoLicenciaController;
 use App\Controllers\TipoProcedimientoTupaController;
+use App\Controllers\UnidadOrganicaController;
 use App\Controllers\ZonificacionController;
 use Illuminate\Support\Facades\Route;
 
@@ -42,4 +43,6 @@ Route::middleware('auth:api')->prefix('lf-itse')->group(function (): void {
     Route::apiResource('tipos-procedimiento-tupa', TipoProcedimientoTupaController::class)->parameters([
         'tipos-procedimiento-tupa' => 'id',
     ]);
+    Route::get('unidades-organicas', [UnidadOrganicaController::class, 'index']);
+    Route::get('unidades-organicas/', [UnidadOrganicaController::class, 'index']);
 });
