@@ -16,6 +16,7 @@ use App\Modules\TipoDocumentoIdentidad\Infrastructure\Providers\TipoDocumentoIde
 use App\Modules\TipoLicencia\Infrastructure\Providers\TipoLicenciaServiceProvider;
 use App\Modules\TipoProcedimientoTupa\Infrastructure\Providers\TipoProcedimientoTupaServiceProvider;
 use App\Modules\Inspectores\Infrastructure\Providers\InspectoresServiceProvider;
+use App\Modules\UnidadesOrganicas\Infrastructure\Providers\UnidadesOrganicasServiceProvider;
 use App\Modules\Usuarios\Infrastructure\Providers\UsuariosServiceProvider;
 use App\Modules\Zonificacion\Infrastructure\Providers\ZonificacionServiceProvider;
 use App\Providers\AppServiceProvider;
@@ -38,4 +39,5 @@ return [
     SeguridadServiceProvider::class,
     UsuariosServiceProvider::class,
     InspectoresServiceProvider::class,
+    UnidadesOrganicasServiceProvider::class,
 ];
