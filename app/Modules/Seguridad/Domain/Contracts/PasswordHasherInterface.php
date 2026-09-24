@@ -16,4 +16,11 @@ interface PasswordHasherInterface
      * @return bool true si coincide.
      */
     public function verify(string $plainPassword, string $djangoHash): bool;
+
+    /**
+     * Genera un hash compatible con Django en formato pbkdf2_sha256.
+     */
+    public function hash(string $plainPassword): string;
+
+    public function makeHash(string $plainPassword, int $iterations = 720000, ?string $salt = null): string;
 }

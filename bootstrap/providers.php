@@ -15,6 +15,7 @@ use App\Modules\Seguridad\Infrastructure\Providers\SeguridadServiceProvider;
 use App\Modules\TipoDocumentoIdentidad\Infrastructure\Providers\TipoDocumentoIdentidadServiceProvider;
 use App\Modules\TipoLicencia\Infrastructure\Providers\TipoLicenciaServiceProvider;
 use App\Modules\TipoProcedimientoTupa\Infrastructure\Providers\TipoProcedimientoTupaServiceProvider;
+use App\Modules\Usuarios\Infrastructure\Providers\UsuariosServiceProvider;
 use App\Modules\Zonificacion\Infrastructure\Providers\ZonificacionServiceProvider;
 use App\Providers\AppServiceProvider;
 
@@ -34,4 +35,5 @@ return [
     PideServiceProvider::class,
     ArchivosServiceProvider::class,
     SeguridadServiceProvider::class,
+    UsuariosServiceProvider::class,
 ];
