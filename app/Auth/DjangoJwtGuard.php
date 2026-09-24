@@ -4,14 +4,19 @@ declare(strict_types=1);
 
 namespace App\Auth;
 
+use App\Models\User;
 use Illuminate\Auth\GuardHelpers;
-use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Http\Request;
 use Lcobucci\JWT\Configuration;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
 use Lcobucci\JWT\Signer\Key\InMemory;
-use App\Models\User;
+use Lcobucci\JWT\Token\Plain;
+use Lcobucci\JWT\Validation\Constraint\LooseValidAt;
+use Lcobucci\JWT\Validation\Constraint\SignedWith;
+use Symfony\Component\Clock\NativeClock;
+use Throwable;
 
 class DjangoJwtGuard implements Guard
 {
@@ -31,47 +36,63 @@ class DjangoJwtGuard implements Guard
         }
 
         $token = $this->getTokenFromRequest();
-        if (!$token) return null;
+        if ($token === null) {
+            return null;
+        }
 
         try {
-            $secret = config('jwt.secret');
+            $secret = (string) config('jwt.secret');
+            if ($secret === '') {
+                return null;
+            }
+
             $config = Configuration::forSymmetricSigner(
-                new Sha256(),
+                new Sha256,
                 InMemory::plainText($secret)
             );
-            
+
             $parsed = $config->parser()->parse($token);
-            
-            // Validate signature only (not exp for now)
+            if (! $parsed instanceof Plain) {
+                return null;
+            }
+
+            $clock = new NativeClock;
             $config->validator()->assert(
                 $parsed,
-                new \Lcobucci\JWT\Validation\Constraint\SignedWith(
-                    $config->signer(),
-                    $config->signingKey()
-                )
+                new SignedWith($config->signer(), $config->verificationKey()),
+                new LooseValidAt($clock),
             );
-            
-            // Django simplejwt uses user_id, standard JWT uses sub
+
+            // Django SimpleJWT usa 'user_id', JWT estándar usa 'sub'
             $userId = $parsed->claims()->get('user_id') ?? $parsed->claims()->get('sub');
-            
-            if (!$userId) return null;
-            
-            $this->user = User::find((int)$userId);
+            if ($userId === null || ! is_numeric($userId)) {
+                return null;
+            }
+
+            $user = User::find((int) $userId);
+            if ($user === null || (isset($user->is_active) && ! $user->is_active)) {
+                return null;
+            }
+
+            $this->user = $user;
+            $this->request->setUserResolver(fn (): ?Authenticatable => $this->user);
+
             return $this->user;
-            
-        } catch (\Throwable $e) {
+        } catch (Throwable) {
             return null;
         }
     }
 
     public function validate(array $credentials = []): bool
     {
-        return $this->user !== null;
+        return $this->user() !== null;
     }
 
     public function setUser(Authenticatable $user): static
     {
         $this->user = $user;
+        $this->request->setUserResolver(fn (): ?Authenticatable => $this->user);
+
         return $this;
     }
 
@@ -81,6 +102,7 @@ class DjangoJwtGuard implements Guard
         if (str_starts_with($header, 'Bearer ')) {
             return substr($header, 7);
         }
+
         return null;
     }
 }

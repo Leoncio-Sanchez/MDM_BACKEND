@@ -103,6 +103,10 @@ return [
 
     'ttl' => env('JWT_TTL', 60),
 
+    'access_lifetime_hours' => (int) env('JWT_ACCESS_TOKEN_LIFETIME_HOURS', 1),
+
+    'refresh_lifetime_days' => (int) env('JWT_REFRESH_TOKEN_LIFETIME_DAYS', 7),
+
     /*
     |--------------------------------------------------------------------------
     | Refresh time to live
