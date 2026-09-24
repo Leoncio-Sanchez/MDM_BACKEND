@@ -179,3 +179,19 @@
 - **Prioridad:** P2
 - **Fecha:** 23/09/2026
 - **Aprobado por:** Leo (Stakeholder)
+
+## TD-016 — Happy path de PIDE no validado contra RENIEC/SUNAT reales
+
+- **Estado:** Pendiente de validación en staging/producción (código completado al 100%)
+- **Impacto:** Bajo-Medio (ambos frameworks usan passthrough de la respuesta JSON cruda de PIDE)
+- **Descripción:** 
+  1. Durante la migración de PIDE (FASE 8A), no se dispuso de credenciales gubernamentales válidas para consultar RENIEC/SUNAT en desarrollo local.
+  2. El diff de paridad se limitó a error paths deterministas (validación de entrada, credenciales no configuradas, timeout), los cuales arrojaron paridad 100% byte-a-byte idéntica.
+  3. El comportamiento del happy path (respuesta real del servicio PIDE con credenciales válidas) está implementado como passthrough directo en Laravel pero requiere validación en staging antes del paso a producción.
+- **Ubicación:**
+  - `app/Modules/Pide/`
+- **Plan de resolución:** Validar el happy path durante el despliegue a staging con credenciales válidas antes de habilitar el pase a producción.
+- **Prioridad:** P2
+- **Fecha:** 23/09/2026
+- **Aprobado por:** Leo (Stakeholder)
+
