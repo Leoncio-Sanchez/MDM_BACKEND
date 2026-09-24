@@ -1,11 +1,21 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Modules\Licencias\Presentation\Requests;
+
 use Illuminate\Foundation\Http\FormRequest;
-final class CrearLicenciaRequest extends FormRequest {
-    public function authorize(): bool { return true; }
+
+final class CrearLicenciaRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true;
+    }
+
     /** @return array<string, mixed> */
-    public function rules(): array {
+    public function rules(): array
+    {
         return [
             'numero_licencia' => ['required', 'string', 'max:50'],
             'nombre_comercial' => ['required', 'string', 'max:200'],
@@ -14,6 +24,6 @@ final class CrearLicenciaRequest extends FormRequest {
             'expediente_id' => ['nullable', 'integer', 'exists:expedientes,id'],
             'nivel_riesgo_id' => ['nullable', 'integer', 'exists:niveles_riesgo,id'],
             'zonificacion_id' => ['nullable', 'integer', 'exists:zonificaciones,id'],
-    ];
+        ];
     }
 }

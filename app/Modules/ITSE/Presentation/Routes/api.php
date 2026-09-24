@@ -19,7 +19,7 @@ Route::middleware('auth:api')->prefix('api/lf-itse')->group(function () {
     Route::post('itse/', [ItseController::class, 'store']);
     Route::get('itse/{pk}/', [ItseController::class, 'show'])->whereNumber('pk');
     Route::put('itse/{pk}/', [ItseController::class, 'update'])->whereNumber('pk');
-    Route::post('itse/{pk}/notificacion/', [ItseController::class, 'notificacion'])->whereNumber('pk');
+    Route::match(['post', 'patch'], 'itse/{pk}/notificacion/', [ItseController::class, 'notificacion'])->whereNumber('pk');
 
     // ── 6B dinámicas ─────────────────────────────────────────────────────────
     Route::get('itse/{pk}/giros/', [ItseController::class, 'giros'])->whereNumber('pk');

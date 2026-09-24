@@ -1,11 +1,14 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Modules\Licencias\Presentation\Resources;
 
-use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
 use App\Modules\Licencias\Domain\Entities\Licencia;
 use App\Modules\Licencias\Infrastructure\Persistence\Models\LicenciaModel;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\DB;
 
 class LicenciaResource extends JsonResource
@@ -35,11 +38,12 @@ class LicenciaResource extends JsonResource
                     'licencia_funcionamiento_id as licencia_funcionamiento',
                     'giro_id as giro',
                     'usuario_id as usuario',
-                    'fecha_digitacion'
+                    'fecha_digitacion',
                 ])
                 ->get()
                 ->map(function ($g) {
-                    $g->fecha_digitacion = \Carbon\Carbon::parse($g->fecha_digitacion)->setTimezone('America/Lima')->format('Y-m-dTH:i:s.uP');
+                    $g->fecha_digitacion = Carbon::parse($g->fecha_digitacion)->setTimezone('America/Lima')->format('Y-m-dTH:i:s.uP');
+
                     return $g;
                 })
                 ->toArray();
@@ -56,11 +60,12 @@ class LicenciaResource extends JsonResource
                     'extension',
                     'tamanio_bytes',
                     'usuario_id as usuario',
-                    'fecha_digitacion'
+                    'fecha_digitacion',
                 ])
                 ->get()
                 ->map(function ($a) {
-                    $a->fecha_digitacion = \Carbon\Carbon::parse($a->fecha_digitacion)->setTimezone('America/Lima')->format('Y-m-dTH:i:s.uP');
+                    $a->fecha_digitacion = Carbon::parse($a->fecha_digitacion)->setTimezone('America/Lima')->format('Y-m-dTH:i:s.uP');
+
                     return $a;
                 })
                 ->toArray();
@@ -75,11 +80,12 @@ class LicenciaResource extends JsonResource
                     'documento',
                     'observaciones',
                     'usuario_id as usuario',
-                    'fecha_digitacion'
+                    'fecha_digitacion',
                 ])
                 ->get()
                 ->map(function ($h) {
-                    $h->fecha_digitacion = \Carbon\Carbon::parse($h->fecha_digitacion)->setTimezone('America/Lima')->format('Y-m-dTH:i:s.uP');
+                    $h->fecha_digitacion = Carbon::parse($h->fecha_digitacion)->setTimezone('America/Lima')->format('Y-m-dTH:i:s.uP');
+
                     return $h;
                 })
                 ->toArray();
@@ -97,14 +103,14 @@ class LicenciaResource extends JsonResource
             'expediente' => $model?->expediente_id,
             'tipo_licencia' => $model?->tipo_licencia_id,
             'numero_licencia' => $model?->numero_licencia,
-            'fecha_emision' => $model?->fecha_emision ? \Carbon\Carbon::parse($model->fecha_emision)->toDateString() : null,
+            'fecha_emision' => $model?->fecha_emision ? Carbon::parse($model->fecha_emision)->toDateString() : null,
             'titular' => $model?->titular_id,
             'conductor' => $model?->conductor_id,
             'licencia_principal' => $model?->licencia_principal_id,
             'nombre_comercial' => $model?->nombre_comercial,
             'es_vigencia_indeterminada' => (bool) $model?->es_vigencia_indeterminada,
-            'fecha_inicio_vigencia' => $model?->fecha_inicio_vigencia ? \Carbon\Carbon::parse($model->fecha_inicio_vigencia)->toDateString() : null,
-            'fecha_fin_vigencia' => $model?->fecha_fin_vigencia ? \Carbon\Carbon::parse($model->fecha_fin_vigencia)->toDateString() : null,
+            'fecha_inicio_vigencia' => $model?->fecha_inicio_vigencia ? Carbon::parse($model->fecha_inicio_vigencia)->toDateString() : null,
+            'fecha_fin_vigencia' => $model?->fecha_fin_vigencia ? Carbon::parse($model->fecha_fin_vigencia)->toDateString() : null,
             'nivel_riesgo' => $model?->nivel_riesgo_id,
             'actividad' => $model?->actividad,
             'direccion' => $model?->direccion,
@@ -116,9 +122,9 @@ class LicenciaResource extends JsonResource
             'numero_recibo_pago' => $model?->numero_recibo_pago,
             'observaciones' => $model?->observaciones,
             'se_puede_publicar' => (bool) $model?->se_puede_publicar,
-            'fecha_notificacion' => $model?->fecha_notificacion ? \Carbon\Carbon::parse($model->fecha_notificacion)->toIso8601String() : null,
+            'fecha_notificacion' => $model?->fecha_notificacion ? Carbon::parse($model->fecha_notificacion)->toIso8601String() : null,
             'usuario' => $model?->usuario_id,
-            'fecha_digitacion' => $model?->fecha_digitacion ? \Carbon\Carbon::parse($model->fecha_digitacion)->setTimezone('America/Lima')->format('Y-m-dTH:i:s.uP') : null,
+            'fecha_digitacion' => $model?->fecha_digitacion ? Carbon::parse($model->fecha_digitacion)->setTimezone('America/Lima')->format('Y-m-dTH:i:s.uP') : null,
             'archivos' => $archivos,
             'historial_estados' => $historial_estados,
             'giros' => $giros,

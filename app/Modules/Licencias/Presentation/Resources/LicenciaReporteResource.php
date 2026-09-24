@@ -1,10 +1,12 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Modules\Licencias\Presentation\Resources;
 
+use App\Modules\Licencias\Domain\Entities\Licencia;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use App\Modules\Licencias\Domain\Entities\Licencia;
 
 class LicenciaReporteResource extends JsonResource
 {
@@ -20,6 +22,7 @@ class LicenciaReporteResource extends JsonResource
         }
 
         $arr = (array) $this->resource;
+
         return [
             'id' => $arr['id'] ?? null,
             'numero_licencia' => $arr['numero_licencia'] ?? null,

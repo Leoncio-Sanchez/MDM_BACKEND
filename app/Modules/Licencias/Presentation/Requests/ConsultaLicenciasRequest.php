@@ -1,11 +1,21 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Modules\Licencias\Presentation\Requests;
+
 use Illuminate\Foundation\Http\FormRequest;
-final class ConsultaLicenciasRequest extends FormRequest {
-    public function authorize(): bool { return true; }
+
+final class ConsultaLicenciasRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true;
+    }
+
     /** @return array<string, mixed> */
-    public function rules(): array {
-        return [ 'numero' => ['nullable', 'string'] ];
+    public function rules(): array
+    {
+        return ['numero' => ['nullable', 'string']];
     }
 }

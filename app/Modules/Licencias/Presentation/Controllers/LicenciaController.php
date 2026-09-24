@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Licencias\Presentation\Controllers;
@@ -23,6 +24,7 @@ use App\Modules\Licencias\Application\UseCases\RegistrarInactivacionUseCase;
 use App\Modules\Licencias\Application\UseCases\RegistrarNotificacionUseCase;
 use App\Modules\Licencias\Application\UseCases\ReporteLicenciasUseCase;
 use App\Modules\Licencias\Application\UseCases\VerificarNumeroExpedienteUseCase;
+use App\Modules\Licencias\Infrastructure\Persistence\Models\LicenciaModel;
 use App\Modules\Licencias\Presentation\Requests\BuscarLicenciasRequest;
 use App\Modules\Licencias\Presentation\Requests\ConsultaLicenciasRequest;
 use App\Modules\Licencias\Presentation\Requests\CrearLicenciaRequest;
@@ -37,6 +39,7 @@ use App\Modules\Licencias\Presentation\Resources\LicenciaReporteResource;
 use App\Modules\Licencias\Presentation\Resources\LicenciaResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\DB;
 
 class LicenciaController
 {
@@ -56,24 +59,28 @@ class LicenciaController
     public function store(CrearLicenciaRequest $request): LicenciaResource
     {
         $licencia = $this->crear->execute(CrearLicenciaDTO::fromArray($request->validated()));
+
         return new LicenciaResource($licencia);
     }
 
     public function buscar(BuscarLicenciasRequest $request): AnonymousResourceCollection
     {
         $resultados = $this->buscar->execute(BuscarLicenciasDTO::fromArray($request->validated()));
+
         return LicenciaListResource::collection($resultados);
     }
 
     public function update(ModificarLicenciaRequest $request, int $pk): LicenciaResource
     {
         $licencia = $this->modificar->execute(ModificarLicenciaDTO::fromArray(array_merge($request->validated(), ['licencia_id' => $pk])));
+
         return new LicenciaResource($licencia);
     }
 
     public function reporte(ReporteLicenciasRequest $request): AnonymousResourceCollection
     {
         $datos = $this->reporte->execute(ReporteLicenciasDTO::fromArray($request->validated()));
+
         return LicenciaReporteResource::collection($datos);
     }
 
@@ -87,29 +94,57 @@ class LicenciaController
     public function inactivar(InactivarLicenciaRequest $request): LicenciaResource
     {
         $licencia = $this->inactivar->execute(InactivarLicenciaDTO::fromArray($request->validated()));
+
         return new LicenciaResource($licencia);
     }
 
     public function destroy(int $pk): JsonResponse
     {
         $this->eliminar->execute(new EliminarLicenciaDTO($pk));
+
         return new JsonResponse(null, 204);
     }
 
-    public function consulta(ConsultaLicenciasRequest $request): AnonymousResourceCollection {
+    public function consulta(ConsultaLicenciasRequest $request): AnonymousResourceCollection
+    {
         $resultados = $this->consulta->execute(ConsultaLicenciasDTO::fromArray($request->validated()));
+
         return LicenciaResource::collection($resultados);
     }
 
     public function notificar(RegistrarNotificacionRequest $request): JsonResponse
     {
         $this->notificar->execute(RegistrarNotificacionDTO::fromArray($request->validated()));
+
         return new JsonResponse([], 200);
     }
 
     public function listarEstados(ListarEstadosRequest $request): JsonResponse
     {
         $estados = $this->listarEstados->execute(ListarEstadosDTO::fromArray($request->validated()));
+
         return new JsonResponse($estados, 200);
+    }
+
+    public function giros(int $pk): JsonResponse
+    {
+        $licencia = LicenciaModel::find($pk);
+        if (! $licencia) {
+            return new JsonResponse(['error' => 'La licencia de funcionamiento no existe.'], 404);
+        }
+
+        $giros = DB::table('licencias_funcionamiento_giros as lfg')
+            ->join('giros as g', 'g.id', '=', 'lfg.giro_id')
+            ->where('lfg.licencia_funcionamiento_id', $pk)
+            ->select([
+                'lfg.id',
+                'lfg.licencia_funcionamiento_id',
+                'lfg.giro_id',
+                'g.ciiu_id',
+                'g.nombre',
+            ])
+            ->get();
+
+        return new JsonResponse($giros, 200);
     }
 }
