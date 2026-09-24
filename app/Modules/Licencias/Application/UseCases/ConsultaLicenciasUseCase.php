@@ -11,6 +11,7 @@ final readonly class ConsultaLicenciasUseCase {
         if ($dto->numeroLicencia) {
             return $this->licencias->buscarPorFiltro('NUMERO_LICENCIA', $dto->numeroLicencia);
         }
-        return $this->licencias->paginar(1, 15);
+        $paginado = $this->licencias->paginar(1, 15);
+        return $paginado['items'] ?? $paginado;
     }
 }
