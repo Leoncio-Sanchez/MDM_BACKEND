@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Controllers\EstadoController;
 use App\Controllers\GiroController;
 use App\Controllers\InspectorController;
+use App\Controllers\ItseController;
 use App\Controllers\LicenciaController;
 use App\Controllers\NivelRiesgoController;
 use App\Controllers\TipoDocumentoIdentidadController;
@@ -81,6 +82,36 @@ Route::middleware('auth:api')->prefix('lf-itse')->group(function (): void {
     Route::put('licencias-funcionamiento/{pk}/', [LicenciaController::class, 'update'])->whereNumber('pk');
     Route::delete('licencias-funcionamiento/{pk}', [LicenciaController::class, 'destroy'])->whereNumber('pk');
     Route::delete('licencias-funcionamiento/{pk}/', [LicenciaController::class, 'destroy'])->whereNumber('pk');
+
+    Route::get('itse/por-renovar', [ItseController::class, 'porRenovar']);
+    Route::get('itse/por-renovar/', [ItseController::class, 'porRenovar']);
+    Route::get('itse/consulta', [ItseController::class, 'consulta']);
+    Route::get('itse/consulta/', [ItseController::class, 'consulta']);
+    Route::get('itse/buscar', [ItseController::class, 'buscar']);
+    Route::get('itse/buscar/', [ItseController::class, 'buscar']);
+    Route::match(['get', 'post'], 'itse/verificar-expediente', [ItseController::class, 'verificarExpediente']);
+    Route::match(['get', 'post'], 'itse/verificar-expediente/', [ItseController::class, 'verificarExpediente']);
+    Route::post('itse/inactivar', [ItseController::class, 'inactivar']);
+    Route::post('itse/inactivar/', [ItseController::class, 'inactivar']);
+
+    Route::post('itse', [ItseController::class, 'store']);
+    Route::post('itse/', [ItseController::class, 'store']);
+    Route::get('itse/{pk}', [ItseController::class, 'show'])->whereNumber('pk');
+    Route::get('itse/{pk}/', [ItseController::class, 'show'])->whereNumber('pk');
+    Route::put('itse/{pk}', [ItseController::class, 'update'])->whereNumber('pk');
+    Route::put('itse/{pk}/', [ItseController::class, 'update'])->whereNumber('pk');
+    Route::delete('itse/{pk}', [ItseController::class, 'destroy'])->whereNumber('pk');
+    Route::delete('itse/{pk}/', [ItseController::class, 'destroy'])->whereNumber('pk');
+    Route::match(['post', 'patch'], 'itse/{pk}/notificacion', [ItseController::class, 'notificacion'])->whereNumber('pk');
+    Route::match(['post', 'patch'], 'itse/{pk}/notificacion/', [ItseController::class, 'notificacion'])->whereNumber('pk');
+    Route::get('itse/{pk}/estados', [ItseController::class, 'estados'])->whereNumber('pk');
+    Route::get('itse/{pk}/estados/', [ItseController::class, 'estados'])->whereNumber('pk');
+    Route::get('itse/{pk}/giros', [ItseController::class, 'giros'])->whereNumber('pk');
+    Route::get('itse/{pk}/giros/', [ItseController::class, 'giros'])->whereNumber('pk');
+    Route::get('itse/{pk}/inspectores', [ItseController::class, 'inspectores'])->whereNumber('pk');
+    Route::get('itse/{pk}/inspectores/', [ItseController::class, 'inspectores'])->whereNumber('pk');
+    Route::post('itse/{pk}/inspectores', [ItseController::class, 'asignarInspector'])->whereNumber('pk');
+    Route::post('itse/{pk}/inspectores/', [ItseController::class, 'asignarInspector'])->whereNumber('pk');
 
     Route::get('usuarios/menus', [UsuarioController::class, 'menus']);
     Route::get('usuarios/menus/', [UsuarioController::class, 'menus']);
