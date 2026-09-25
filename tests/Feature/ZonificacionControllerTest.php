@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Models\Zonificacion;
-use App\Modules\Seguridad\Domain\Contracts\TokenServiceInterface;
-use App\Modules\Seguridad\Domain\ValueObjects\AuthenticatedUser;
+use App\Services\DjangoJwtTokenService;
+use App\Services\AuthenticatedUser;
 use App\Models\Usuario as UsuarioModel;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -57,8 +57,8 @@ final class ZonificacionControllerTest extends TestCase
             'is_active' => true,
         ]);
 
-        /** @var TokenServiceInterface $tokenService */
-        $tokenService = app(TokenServiceInterface::class);
+        /** @var DjangoJwtTokenService $tokenService */
+        $tokenService = app(DjangoJwtTokenService::class);
         $authUser = new AuthenticatedUser(
             id: 1,
             username: 'admin',

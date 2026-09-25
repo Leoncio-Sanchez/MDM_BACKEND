@@ -6,8 +6,8 @@ namespace Tests\Feature\Itse;
 
 use App\Models\Itse;
 use App\Models\Usuario as UsuarioModel;
-use App\Modules\Seguridad\Domain\Contracts\TokenServiceInterface;
-use App\Modules\Seguridad\Domain\ValueObjects\AuthenticatedUser;
+use App\Services\DjangoJwtTokenService;
+use App\Services\AuthenticatedUser;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -218,7 +218,7 @@ final class ItseControllerTest extends TestCase
             ruc: null,
             passwordHash: $usuario->password,
         );
-        $tokenService = app(TokenServiceInterface::class);
+        $tokenService = app(DjangoJwtTokenService::class);
         $this->token = $tokenService->issue($authenticatedUser)->access;
 
         DB::table('estados')->insert([

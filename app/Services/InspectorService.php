@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\Usuario;
-use App\Modules\Seguridad\Domain\Contracts\PasswordHasherInterface;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -13,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 class InspectorService
 {
     public function __construct(
-        private readonly PasswordHasherInterface $hasher,
+        private readonly DjangoPbkdf2Hasher $hasher,
     ) {}
 
     /**

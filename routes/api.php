@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Controllers\ArchivoController;
+use App\Controllers\Auth\JwtAuthController;
+use App\Controllers\Auth\UserController;
 use App\Controllers\EstadoController;
 use App\Controllers\ExpedienteController;
 use App\Controllers\GiroController;
@@ -200,4 +202,17 @@ Route::middleware('auth:api')->prefix('lf-itse')->group(function (): void {
     Route::apiResource('usuarios', UsuarioController::class)->parameters([
         'usuarios' => 'pk',
     ]);
+});
+
+// ── AUTH: JWT & USER (DJOSER PARITY) ─────────────────────────────────────────
+Route::post('auth/jwt/create', [JwtAuthController::class, 'create'])->name('auth.jwt.create');
+Route::post('auth/jwt/create/', [JwtAuthController::class, 'create']);
+Route::post('auth/jwt/refresh', [JwtAuthController::class, 'refresh'])->name('auth.jwt.refresh');
+Route::post('auth/jwt/refresh/', [JwtAuthController::class, 'refresh']);
+Route::post('auth/jwt/verify', [JwtAuthController::class, 'verify'])->name('auth.jwt.verify');
+Route::post('auth/jwt/verify/', [JwtAuthController::class, 'verify']);
+
+Route::middleware('auth:api')->group(function (): void {
+    Route::get('auth/users/me', [UserController::class, 'me'])->name('auth.users.me');
+    Route::get('auth/users/me/', [UserController::class, 'me']);
 });

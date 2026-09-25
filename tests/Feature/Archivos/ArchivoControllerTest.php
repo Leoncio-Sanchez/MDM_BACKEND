@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Tests\Feature\Archivos;
 
 use App\Models\Usuario as UsuarioModel;
-use App\Modules\Seguridad\Domain\Contracts\TokenServiceInterface;
-use App\Modules\Seguridad\Domain\ValueObjects\AuthenticatedUser;
+use App\Services\DjangoJwtTokenService;
+use App\Services\AuthenticatedUser;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -131,7 +131,7 @@ final class ArchivoControllerTest extends TestCase
             ruc: null,
             passwordHash: $user->password
         );
-        $this->token = app(TokenServiceInterface::class)->issue($authUser)->access;
+        $this->token = app(DjangoJwtTokenService::class)->issue($authUser)->access;
 
         $this->expedienteId = (int) DB::table('expedientes')->insertGetId([
             'numero_expediente' => 'EXP-2026-0001',

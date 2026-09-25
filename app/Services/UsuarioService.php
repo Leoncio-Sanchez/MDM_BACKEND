@@ -6,14 +6,13 @@ namespace App\Services;
 
 use App\Models\Usuario;
 use App\Models\UsuarioPerfil;
-use App\Modules\Seguridad\Domain\Contracts\PasswordHasherInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 class UsuarioService
 {
     public function __construct(
-        private readonly PasswordHasherInterface $hasher,
+        private readonly DjangoPbkdf2Hasher $hasher,
     ) {}
 
     /**

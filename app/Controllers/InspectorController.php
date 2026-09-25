@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Requests\Inspectores\BuscarInspectorRequest;
 use App\Requests\Inspectores\StoreInspectorRequest;
 use App\Requests\Inspectores\UpdateInspectorRequest;

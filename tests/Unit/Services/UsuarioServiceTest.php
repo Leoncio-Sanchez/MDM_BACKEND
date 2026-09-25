@@ -6,7 +6,7 @@ namespace Tests\Unit\Services;
 
 use App\Models\Usuario;
 use App\Models\UsuarioPerfil;
-use App\Modules\Seguridad\Domain\Contracts\PasswordHasherInterface;
+use App\Services\DjangoPbkdf2Hasher;
 use App\Services\UsuarioService;
 use Carbon\Carbon;
 use Illuminate\Database\Schema\Blueprint;
@@ -17,7 +17,7 @@ final class UsuarioServiceTest extends TestCase
 {
     private UsuarioService $service;
 
-    private PasswordHasherInterface $hasher;
+    private DjangoPbkdf2Hasher $hasher;
 
     protected function setUp(): void
     {
@@ -55,7 +55,7 @@ final class UsuarioServiceTest extends TestCase
         UsuarioPerfil::truncate();
         Usuario::truncate();
 
-        $this->hasher = app(PasswordHasherInterface::class);
+        $this->hasher = new DjangoPbkdf2Hasher;
         $this->service = new UsuarioService($this->hasher);
     }
 

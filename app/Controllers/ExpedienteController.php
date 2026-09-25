@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Requests\Expedientes\AmpliarPlazoRequest;
 use App\Requests\Expedientes\BuscarExpedienteRequest;
 use App\Requests\Expedientes\DenegarItseRequest;

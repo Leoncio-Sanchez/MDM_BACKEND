@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Requests\Itse\ActualizarItseRequest;
 use App\Requests\Itse\BuscarItseRequest;
 use App\Requests\Itse\ConsultaItseRequest;

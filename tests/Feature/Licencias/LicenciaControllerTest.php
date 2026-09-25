@@ -6,8 +6,8 @@ namespace Tests\Feature\Licencias;
 
 use App\Models\LicenciaFuncionamiento;
 use App\Models\Usuario as UsuarioModel;
-use App\Modules\Seguridad\Domain\Contracts\TokenServiceInterface;
-use App\Modules\Seguridad\Domain\ValueObjects\AuthenticatedUser;
+use App\Services\DjangoJwtTokenService;
+use App\Services\AuthenticatedUser;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -234,8 +234,8 @@ final class LicenciaControllerTest extends TestCase
             'is_active' => true,
         ]);
 
-        /** @var TokenServiceInterface $tokenService */
-        $tokenService = app(TokenServiceInterface::class);
+        /** @var DjangoJwtTokenService $tokenService */
+        $tokenService = app(DjangoJwtTokenService::class);
         $authUser = new AuthenticatedUser(
             id: 1,
             username: 'admin',

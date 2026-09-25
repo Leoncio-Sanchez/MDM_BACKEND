@@ -3,7 +3,12 @@ includes:
 
 parameters:
     paths:
-        - app/Modules/Estados
+        - app/Controllers
+        - app/Services
+        - app/Requests
+        - app/Resources
+        - app/Exceptions
+        - app/Models
     excludePaths:
-        - app/Modules/*/Tests/*
+        - app/Models/User.php
     level: 8

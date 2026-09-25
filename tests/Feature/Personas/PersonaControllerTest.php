@@ -8,8 +8,8 @@ use App\Models\Persona;
 use App\Models\PersonaDocumento;
 use App\Models\TipoDocumentoIdentidad;
 use App\Models\Usuario as UsuarioModel;
-use App\Modules\Seguridad\Domain\Contracts\TokenServiceInterface;
-use App\Modules\Seguridad\Domain\ValueObjects\AuthenticatedUser;
+use App\Services\DjangoJwtTokenService;
+use App\Services\AuthenticatedUser;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
@@ -125,7 +125,7 @@ final class PersonaControllerTest extends TestCase
             ruc: null,
             passwordHash: $user->password
         );
-        $this->token = app(TokenServiceInterface::class)->issue($authUser)->access;
+        $this->token = app(DjangoJwtTokenService::class)->issue($authUser)->access;
 
         $tipoDni = TipoDocumentoIdentidad::firstOrCreate(
             ['codigo' => '01'],
