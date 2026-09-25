@@ -2,9 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Modules\Archivos\Infrastructure\Persistence\Models;
+namespace App\Models;
 
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $id
@@ -14,13 +17,17 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $ruta_archivo
  * @property string $extension
  * @property int $tamanio_bytes
- * @property \DateTimeInterface $fecha_digitacion
- * @property int $expediente_id
+ * @property Carbon|string $fecha_digitacion
+ * @property int $itse_id
  * @property int $usuario_id
+ * @property-read Itse|null $itse
+ * @property-read Usuario|null $usuario
+ *
+ * @method static Builder<static> query()
  */
-class ExpedienteArchivoModel extends Model
+class ItseArchivo extends Model
 {
-    protected $table = 'expedientes_archivos';
+    protected $table = 'itse_archivos';
 
     public $timestamps = false;
 
@@ -33,7 +40,7 @@ class ExpedienteArchivoModel extends Model
         'extension',
         'tamanio_bytes',
         'fecha_digitacion',
-        'expediente_id',
+        'itse_id',
         'usuario_id',
     ];
 
@@ -44,14 +51,25 @@ class ExpedienteArchivoModel extends Model
     {
         return [
             'tamanio_bytes' => 'integer',
-            'expediente_id' => 'integer',
+            'itse_id' => 'integer',
             'usuario_id' => 'integer',
             'fecha_digitacion' => 'datetime',
         ];
     }
 
-    public function getDateFormat(): string
+    /**
+     * @return BelongsTo<Itse, $this>
+     */
+    public function itse(): BelongsTo
     {
-        return 'Y-m-d H:i:sP';
+        return $this->belongsTo(Itse::class, 'itse_id');
+    }
+
+    /**
+     * @return BelongsTo<Usuario, $this>
+     */
+    public function usuario(): BelongsTo
+    {
+        return $this->belongsTo(Usuario::class, 'usuario_id');
     }
 }

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Controllers\ArchivoController;
 use App\Controllers\EstadoController;
 use App\Controllers\ExpedienteController;
 use App\Controllers\GiroController;
@@ -72,6 +73,14 @@ Route::middleware('auth:api')->prefix('lf-itse')->group(function (): void {
     Route::post('expedientes/{pk}/denegar-itse/', [ExpedienteController::class, 'denegarItse'])->whereNumber('pk');
     Route::get('expedientes/{pk}/autorizacion-improcedente', [ExpedienteController::class, 'autorizacionImprocedente'])->whereNumber('pk');
     Route::get('expedientes/{pk}/autorizacion-improcedente/', [ExpedienteController::class, 'autorizacionImprocedente'])->whereNumber('pk');
+    Route::get('expedientes/archivos/{uuid}/descargar', [ArchivoController::class, 'descargarExpediente'])->name('archivos.expedientes.descargar');
+    Route::get('expedientes/archivos/{uuid}/descargar/', [ArchivoController::class, 'descargarExpediente']);
+    Route::delete('expedientes/archivos/{pk}', [ArchivoController::class, 'eliminarExpediente'])->whereNumber('pk')->name('archivos.expedientes.eliminar');
+    Route::delete('expedientes/archivos/{pk}/', [ArchivoController::class, 'eliminarExpediente'])->whereNumber('pk');
+    Route::get('expedientes/{pk}/archivos', [ArchivoController::class, 'listarExpediente'])->whereNumber('pk')->name('archivos.expedientes.listar');
+    Route::get('expedientes/{pk}/archivos/', [ArchivoController::class, 'listarExpediente'])->whereNumber('pk');
+    Route::post('expedientes/{pk}/archivos', [ArchivoController::class, 'subirExpediente'])->whereNumber('pk')->name('archivos.expedientes.subir');
+    Route::post('expedientes/{pk}/archivos/', [ArchivoController::class, 'subirExpediente'])->whereNumber('pk');
 
     Route::get('expedientes', [ExpedienteController::class, 'index']);
     Route::get('expedientes/', [ExpedienteController::class, 'index']);
@@ -101,6 +110,14 @@ Route::middleware('auth:api')->prefix('lf-itse')->group(function (): void {
     Route::get('licencias-funcionamiento/{pk}/giros/', [LicenciaController::class, 'giros'])->whereNumber('pk');
     Route::match(['post', 'patch'], 'licencias-funcionamiento/{pk}/notificacion', [LicenciaController::class, 'notificar'])->whereNumber('pk');
     Route::match(['post', 'patch'], 'licencias-funcionamiento/{pk}/notificacion/', [LicenciaController::class, 'notificar'])->whereNumber('pk');
+    Route::get('licencias-funcionamiento/archivos/{uuid}/descargar', [ArchivoController::class, 'descargarLicencia'])->name('archivos.licencias.descargar');
+    Route::get('licencias-funcionamiento/archivos/{uuid}/descargar/', [ArchivoController::class, 'descargarLicencia']);
+    Route::delete('licencias-funcionamiento/archivos/{pk}', [ArchivoController::class, 'eliminarLicencia'])->whereNumber('pk')->name('archivos.licencias.eliminar');
+    Route::delete('licencias-funcionamiento/archivos/{pk}/', [ArchivoController::class, 'eliminarLicencia'])->whereNumber('pk');
+    Route::get('licencias-funcionamiento/{pk}/archivos', [ArchivoController::class, 'listarLicencia'])->whereNumber('pk')->name('archivos.licencias.listar');
+    Route::get('licencias-funcionamiento/{pk}/archivos/', [ArchivoController::class, 'listarLicencia'])->whereNumber('pk');
+    Route::post('licencias-funcionamiento/{pk}/archivos', [ArchivoController::class, 'subirLicencia'])->whereNumber('pk')->name('archivos.licencias.subir');
+    Route::post('licencias-funcionamiento/{pk}/archivos/', [ArchivoController::class, 'subirLicencia'])->whereNumber('pk');
 
     Route::post('licencias-funcionamiento', [LicenciaController::class, 'store']);
     Route::post('licencias-funcionamiento/', [LicenciaController::class, 'store']);
@@ -140,6 +157,14 @@ Route::middleware('auth:api')->prefix('lf-itse')->group(function (): void {
     Route::get('itse/{pk}/inspectores/', [ItseController::class, 'inspectores'])->whereNumber('pk');
     Route::post('itse/{pk}/inspectores', [ItseController::class, 'asignarInspector'])->whereNumber('pk');
     Route::post('itse/{pk}/inspectores/', [ItseController::class, 'asignarInspector'])->whereNumber('pk');
+    Route::get('itse/archivos/{uuid}/descargar', [ArchivoController::class, 'descargarItse'])->name('archivos.itse.descargar');
+    Route::get('itse/archivos/{uuid}/descargar/', [ArchivoController::class, 'descargarItse']);
+    Route::delete('itse/archivos/{pk}', [ArchivoController::class, 'eliminarItse'])->whereNumber('pk')->name('archivos.itse.eliminar');
+    Route::delete('itse/archivos/{pk}/', [ArchivoController::class, 'eliminarItse'])->whereNumber('pk');
+    Route::get('itse/{pk}/archivos', [ArchivoController::class, 'listarItse'])->whereNumber('pk')->name('archivos.itse.listar');
+    Route::get('itse/{pk}/archivos/', [ArchivoController::class, 'listarItse'])->whereNumber('pk');
+    Route::post('itse/{pk}/archivos', [ArchivoController::class, 'subirItse'])->whereNumber('pk')->name('archivos.itse.subir');
+    Route::post('itse/{pk}/archivos/', [ArchivoController::class, 'subirItse'])->whereNumber('pk');
 
     Route::get('usuarios/menus', [UsuarioController::class, 'menus']);
     Route::get('usuarios/menus/', [UsuarioController::class, 'menus']);

@@ -2,9 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Modules\Archivos\Infrastructure\Persistence\Models;
+namespace App\Models;
 
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $id
@@ -14,13 +17,17 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $ruta_archivo
  * @property string $extension
  * @property int $tamanio_bytes
- * @property \DateTimeInterface $fecha_digitacion
- * @property int $licencia_funcionamiento_id
+ * @property Carbon|string $fecha_digitacion
+ * @property int $expediente_id
  * @property int $usuario_id
+ * @property-read Expediente|null $expediente
+ * @property-read Usuario|null $usuario
+ *
+ * @method static Builder<static> query()
  */
-class LicenciaFuncionamientoArchivoModel extends Model
+class ExpedienteArchivo extends Model
 {
-    protected $table = 'licencias_funcionamiento_archivos';
+    protected $table = 'expedientes_archivos';
 
     public $timestamps = false;
 
@@ -33,7 +40,7 @@ class LicenciaFuncionamientoArchivoModel extends Model
         'extension',
         'tamanio_bytes',
         'fecha_digitacion',
-        'licencia_funcionamiento_id',
+        'expediente_id',
         'usuario_id',
     ];
 
@@ -44,14 +51,25 @@ class LicenciaFuncionamientoArchivoModel extends Model
     {
         return [
             'tamanio_bytes' => 'integer',
-            'licencia_funcionamiento_id' => 'integer',
+            'expediente_id' => 'integer',
             'usuario_id' => 'integer',
             'fecha_digitacion' => 'datetime',
         ];
     }
 
-    public function getDateFormat(): string
+    /**
+     * @return BelongsTo<Expediente, $this>
+     */
+    public function expediente(): BelongsTo
     {
-        return 'Y-m-d H:i:sP';
+        return $this->belongsTo(Expediente::class, 'expediente_id');
+    }
+
+    /**
+     * @return BelongsTo<Usuario, $this>
+     */
+    public function usuario(): BelongsTo
+    {
+        return $this->belongsTo(Usuario::class, 'usuario_id');
     }
 }

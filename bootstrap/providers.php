@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Modules\Archivos\Infrastructure\Providers\ArchivosServiceProvider;
 use App\Modules\Personas\Infrastructure\Providers\PersonasServiceProvider;
 use App\Modules\Pide\Infrastructure\Providers\PideServiceProvider;
 use App\Modules\Seguridad\Infrastructure\Providers\SeguridadServiceProvider;
@@ -12,6 +11,5 @@ return [
     PersonasServiceProvider::class,
     AppServiceProvider::class,
     PideServiceProvider::class,
-    ArchivosServiceProvider::class,
     SeguridadServiceProvider::class,
 ];
