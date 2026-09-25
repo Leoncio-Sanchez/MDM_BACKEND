@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Modules\Pide\Domain\Exceptions;
+namespace App\Exceptions\Pide;
 
 final class SunatError extends PideError
 {

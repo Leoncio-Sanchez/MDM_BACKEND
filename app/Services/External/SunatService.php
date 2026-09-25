@@ -2,24 +2,29 @@
 
 declare(strict_types=1);
 
-namespace App\Modules\Pide\Infrastructure\External;
+namespace App\Services\External;
 
-use App\Modules\Pide\Domain\Contracts\SunatClientInterface;
-use App\Modules\Pide\Domain\Exceptions\SunatError;
+use App\Exceptions\Pide\SunatError;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
 use InvalidArgumentException;
 use Throwable;
 
-final readonly class SunatHttpClient implements SunatClientInterface
+class SunatService
 {
     private const TIMEOUT = 10;
 
-    public function __construct(
-        private string $url,
-    ) {}
+    private string $url;
 
+    public function __construct(?string $url = null)
+    {
+        $this->url = $url ?? (string) config('services.sunat.url', 'https://ws3.pide.gob.pe/Rest/Sunat/DatosPrincipales');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
     public function consultarPorRuc(string $ruc): array
     {
         $ruc = trim($ruc);

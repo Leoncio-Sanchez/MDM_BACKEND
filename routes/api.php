@@ -11,6 +11,7 @@ use App\Controllers\ItseController;
 use App\Controllers\LicenciaController;
 use App\Controllers\NivelRiesgoController;
 use App\Controllers\PersonaController;
+use App\Controllers\PideController;
 use App\Controllers\TipoDocumentoIdentidadController;
 use App\Controllers\TipoLicenciaController;
 use App\Controllers\TipoProcedimientoTupaController;
@@ -70,6 +71,11 @@ Route::middleware('auth:api')->prefix('lf-itse')->group(function (): void {
     Route::put('personas/{pk}/', [PersonaController::class, 'update'])->whereNumber('pk');
     Route::delete('personas/{pk}', [PersonaController::class, 'destroy'])->whereNumber('pk');
     Route::delete('personas/{pk}/', [PersonaController::class, 'destroy'])->whereNumber('pk');
+
+    Route::get('reniec/consultar', [PideController::class, 'reniec'])->name('pide.reniec.consultar');
+    Route::get('reniec/consultar/', [PideController::class, 'reniec']);
+    Route::get('sunat/consultar', [PideController::class, 'sunat'])->name('pide.sunat.consultar');
+    Route::get('sunat/consultar/', [PideController::class, 'sunat']);
 
     Route::get('inspectores/buscar', [InspectorController::class, 'buscar']);
     Route::get('inspectores/buscar/', [InspectorController::class, 'buscar']);

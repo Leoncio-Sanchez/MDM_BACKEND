@@ -2,26 +2,44 @@
 
 declare(strict_types=1);
 
-namespace App\Modules\Pide\Infrastructure\External;
+namespace App\Services\External;
 
-use App\Modules\Pide\Domain\Contracts\ReniecClientInterface;
-use App\Modules\Pide\Domain\Exceptions\ReniecError;
+use App\Exceptions\Pide\ReniecError;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
 use InvalidArgumentException;
 use Throwable;
 
-final readonly class ReniecHttpClient implements ReniecClientInterface
+class ReniecService
 {
-    public function __construct(
-        private string $url,
-        private string $dniUsuario,
-        private string $rucUsuario,
-        private string $password,
-        private int $timeout,
-    ) {}
+    private string $url;
 
+    private string $dniUsuario;
+
+    private string $rucUsuario;
+
+    private string $password;
+
+    private int $timeout;
+
+    public function __construct(
+        ?string $url = null,
+        ?string $dniUsuario = null,
+        ?string $rucUsuario = null,
+        ?string $password = null,
+        ?int $timeout = null,
+    ) {
+        $this->url = $url ?? (string) config('services.reniec.url', 'https://ws2.pide.gob.pe/Rest/RENIEC/Consultar');
+        $this->dniUsuario = $dniUsuario ?? (string) config('services.reniec.dni_usuario', '');
+        $this->rucUsuario = $rucUsuario ?? (string) config('services.reniec.ruc_usuario', '');
+        $this->password = $password ?? (string) config('services.reniec.password', '');
+        $this->timeout = $timeout ?? (int) config('services.reniec.timeout', 10);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
     public function consultarPorDni(string $dni): array
     {
         $dni = trim($dni);

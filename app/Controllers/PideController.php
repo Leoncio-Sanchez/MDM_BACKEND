@@ -2,29 +2,28 @@
 
 declare(strict_types=1);
 
-namespace App\Modules\Pide\Presentation\Controllers;
+namespace App\Controllers;
 
-use App\Modules\Pide\Application\DTOs\ConsultaReniecDTO;
-use App\Modules\Pide\Application\DTOs\ConsultaSunatDTO;
-use App\Modules\Pide\Application\UseCases\ConsultarReniecUseCase;
-use App\Modules\Pide\Application\UseCases\ConsultarSunatUseCase;
-use App\Modules\Pide\Domain\Exceptions\ReniecError;
-use App\Modules\Pide\Domain\Exceptions\SunatError;
+use App\Exceptions\Pide\ReniecError;
+use App\Exceptions\Pide\SunatError;
+use App\Requests\Pide\ConsultarReniecRequest;
+use App\Requests\Pide\ConsultarSunatRequest;
+use App\Services\External\ReniecService;
+use App\Services\External\SunatService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use InvalidArgumentException;
 use Throwable;
 
-final readonly class PideController
+final class PideController
 {
     public function __construct(
-        private ConsultarReniecUseCase $consultarReniec,
-        private ConsultarSunatUseCase $consultarSunat,
+        private readonly ReniecService $reniecService,
+        private readonly SunatService $sunatService,
     ) {}
 
-    public function reniec(Request $request): JsonResponse
+    public function reniec(ConsultarReniecRequest $request): JsonResponse
     {
-        $dni = (string) $request->query('dni', '');
+        $dni = trim((string) ($request->query('dni') ?? $request->input('dni', '')));
 
         if ($dni === '') {
             return response()->json(
@@ -34,9 +33,9 @@ final readonly class PideController
         }
 
         try {
-            $resultado = $this->consultarReniec->execute(
-                ConsultaReniecDTO::fromArray(['dni' => $dni]),
-            );
+            $resultado = $this->reniecService->consultarPorDni($dni);
+
+            return response()->json($resultado, 200);
         } catch (InvalidArgumentException $e) {
             return response()->json(['error' => $e->getMessage()], 400);
         } catch (ReniecError $e) {
@@ -46,13 +45,11 @@ final readonly class PideController
 
             return response()->json(['error' => $e->getMessage()], 500);
         }
-
-        return response()->json($resultado, 200);
     }
 
-    public function sunat(Request $request): JsonResponse
+    public function sunat(ConsultarSunatRequest $request): JsonResponse
     {
-        $ruc = (string) $request->query('ruc', '');
+        $ruc = trim((string) ($request->query('ruc') ?? $request->input('ruc', '')));
 
         if ($ruc === '') {
             return response()->json(
@@ -62,9 +59,9 @@ final readonly class PideController
         }
 
         try {
-            $resultado = $this->consultarSunat->execute(
-                ConsultaSunatDTO::fromArray(['ruc' => $ruc]),
-            );
+            $resultado = $this->sunatService->consultarPorRuc($ruc);
+
+            return response()->json($resultado, 200);
         } catch (InvalidArgumentException $e) {
             return response()->json(['error' => $e->getMessage()], 400);
         } catch (SunatError $e) {
@@ -74,7 +71,5 @@ final readonly class PideController
 
             return response()->json(['error' => $e->getMessage()], 500);
         }
-
-        return response()->json($resultado, 200);
     }
 }
