@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Models;
@@ -13,10 +14,11 @@ class User extends Authenticatable implements JWTSubject
     use HasFactory, Notifiable;
 
     protected $table = 'auth_user';
+
     public $timestamps = false;
 
     protected $fillable = [
-        'name', 'username', 'role', 'ruc', 'email', 'password'
+        'name', 'username', 'role', 'ruc', 'email', 'password',
     ];
 
     protected $hidden = [
@@ -39,12 +41,12 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims(): array
     {
         return [
-            "id" => $this->id,
-            "user_id" => (string)$this->id,
-            "username" => $this->username,
-            "role" => $this->role,
-            "ruc" => $this->ruc,
-            "token_type" => "access"
+            'id' => $this->id,
+            'user_id' => (string) $this->id,
+            'username' => $this->username,
+            'role' => $this->role,
+            'ruc' => $this->ruc,
+            'token_type' => 'access',
         ];
     }
 }
