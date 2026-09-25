@@ -7,7 +7,7 @@ namespace Tests\Feature;
 use App\Models\UnidadOrganica;
 use App\Modules\Seguridad\Domain\Contracts\TokenServiceInterface;
 use App\Modules\Seguridad\Domain\ValueObjects\AuthenticatedUser;
-use App\Modules\Usuarios\Infrastructure\Persistence\Models\UsuarioModel;
+use App\Models\Usuario as UsuarioModel;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;

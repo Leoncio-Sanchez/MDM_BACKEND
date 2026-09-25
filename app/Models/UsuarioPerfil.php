@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Modules\Usuarios\Infrastructure\Persistence\Models;
+namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -14,10 +15,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property bool $licencias
  * @property bool $itse
  * @property bool $admin
- * @property int $user_id_digitador
- * @property string $fecha_digitacion
+ * @property int|null $user_id_digitador
+ * @property Carbon|null $fecha_digitacion
+ * @property-read Usuario $usuario
+ *
+ * @method static UsuarioPerfil create(array<string, mixed> $attributes = [])
+ * @method static UsuarioPerfil findOrFail(mixed $id, array<string> $columns = ['*'])
  */
-final class UsuarioPerfilModel extends Model
+class UsuarioPerfil extends Model
 {
     protected $table = 'usuarios_perfiles';
 
@@ -43,14 +48,15 @@ final class UsuarioPerfilModel extends Model
             'itse' => 'boolean',
             'admin' => 'boolean',
             'user_id_digitador' => 'integer',
+            'fecha_digitacion' => 'datetime',
         ];
     }
 
     /**
-     * @return BelongsTo<UsuarioModel, $this>
+     * @return BelongsTo<Usuario, $this>
      */
     public function usuario(): BelongsTo
     {
-        return $this->belongsTo(UsuarioModel::class, 'user_id');
+        return $this->belongsTo(Usuario::class, 'user_id');
     }
 }

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Inspectores\Application\UseCases;
 
 use App\Modules\Inspectores\Domain\Contracts\InspectorRepositoryInterface;
-use App\Modules\Usuarios\Infrastructure\Persistence\Models\UsuarioModel;
+use App\Models\Usuario as UsuarioModel;
 
 final readonly class ListarInspectoresUseCase
 {

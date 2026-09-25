@@ -10,7 +10,7 @@ use App\Modules\Inspectores\Application\UseCases\CrearInspectorUseCase;
 use App\Modules\Inspectores\Application\UseCases\EliminarInspectorUseCase;
 use App\Modules\Inspectores\Application\UseCases\ListarInspectoresUseCase;
 use App\Modules\Inspectores\Application\UseCases\ObtenerInspectorUseCase;
-use App\Modules\Usuarios\Presentation\Resources\UsuarioResource;
+use App\Resources\UsuarioResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 

@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace App\Modules\Usuarios\Tests\Feature;
+namespace Tests\Feature;
 
+use App\Models\Usuario;
+use App\Models\UsuarioPerfil;
 use App\Modules\Seguridad\Domain\Contracts\TokenServiceInterface;
 use App\Modules\Seguridad\Domain\ValueObjects\AuthenticatedUser;
-use App\Modules\Usuarios\Infrastructure\Persistence\Models\UsuarioModel;
-use App\Modules\Usuarios\Infrastructure\Persistence\Models\UsuarioPerfilModel;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
-final class UsuarioApiTest extends TestCase
+final class UsuarioControllerTest extends TestCase
 {
     private string $token;
 
-    private UsuarioModel $adminUser;
+    private Usuario $adminUser;
 
     protected function setUp(): void
     {
@@ -51,10 +51,10 @@ final class UsuarioApiTest extends TestCase
             });
         }
 
-        UsuarioPerfilModel::truncate();
-        UsuarioModel::truncate();
+        UsuarioPerfil::truncate();
+        Usuario::truncate();
 
-        $this->adminUser = UsuarioModel::create([
+        $this->adminUser = Usuario::create([
             'id' => 1,
             'username' => 'admin',
             'password' => 'somehash',
@@ -64,9 +64,10 @@ final class UsuarioApiTest extends TestCase
             'is_superuser' => true,
             'is_staff' => true,
             'is_active' => true,
+            'date_joined' => '2026-04-24 13:48:01.415596',
         ]);
 
-        UsuarioPerfilModel::create([
+        UsuarioPerfil::create([
             'user_id' => 1,
             'expedientes' => true,
             'licencias' => true,
@@ -92,7 +93,7 @@ final class UsuarioApiTest extends TestCase
     public function test_listar_usuarios_devuelve_200_con_array(): void
     {
         $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
-            ->getJson('/api/lf-itse/usuarios/');
+            ->getJson('/api/lf-itse/usuarios');
 
         $response->assertStatus(200);
         $this->assertIsArray($response->json());
@@ -104,7 +105,7 @@ final class UsuarioApiTest extends TestCase
     public function test_crear_usuario_devuelve_201_y_hashea_password(): void
     {
         $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
-            ->postJson('/api/lf-itse/usuarios/', [
+            ->postJson('/api/lf-itse/usuarios', [
                 'username' => 'nuevo_usuario',
                 'password' => 'clave123',
                 'first_name' => 'Juan',
@@ -123,7 +124,7 @@ final class UsuarioApiTest extends TestCase
         $this->assertTrue($response->json('perfil.expedientes'));
         $this->assertFalse($response->json('perfil.licencias'));
 
-        $created = UsuarioModel::where('username', 'nuevo_usuario')->first();
+        $created = Usuario::where('username', 'nuevo_usuario')->first();
         $this->assertNotNull($created);
         $this->assertStringStartsWith('pbkdf2_sha256$', $created->password);
     }
@@ -131,7 +132,7 @@ final class UsuarioApiTest extends TestCase
     public function test_obtener_detalle_usuario_devuelve_200(): void
     {
         $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
-            ->getJson('/api/lf-itse/usuarios/1/detalle/');
+            ->getJson('/api/lf-itse/usuarios/1/detalle');
 
         $response->assertStatus(200);
         $this->assertSame('admin', $response->json('username'));
@@ -141,7 +142,7 @@ final class UsuarioApiTest extends TestCase
     public function test_actualizar_usuario_modifica_datos_y_perfil(): void
     {
         $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
-            ->putJson('/api/lf-itse/usuarios/1/', [
+            ->putJson('/api/lf-itse/usuarios/1', [
                 'first_name' => 'Administrador',
                 'last_name' => 'Principal',
                 'email' => 'admin_nuevo@muni.gob.pe',
@@ -160,14 +161,14 @@ final class UsuarioApiTest extends TestCase
 
     public function test_eliminar_usuario_desactiva_logicamente_con_204(): void
     {
-        $target = UsuarioModel::create([
+        $target = Usuario::create([
             'username' => 'para_eliminar',
             'password' => 'somehash',
             'is_active' => true,
         ]);
 
         $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
-            ->deleteJson('/api/lf-itse/usuarios/'.$target->id.'/');
+            ->deleteJson('/api/lf-itse/usuarios/'.$target->id);
 
         $response->assertStatus(204);
 
@@ -178,7 +179,7 @@ final class UsuarioApiTest extends TestCase
     public function test_cambiar_password_con_pbkdf2(): void
     {
         $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
-            ->patchJson('/api/lf-itse/usuarios/1/cambiar-password/', [
+            ->patchJson('/api/lf-itse/usuarios/1/cambiar-password', [
                 'password' => 'nuevaPassword123',
                 'password_confirm' => 'nuevaPassword123',
             ]);
@@ -193,7 +194,7 @@ final class UsuarioApiTest extends TestCase
     public function test_cambiar_password_valida_longitud_minima(): void
     {
         $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
-            ->patchJson('/api/lf-itse/usuarios/1/cambiar-password/', [
+            ->patchJson('/api/lf-itse/usuarios/1/cambiar-password', [
                 'password' => '123',
                 'password_confirm' => '123',
             ]);
@@ -205,7 +206,7 @@ final class UsuarioApiTest extends TestCase
     public function test_obtener_menus_usuario_devuelve_estructura_completa(): void
     {
         $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
-            ->getJson('/api/lf-itse/usuarios/menus/');
+            ->getJson('/api/lf-itse/usuarios/menus');
 
         $response->assertStatus(200);
         $menus = $response->json();
@@ -219,5 +220,22 @@ final class UsuarioApiTest extends TestCase
         $this->assertContains('reportes', $ids);
         $this->assertContains('catalogos', $ids);
         $this->assertContains('usuarios', $ids);
+    }
+
+    public function test_nombre_completo_con_fallback_a_username(): void
+    {
+        $u = Usuario::create([
+            'username' => 'sin_nombre',
+            'password' => 'pass',
+            'first_name' => '',
+            'last_name' => '',
+            'is_active' => true,
+        ]);
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
+            ->getJson('/api/lf-itse/usuarios/'.$u->id);
+
+        $response->assertStatus(200);
+        $this->assertSame('sin_nombre', $response->json('nombre_completo'));
     }
 }

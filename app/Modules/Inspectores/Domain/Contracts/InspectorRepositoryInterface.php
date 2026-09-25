@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Inspectores\Domain\Contracts;
 
-use App\Modules\Usuarios\Infrastructure\Persistence\Models\UsuarioModel;
+use App\Models\Usuario as UsuarioModel;
 
 interface InspectorRepositoryInterface
 {

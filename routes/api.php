@@ -9,6 +9,7 @@ use App\Controllers\TipoDocumentoIdentidadController;
 use App\Controllers\TipoLicenciaController;
 use App\Controllers\TipoProcedimientoTupaController;
 use App\Controllers\UnidadOrganicaController;
+use App\Controllers\UsuarioController;
 use App\Controllers\ZonificacionController;
 use Illuminate\Support\Facades\Route;
 
@@ -45,4 +46,14 @@ Route::middleware('auth:api')->prefix('lf-itse')->group(function (): void {
     ]);
     Route::get('unidades-organicas', [UnidadOrganicaController::class, 'index']);
     Route::get('unidades-organicas/', [UnidadOrganicaController::class, 'index']);
+
+    Route::get('usuarios/menus', [UsuarioController::class, 'menus']);
+    Route::get('usuarios/menus/', [UsuarioController::class, 'menus']);
+    Route::get('usuarios/{pk}/detalle', [UsuarioController::class, 'detalle'])->whereNumber('pk');
+    Route::get('usuarios/{pk}/detalle/', [UsuarioController::class, 'detalle'])->whereNumber('pk');
+    Route::patch('usuarios/{pk}/cambiar-password', [UsuarioController::class, 'cambiarPassword'])->whereNumber('pk');
+    Route::patch('usuarios/{pk}/cambiar-password/', [UsuarioController::class, 'cambiarPassword'])->whereNumber('pk');
+    Route::apiResource('usuarios', UsuarioController::class)->parameters([
+        'usuarios' => 'pk',
+    ]);
 });
