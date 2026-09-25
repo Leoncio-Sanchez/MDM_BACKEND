@@ -10,6 +10,7 @@ use App\Controllers\InspectorController;
 use App\Controllers\ItseController;
 use App\Controllers\LicenciaController;
 use App\Controllers\NivelRiesgoController;
+use App\Controllers\PersonaController;
 use App\Controllers\TipoDocumentoIdentidadController;
 use App\Controllers\TipoLicenciaController;
 use App\Controllers\TipoProcedimientoTupaController;
@@ -51,6 +52,24 @@ Route::middleware('auth:api')->prefix('lf-itse')->group(function (): void {
     ]);
     Route::get('unidades-organicas', [UnidadOrganicaController::class, 'index']);
     Route::get('unidades-organicas/', [UnidadOrganicaController::class, 'index']);
+
+    Route::get('personas/buscar', [PersonaController::class, 'buscar']);
+    Route::get('personas/buscar/', [PersonaController::class, 'buscar']);
+    Route::get('personas/sexos', [PersonaController::class, 'sexos']);
+    Route::get('personas/sexos/', [PersonaController::class, 'sexos']);
+    Route::get('personas/{pk}/documentos', [PersonaController::class, 'documentos'])->whereNumber('pk');
+    Route::get('personas/{pk}/documentos/', [PersonaController::class, 'documentos'])->whereNumber('pk');
+
+    Route::get('personas', [PersonaController::class, 'index']);
+    Route::get('personas/', [PersonaController::class, 'index']);
+    Route::post('personas', [PersonaController::class, 'store']);
+    Route::post('personas/', [PersonaController::class, 'store']);
+    Route::get('personas/{pk}', [PersonaController::class, 'show'])->whereNumber('pk');
+    Route::get('personas/{pk}/', [PersonaController::class, 'show'])->whereNumber('pk');
+    Route::put('personas/{pk}', [PersonaController::class, 'update'])->whereNumber('pk');
+    Route::put('personas/{pk}/', [PersonaController::class, 'update'])->whereNumber('pk');
+    Route::delete('personas/{pk}', [PersonaController::class, 'destroy'])->whereNumber('pk');
+    Route::delete('personas/{pk}/', [PersonaController::class, 'destroy'])->whereNumber('pk');
 
     Route::get('inspectores/buscar', [InspectorController::class, 'buscar']);
     Route::get('inspectores/buscar/', [InspectorController::class, 'buscar']);
