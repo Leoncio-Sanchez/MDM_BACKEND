@@ -2,21 +2,26 @@
 
 declare(strict_types=1);
 
-namespace App\Modules\Inspectores\Infrastructure\Persistence\Repositories;
+namespace App\Services;
 
-use App\Modules\Inspectores\Domain\Contracts\InspectorRepositoryInterface;
-use App\Models\Usuario as UsuarioModel;
+use App\Models\Usuario;
+use App\Modules\Seguridad\Domain\Contracts\PasswordHasherInterface;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
-final class EloquentInspectorRepository implements InspectorRepositoryInterface
+class InspectorService
 {
+    public function __construct(
+        private readonly PasswordHasherInterface $hasher,
+    ) {}
+
     /**
-     * @return array<int, UsuarioModel>
+     * @return Collection<int, Usuario>
      */
-    public function listar(?string $busqueda = null): array
+    public function listar(?string $busqueda = null): Collection
     {
-        $query = UsuarioModel::with('perfil')
+        $query = Usuario::with('perfil')
             ->where('is_active', true)
             ->orderBy('username', 'asc');
 
@@ -30,23 +35,36 @@ final class EloquentInspectorRepository implements InspectorRepositoryInterface
             });
         }
 
-        return $query->get()->all();
+        return $query->get();
     }
 
-    public function buscarPorId(int $id): ?UsuarioModel
+    /**
+     * @return Collection<int, Usuario>
+     */
+    public function buscar(?string $busqueda = null): Collection
     {
-        return UsuarioModel::with('perfil')->find($id);
+        return $this->listar($busqueda);
+    }
+
+    public function obtenerPorId(int $id): ?Usuario
+    {
+        return Usuario::with('perfil')->find($id);
     }
 
     /**
      * @param  array<string, mixed>  $datos
      */
-    public function crear(array $datos): UsuarioModel
+    public function crear(array $datos): Usuario
     {
-        return DB::transaction(function () use ($datos): UsuarioModel {
-            $user = new UsuarioModel;
+        return DB::transaction(function () use ($datos): Usuario {
+            $user = new Usuario;
             $user->username = (string) $datos['username'];
-            $user->password = (string) ($datos['password'] ?? '');
+            $password = (string) ($datos['password'] ?? '');
+            if ($password !== '') {
+                $user->password = $this->hasher->hash($password);
+            } else {
+                $user->password = '';
+            }
             $user->first_name = (string) ($datos['first_name'] ?? '');
             $user->last_name = (string) ($datos['last_name'] ?? '');
             $user->email = (string) ($datos['email'] ?? '');
@@ -65,9 +83,9 @@ final class EloquentInspectorRepository implements InspectorRepositoryInterface
     /**
      * @param  array<string, mixed>  $datos
      */
-    public function actualizar(int $id, array $datos): ?UsuarioModel
+    public function actualizar(int $id, array $datos): ?Usuario
     {
-        $user = UsuarioModel::with('perfil')->find($id);
+        $user = Usuario::with('perfil')->find($id);
         if (! $user) {
             return null;
         }
@@ -91,7 +109,7 @@ final class EloquentInspectorRepository implements InspectorRepositoryInterface
 
     public function eliminar(int $id): bool
     {
-        $user = UsuarioModel::find($id);
+        $user = Usuario::find($id);
         if (! $user) {
             return false;
         }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Controllers\EstadoController;
 use App\Controllers\GiroController;
+use App\Controllers\InspectorController;
 use App\Controllers\NivelRiesgoController;
 use App\Controllers\TipoDocumentoIdentidadController;
 use App\Controllers\TipoLicenciaController;
@@ -46,6 +47,12 @@ Route::middleware('auth:api')->prefix('lf-itse')->group(function (): void {
     ]);
     Route::get('unidades-organicas', [UnidadOrganicaController::class, 'index']);
     Route::get('unidades-organicas/', [UnidadOrganicaController::class, 'index']);
+
+    Route::get('inspectores/buscar', [InspectorController::class, 'buscar']);
+    Route::get('inspectores/buscar/', [InspectorController::class, 'buscar']);
+    Route::apiResource('inspectores', InspectorController::class)->parameters([
+        'inspectores' => 'pk',
+    ]);
 
     Route::get('usuarios/menus', [UsuarioController::class, 'menus']);
     Route::get('usuarios/menus/', [UsuarioController::class, 'menus']);

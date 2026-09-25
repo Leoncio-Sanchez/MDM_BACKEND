@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Modules\Archivos\Infrastructure\Providers\ArchivosServiceProvider;
 use App\Modules\Expedientes\Infrastructure\Providers\ExpedienteServiceProvider;
-use App\Modules\Inspectores\Infrastructure\Providers\InspectoresServiceProvider;
 use App\Modules\ITSE\Infrastructure\Providers\ItseServiceProvider;
 use App\Modules\Licencias\Infrastructure\Providers\LicenciasServiceProvider;
 use App\Modules\Personas\Infrastructure\Providers\PersonasServiceProvider;
@@ -21,5 +20,4 @@ return [
     PideServiceProvider::class,
     ArchivosServiceProvider::class,
     SeguridadServiceProvider::class,
-    InspectoresServiceProvider::class,
 ];
