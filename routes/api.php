@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Controllers\EstadoController;
+use App\Controllers\ExpedienteController;
 use App\Controllers\GiroController;
 use App\Controllers\InspectorController;
 use App\Controllers\ItseController;
@@ -55,6 +56,33 @@ Route::middleware('auth:api')->prefix('lf-itse')->group(function (): void {
     Route::apiResource('inspectores', InspectorController::class)->parameters([
         'inspectores' => 'pk',
     ]);
+
+    Route::get('expedientes/pendientes', [ExpedienteController::class, 'pendientes']);
+    Route::get('expedientes/pendientes/', [ExpedienteController::class, 'pendientes']);
+    Route::get('expedientes/buscar', [ExpedienteController::class, 'buscar']);
+    Route::get('expedientes/buscar/', [ExpedienteController::class, 'buscar']);
+    Route::get('expedientes/consulta', [ExpedienteController::class, 'consulta']);
+    Route::get('expedientes/consulta/', [ExpedienteController::class, 'consulta']);
+
+    Route::post('expedientes/{pk}/ampliacion-plazo', [ExpedienteController::class, 'ampliarPlazo'])->whereNumber('pk');
+    Route::post('expedientes/{pk}/ampliacion-plazo/', [ExpedienteController::class, 'ampliarPlazo'])->whereNumber('pk');
+    Route::post('expedientes/{pk}/denegar-licencia', [ExpedienteController::class, 'denegarLicencia'])->whereNumber('pk');
+    Route::post('expedientes/{pk}/denegar-licencia/', [ExpedienteController::class, 'denegarLicencia'])->whereNumber('pk');
+    Route::post('expedientes/{pk}/denegar-itse', [ExpedienteController::class, 'denegarItse'])->whereNumber('pk');
+    Route::post('expedientes/{pk}/denegar-itse/', [ExpedienteController::class, 'denegarItse'])->whereNumber('pk');
+    Route::get('expedientes/{pk}/autorizacion-improcedente', [ExpedienteController::class, 'autorizacionImprocedente'])->whereNumber('pk');
+    Route::get('expedientes/{pk}/autorizacion-improcedente/', [ExpedienteController::class, 'autorizacionImprocedente'])->whereNumber('pk');
+
+    Route::get('expedientes', [ExpedienteController::class, 'index']);
+    Route::get('expedientes/', [ExpedienteController::class, 'index']);
+    Route::post('expedientes', [ExpedienteController::class, 'store']);
+    Route::post('expedientes/', [ExpedienteController::class, 'store']);
+    Route::get('expedientes/{pk}', [ExpedienteController::class, 'show'])->whereNumber('pk');
+    Route::get('expedientes/{pk}/', [ExpedienteController::class, 'show'])->whereNumber('pk');
+    Route::put('expedientes/{pk}', [ExpedienteController::class, 'update'])->whereNumber('pk');
+    Route::put('expedientes/{pk}/', [ExpedienteController::class, 'update'])->whereNumber('pk');
+    Route::delete('expedientes/{pk}', [ExpedienteController::class, 'destroy'])->whereNumber('pk');
+    Route::delete('expedientes/{pk}/', [ExpedienteController::class, 'destroy'])->whereNumber('pk');
 
     Route::get('licencias-funcionamiento/consulta', [LicenciaController::class, 'consulta']);
     Route::get('licencias-funcionamiento/consulta/', [LicenciaController::class, 'consulta']);
