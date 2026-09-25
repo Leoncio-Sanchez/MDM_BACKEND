@@ -3,12 +3,9 @@ includes:
 
 parameters:
     paths:
-        - app/Controllers
-        - app/Services
-        - app/Requests
-        - app/Resources
-        - app/Exceptions
-        - app/Models
+        - app
     excludePaths:
         - app/Models/User.php
+        - app/Auth
+        - app/Shared/Infrastructure/Concerns/ReadOnlyTrait.php
     level: 8

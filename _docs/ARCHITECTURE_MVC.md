@@ -98,3 +98,5 @@ flowchart LR
 ## 5. Conclusión
 
 El refactor redujo el tamaño del proyecto en más de un **80% de archivos** y más de **11,400 líneas netas de código**, aumentando drásticamente la legibilidad, la velocidad de ejecución y la facilidad de mantenimiento sin introducir regresiones ni alterar el contrato HTTP con los clientes frontend.
+
+

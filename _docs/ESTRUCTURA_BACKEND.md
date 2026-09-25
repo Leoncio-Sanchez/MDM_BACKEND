@@ -274,3 +274,5 @@ Cada uno de los 17 módulos en `app/Modules/<Nombre>/` sigue una separación est
    - Pruebas directas de integración entre el frontend Vue y el backend Laravel con base de datos compartida.
 3. **FASE 11 — Despliegue en IIS (Entorno de Producción):**
    - Configuración de URL Rewrite, FastCGI PHP 8.5 en Windows Server / IIS y pruebas de rendimiento.
+
+
