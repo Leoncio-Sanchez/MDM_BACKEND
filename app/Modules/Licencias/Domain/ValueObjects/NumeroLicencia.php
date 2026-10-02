@@ -15,6 +15,11 @@ final readonly class NumeroLicencia
         return new self($value);
     }
 
+    public function toInt(): int
+    {
+        return $this->value;
+    }
+
     public function equals(self $other): bool
     {
         return $this->value === $other->value;

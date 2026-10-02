@@ -7,7 +7,7 @@ use Carbon\CarbonImmutable;
 final readonly class CrearLicenciaDTO
 {
     public function __construct(
-        public int $numeroLicencia,
+        public int|string $numeroLicencia,
         public string $nombreComercial,
         public int $tipoLicenciaId,
         public int $titularId,
@@ -39,11 +39,11 @@ final readonly class CrearLicenciaDTO
             numeroLicencia: (int) $data['numero_licencia'],
             nombreComercial: (string) $data['nombre_comercial'],
             tipoLicenciaId: (int) $data['tipo_licencia_id'],
-            titularId: (int) $data['titular_id'],
-            conductorId: (int) $data['conductor_id'],
-            expedienteId: (int) $data['expediente_id'],
-            nivelRiesgoId: (int) $data['nivel_riesgo_id'],
-            zonificacionId: (int) $data['zonificacion_id'],
+            titularId: (int) ($data['titular_id'] ?? 0),
+            conductorId: (int) ($data['conductor_id'] ?? $data['titular_id'] ?? 0),
+            expedienteId: (int) ($data['expediente_id'] ?? 0),
+            nivelRiesgoId: (int) ($data['nivel_riesgo_id'] ?? 0),
+            zonificacionId: (int) ($data['zonificacion_id'] ?? 0),
             licenciaPrincipalId: isset($data['licencia_principal_id']) ? (int) $data['licencia_principal_id'] : null,
             esVigenciaIndeterminada: (bool) ($data['es_vigencia_indeterminada'] ?? true),
             fechaInicioVigencia: !empty($data['fecha_inicio_vigencia']) ? CarbonImmutable::parse($data['fecha_inicio_vigencia']) : null,

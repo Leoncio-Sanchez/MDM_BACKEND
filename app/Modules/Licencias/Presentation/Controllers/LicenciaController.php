@@ -7,7 +7,6 @@ namespace App\Modules\Licencias\Presentation\Controllers;
 use App\Modules\Licencias\Application\DTOs\BuscarLicenciasDTO;
 use App\Modules\Licencias\Application\DTOs\ConsultaLicenciasDTO;
 use App\Modules\Licencias\Application\DTOs\CrearLicenciaDTO;
-use App\Modules\Licencias\Application\DTOs\EliminarLicenciaDTO;
 use App\Modules\Licencias\Application\DTOs\InactivarLicenciaDTO;
 use App\Modules\Licencias\Application\DTOs\ListarEstadosDTO;
 use App\Modules\Licencias\Application\DTOs\ModificarLicenciaDTO;
@@ -100,7 +99,7 @@ class LicenciaController
 
     public function destroy(int $pk): JsonResponse
     {
-        $this->eliminar->execute(new EliminarLicenciaDTO($pk));
+        $this->eliminar->execute($pk);
 
         return new JsonResponse(null, 204);
     }

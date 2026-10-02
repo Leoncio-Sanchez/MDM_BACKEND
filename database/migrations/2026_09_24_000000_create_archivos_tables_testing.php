@@ -10,7 +10,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (app()->environment('testing')) {
+        if (app()->environment(['testing', 'local'])) {
             if (! Schema::hasTable('expedientes_archivos')) {
                 Schema::create('expedientes_archivos', function (Blueprint $table) {
                     $table->id();

@@ -11,12 +11,12 @@ use App\Modules\TipoDocumentoIdentidad\Infrastructure\Persistence\Models\TipoDoc
 class EloquentTipoDocumentoIdentidadRepository implements TipoDocumentoIdentidadRepositoryInterface
 {
     /** @return TipoDocumentoIdentidad[] */
-    public function obtenerTodos(string $tipoPersona): array
+    public function obtenerTodos(?string $tipoPersona = null): array
     {
         $query = TipoDocumentoIdentidadModel::query();
         if ($tipoPersona === 'N') {
             $query->where('es_para_natural', true);
-        } else {
+        } elseif ($tipoPersona === 'J') {
             $query->where('es_para_juridica', true);
         }
 

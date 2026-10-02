@@ -28,14 +28,11 @@ class TipoDocumentoIdentidadController
     public function index(Request $request): JsonResponse
     {
         $tipoPersona = $request->query('tipo_persona');
-        if ($tipoPersona === null || $tipoPersona === '') {
-            return new JsonResponse(['error' => "El parámetro 'tipo_persona' es obligatorio."], 400);
-        }
-        if (! in_array($tipoPersona, ['N', 'J'], true)) {
+        if ($tipoPersona !== null && $tipoPersona !== '' && ! in_array($tipoPersona, ['N', 'J'], true)) {
             return new JsonResponse(['error' => "tipo_persona '{$tipoPersona}' no válido. Opciones: N (natural), J (jurídica)."], 400);
         }
 
-        $items = $this->listar->execute($tipoPersona);
+        $items = $this->listar->execute($tipoPersona ?: null);
 
         return new JsonResponse(TipoDocumentoIdentidadResource::collection($items));
     }

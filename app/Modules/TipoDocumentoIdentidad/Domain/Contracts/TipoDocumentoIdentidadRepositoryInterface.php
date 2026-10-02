@@ -9,7 +9,7 @@ use App\Modules\TipoDocumentoIdentidad\Domain\Entities\TipoDocumentoIdentidad;
 interface TipoDocumentoIdentidadRepositoryInterface
 {
     /** @return TipoDocumentoIdentidad[] */
-    public function obtenerTodos(string $tipoPersona): array;
+    public function obtenerTodos(?string $tipoPersona = null): array;
 
     public function buscarPorId(int $id): ?TipoDocumentoIdentidad;
 

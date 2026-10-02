@@ -4,25 +4,41 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use App\Modules\Estados\Infrastructure\Persistence\Models\EstadoModel;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Usuario para pruebas de API
-        User::create([
-            'name' => 'Admin User',
-            'email' => 'admin',
-            'password' => Hash::make('admin'),
-        ]);
+        // Usuario administrador inicial compatible con Django
+        $hasher = new \App\Modules\Seguridad\Infrastructure\Hashing\DjangoPbkdf2Hasher();
+        DB::table('auth_user')->updateOrInsert(
+            ['id' => 1],
+            [
+                'username' => 'admin',
+                'email' => 'admin@muni.gob.pe',
+                'password' => $hasher->hash('admin123'),
+                'role' => 'admin',
+                'is_active' => true,
+                'is_staff' => true,
+                'is_superuser' => true,
+            ]
+        );
 
-        // Estados mock
-        EstadoModel::create(['nombre' => 'Registrado', 'es_para_lf' => true, 'es_para_itse' => true, 'esta_activo' => true]);
-        EstadoModel::create(['nombre' => 'En Proceso', 'es_para_lf' => true, 'es_para_itse' => true, 'esta_activo' => true]);
-        EstadoModel::create(['nombre' => 'Observado', 'es_para_lf' => true, 'es_para_itse' => false, 'esta_activo' => false]);
+        if (DB::table('usuarios_perfiles')->where('user_id', 1)->doesntExist()) {
+            DB::table('usuarios_perfiles')->insert([
+                'user_id' => 1,
+                'es_inspector' => false,
+                'cargo' => 'Administrador General',
+                'es_administrador' => true,
+                'acceso_licencias' => true,
+                'acceso_itse' => true,
+                'acceso_expedientes' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
     }
 }

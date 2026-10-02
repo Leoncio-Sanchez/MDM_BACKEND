@@ -64,7 +64,7 @@ return [
 
         'media' => [
             'driver' => 'local',
-            'root' => '/home/leo/Documentos/Muni/backend/media',
+            'root' => env('MEDIA_DISK_ROOT', '/home/leo/Documentos/Muni/backend/media'),
             'visibility' => 'private',
             'throw' => true,
         ],

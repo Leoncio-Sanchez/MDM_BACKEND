@@ -9,10 +9,26 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (app()->environment('testing')) {
+        if (app()->environment(['testing', 'local'])) {
+            if (! Schema::hasTable('auth_user')) {
+                Schema::create('auth_user', function (Blueprint $table) {
+                    $table->id();
+                    $table->string('username')->unique();
+                    $table->string('email')->nullable();
+                    $table->string('password');
+                    $table->string('role')->nullable();
+                    $table->string('ruc')->nullable();
+                    $table->boolean('is_active')->default(true);
+                    $table->boolean('is_staff')->default(false);
+                    $table->boolean('is_superuser')->default(false);
+                    $table->timestamps();
+                });
+            }
+
             if (! Schema::hasTable('tipos_licencia')) {
                 Schema::create('tipos_licencia', function (Blueprint $table) {
                     $table->id();
+                    $table->string('codigo')->nullable();
                     $table->string('nombre');
                     $table->boolean('esta_activo')->default(true);
                 });
@@ -174,6 +190,7 @@ return new class extends Migration
                     $table->id();
                     $table->string('codigo', 20)->unique();
                     $table->string('nombre', 100);
+                    $table->string('sigla', 20)->nullable();
                     $table->boolean('esta_activo')->default(true);
                 });
 
@@ -215,39 +232,23 @@ return new class extends Migration
                 });
             }
 
-            if (! Schema::hasTable('auth_user')) {
-
-                if (! Schema::hasTable('tipos_documento_identidad')) {
-                    Schema::create('tipos_documento_identidad', function (Blueprint $table) {
-                        $table->id();
-                        $table->string('codigo', 20)->unique();
-                        $table->string('nombre', 100);
-                        $table->boolean('esta_activo')->default(true);
-                        $table->boolean('es_para_natural')->default(true);
-                        $table->boolean('es_para_juridica')->default(true);
-                    });
-                }
-
-                if (! Schema::hasTable('personas_documentos')) {
-                    Schema::create('personas_documentos', function (Blueprint $table) {
-                        $table->id();
-                        $table->foreignId('persona_id');
-                        $table->foreignId('tipo_documento_identidad_id');
-                        $table->string('numero_documento', 20);
-                    });
-                }
-
-                Schema::create('auth_user', function (Blueprint $table) {
+            if (! Schema::hasTable('tipos_documento_identidad')) {
+                Schema::create('tipos_documento_identidad', function (Blueprint $table) {
                     $table->id();
-                    $table->string('username')->unique();
-                    $table->string('email')->nullable();
-                    $table->string('password');
-                    $table->string('role')->nullable();
-                    $table->string('ruc')->nullable();
-                    $table->boolean('is_active')->default(true);
-                    $table->boolean('is_staff')->default(false);
-                    $table->boolean('is_superuser')->default(false);
-                    $table->timestamps();
+                    $table->string('codigo', 20)->unique();
+                    $table->string('nombre', 100);
+                    $table->boolean('esta_activo')->default(true);
+                    $table->boolean('es_para_natural')->default(true);
+                    $table->boolean('es_para_juridica')->default(true);
+                });
+            }
+
+            if (! Schema::hasTable('personas_documentos')) {
+                Schema::create('personas_documentos', function (Blueprint $table) {
+                    $table->id();
+                    $table->foreignId('persona_id');
+                    $table->foreignId('tipo_documento_identidad_id');
+                    $table->string('numero_documento', 20);
                 });
             }
 
@@ -258,6 +259,21 @@ return new class extends Migration
                     $table->boolean('es_para_lf')->default(true);
                     $table->boolean('es_para_itse')->default(true);
                     $table->boolean('esta_activo')->default(true);
+                });
+            }
+
+            if (! Schema::hasTable('usuarios_perfiles')) {
+                Schema::create('usuarios_perfiles', function (Blueprint $table) {
+                    $table->id();
+                    $table->foreignId('user_id');
+                    $table->boolean('es_inspector')->default(false);
+                    $table->string('cargo', 100)->nullable();
+                    $table->foreignId('unidad_organica_id')->nullable();
+                    $table->boolean('es_administrador')->default(false);
+                    $table->boolean('acceso_licencias')->default(false);
+                    $table->boolean('acceso_itse')->default(false);
+                    $table->boolean('acceso_expedientes')->default(false);
+                    $table->timestamps();
                 });
             }
         }

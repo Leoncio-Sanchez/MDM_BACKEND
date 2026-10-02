@@ -21,13 +21,27 @@ final readonly class CrearLicenciaUseCase {
         }
         $licencia = Licencia::crear(
             uuid: Uuid::uuid4()->toString(),
-            numeroLicencia: $dto->numeroLicencia,
+            numeroLicencia: (int) $dto->numeroLicencia,
             nombreComercial: $dto->nombreComercial,
             tipoLicenciaId: $dto->tipoLicenciaId,
             titularId: $dto->titularId,
+            conductorId: $dto->conductorId,
             expedienteId: $dto->expedienteId,
             nivelRiesgoId: $dto->nivelRiesgoId,
             zonificacionId: $dto->zonificacionId,
+            licenciaPrincipalId: $dto->licenciaPrincipalId,
+            esVigenciaIndeterminada: $dto->esVigenciaIndeterminada,
+            fechaInicioVigencia: $dto->fechaInicioVigencia,
+            fechaFinVigencia: $dto->fechaFinVigencia,
+            actividad: $dto->actividad,
+            direccion: $dto->direccion,
+            horaDesde: $dto->horaDesde,
+            horaHasta: $dto->horaHasta,
+            resolucionNumero: $dto->resolucionNumero,
+            area: $dto->area,
+            numeroReciboPago: $dto->numeroReciboPago,
+            observaciones: $dto->observaciones,
+            sePuedePublicar: $dto->sePuedePublicar,
         );
         return $this->licencias->crear($licencia);
     }

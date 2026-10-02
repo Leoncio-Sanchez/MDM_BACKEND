@@ -5,6 +5,7 @@ services:
             dockerfile: Dockerfile
             args:
                 WWWGROUP: '${WWWGROUP}'
+                POSTGRES_VERSION: '16'
         image: 'sail-8.5/app'
         extra_hosts:
             - 'host.docker.internal:host-gateway'
@@ -22,14 +23,15 @@ services:
             IGNITION_LOCAL_SITES_PATH: '${PWD}'
         volumes:
             - '.:/var/www/html'
-            - '../backend/media:/home/leo/Documentos/Muni/backend/media'
+            - '../APP_ORIGINAL/backend/media:/home/leo/Documentos/Muni/backend/media'
+            - '../APP_ORIGINAL/backend/media:/var/www/html/storage/media'
         networks:
             - sail
         depends_on:
             - pgsql
             - redis
     pgsql:
-        image: 'postgres:18-alpine'
+        image: 'postgres:16-alpine'
         ports:
             - '${FORWARD_DB_PORT:-5432}:5432'
         environment:

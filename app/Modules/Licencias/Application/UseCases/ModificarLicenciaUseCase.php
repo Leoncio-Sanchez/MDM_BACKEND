@@ -30,12 +30,15 @@ final readonly class ModificarLicenciaUseCase
                 throw LicenciaNoEncontrada::porId($dto->licenciaId);
             }
 
-            if ($this->expedientes->tieneAutorizacionImprocedente($dto->expedienteId, 'LF')) {
-                throw LicenciaDenegadaError::porExpediente($dto->expedienteId);
+            $numeroLicencia = $dto->numeroLicencia ?? $existente->numeroLicencia->toInt();
+            $expedienteId = $dto->expedienteId ?: $existente->expedienteId;
+
+            if ($this->expedientes->tieneAutorizacionImprocedente($expedienteId, 'LF')) {
+                throw LicenciaDenegadaError::porExpediente($expedienteId);
             }
 
-            if ($this->licencias->existeNumeroLicencia($dto->numeroLicencia, $dto->licenciaId)) {
-                throw LicenciaDuplicadaError::porNumero((string) $dto->numeroLicencia);
+            if ($this->licencias->existeNumeroLicencia($numeroLicencia, $dto->licenciaId)) {
+                throw LicenciaDuplicadaError::porNumero((string) $numeroLicencia);
             }
 
             if ($dto->numeroReciboPago !== '' && $this->licencias->existeReciboPago($dto->numeroReciboPago, $dto->licenciaId)) {
@@ -43,7 +46,7 @@ final readonly class ModificarLicenciaUseCase
             }
 
             $modificada = $existente->actualizar(
-                numeroLicencia: $dto->numeroLicencia,
+                numeroLicencia: $numeroLicencia,
                 nombreComercial: $dto->nombreComercial,
                 titularId: $dto->titularId,
                 conductorId: $dto->conductorId,

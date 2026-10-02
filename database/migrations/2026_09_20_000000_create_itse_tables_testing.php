@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (app()->environment('testing')) {
+        if (app()->environment(['testing', 'local'])) {
             Schema::create('itse', function (Blueprint $table) {
                 $table->id();
                 $table->uuid('uuid')->unique();

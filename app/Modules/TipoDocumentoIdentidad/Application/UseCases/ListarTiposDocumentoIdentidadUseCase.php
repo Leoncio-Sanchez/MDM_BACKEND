@@ -12,7 +12,7 @@ final readonly class ListarTiposDocumentoIdentidadUseCase
     public function __construct(private TipoDocumentoIdentidadRepositoryInterface $repository) {}
 
     /** @return TipoDocumentoIdentidad[] */
-    public function execute(string $tipoPersona): array
+    public function execute(?string $tipoPersona = null): array
     {
         return $this->repository->obtenerTodos($tipoPersona);
     }
