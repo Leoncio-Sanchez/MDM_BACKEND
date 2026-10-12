@@ -6,6 +6,7 @@ use App\Modules\ITSE\Application\UseCases\InactivarItseUseCase;
 use App\Modules\ITSE\Domain\Contracts\ItseEstadoRepositoryInterface;
 use App\Modules\ITSE\Domain\Contracts\ItseRepositoryInterface;
 use App\Modules\ITSE\Domain\Entities\Itse;
+use App\Modules\ITSE\Domain\Entities\ItseEstado;
 use App\Modules\ITSE\Domain\Exceptions\ItseInvalido;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
@@ -21,13 +22,20 @@ beforeEach(function () {
 it('inactiva un ITSE correctamente', function () {
     $itses = Mockery::mock(ItseRepositoryInterface::class);
     $estados = Mockery::mock(ItseEstadoRepositoryInterface::class);
-    $dto = new InactivarItseDTO(1, 'Obs', 1);
+    $dto = new InactivarItseDTO(1, 7, CarbonImmutable::parse('2026-10-12'), 'RES 120-2026', 'Obs', 1);
     
     $itse = Itse::crear('uuid', 123, CarbonImmutable::now(), null, CarbonImmutable::now()->addYear(), 'A', 'B', 'C', 10.5, 100, 'R123', null, false, 1, 1, null, 1, 1, 1, 1, CarbonImmutable::now());
     
     $itses->shouldReceive('buscarPorId')->with(1)->twice()->andReturn($itse);
-    $estados->shouldReceive('tieneEstado')->with(1, 'INACTIVO')->once()->andReturn(false);
-    $estados->shouldReceive('insertar')->once();
+    $estados->shouldReceive('tieneEstadoInactivo')->with(1)->once()->andReturn(false);
+    $estados->shouldReceive('crear')->once()
+        ->with(Mockery::on(fn (ItseEstado $e) => $e->itseId === 1
+            && $e->estadoId === 7
+            && $e->fechaEstado->format('Y-m-d') === '2026-10-12'
+            && $e->documento === 'RES 120-2026'
+            && $e->observaciones === 'Obs'
+            && $e->usuarioId === 1))
+        ->andReturnArg(0);
     
     $useCase = new InactivarItseUseCase($itses, $estados);
     $result = $useCase->execute($dto);
@@ -38,12 +46,12 @@ it('inactiva un ITSE correctamente', function () {
 it('lanza ItseInvalido si ya está inactivo', function () {
     $itses = Mockery::mock(ItseRepositoryInterface::class);
     $estados = Mockery::mock(ItseEstadoRepositoryInterface::class);
-    $dto = new InactivarItseDTO(1, 'Obs', 1);
+    $dto = new InactivarItseDTO(1, 7, CarbonImmutable::parse('2026-10-12'), 'RES 120-2026', 'Obs', 1);
     
     $itse = Itse::crear('uuid', 123, CarbonImmutable::now(), null, CarbonImmutable::now()->addYear(), 'A', 'B', 'C', 10.5, 100, 'R123', null, false, 1, 1, null, 1, 1, 1, 1, CarbonImmutable::now());
     
     $itses->shouldReceive('buscarPorId')->with(1)->once()->andReturn($itse);
-    $estados->shouldReceive('tieneEstado')->with(1, 'INACTIVO')->once()->andReturn(true);
+    $estados->shouldReceive('tieneEstadoInactivo')->with(1)->once()->andReturn(true);
     
     $useCase = new InactivarItseUseCase($itses, $estados);
     $useCase->execute($dto);

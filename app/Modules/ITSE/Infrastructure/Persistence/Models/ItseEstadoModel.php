@@ -12,13 +12,16 @@ final class ItseEstadoModel extends Model
 
     protected $fillable = [
         'itse_id',
-        'estado',
-        'fecha',
+        'estado_id',
+        'fecha_estado',
+        'documento',
         'observaciones',
         'usuario_id',
+        'fecha_digitacion',
     ];
 
     protected $casts = [
-        'fecha' => 'date',
+        'fecha_estado' => 'date',
+        'fecha_digitacion' => 'datetime',
     ];
 }

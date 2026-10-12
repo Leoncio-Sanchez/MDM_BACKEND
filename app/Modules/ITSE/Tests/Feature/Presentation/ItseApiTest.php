@@ -202,14 +202,19 @@ it('inactivar ITSE', function () {
     $this->mock(ItseRepositoryInterface::class, function ($mock) {
         $mock->shouldReceive('buscarPorId')->zeroOrMoreTimes()->andReturn($this->mockItse);
     });
-    $this->mock(ItseEstadoRepositoryInterface::class, function ($mock) {
-        $mock->shouldReceive('tieneEstado')->andReturn(false);
-        $mock->shouldReceive('insertar')->once()->andReturn(new ItseEstado(1, CarbonImmutable::now(), "DOC", "OBS", CarbonImmutable::now(), 1, 1, 1));
+    $estadoId = DB::table('estados')->insertGetId(['nombre' => 'CLAUSURA', 'es_para_lf' => false, 'es_para_itse' => true, 'esta_activo' => false]);
+    $this->mock(ItseEstadoRepositoryInterface::class, function ($mock) use ($estadoId) {
+        $mock->shouldReceive('tieneEstadoInactivo')->andReturn(false);
+        $mock->shouldReceive('crear')->once()
+            ->with(Mockery::on(fn (ItseEstado $e) => $e->estadoId === $estadoId
+                && $e->fechaEstado->format('Y-m-d') === '2026-03-01'
+                && $e->documento === 'DOC'))
+            ->andReturnArg(0);
     });
 
     $response = $this->actingAs($this->user, 'api')->postJson("/api/lf-itse/itse/inactivar/", [
         'itse_id' => 1,
-        'estado_id' => 1,
+        'estado_id' => $estadoId,
         'fecha_estado' => '2026-03-01',
         'documento' => 'DOC',
         'observaciones' => 'OBS',

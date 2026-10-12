@@ -41,7 +41,7 @@ final readonly class CrearItseDTO
             direccion: (string) $data['direccion'],
             resolucionNumero: (string) $data['resolucion_numero'],
             area: (float) $data['area'],
-            capacidadAforo: (int) $data['capacidad_aforo'],
+            capacidadAforo: (int) ($data['capacidad_aforo'] ?? 0),
             numeroReciboPago: (string) $data['numero_recibo_pago'],
             observaciones: $data['observaciones'] ?? null,
             sePuedePublicar: (bool) ($data['se_puede_publicar'] ?? false),

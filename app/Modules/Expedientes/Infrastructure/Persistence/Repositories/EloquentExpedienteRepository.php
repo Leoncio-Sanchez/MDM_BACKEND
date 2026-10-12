@@ -57,7 +57,7 @@ final readonly class EloquentExpedienteRepository implements ExpedienteRepositor
         $model = new ExpedienteModel;
         $model->uuid = $expediente->uuid;
         $model->numero_expediente = $expediente->numeroExpediente;
-        $model->fecha_recepcion = $expediente->fechaRecepcion;
+        $model->fecha_recepcion = $this->toUtc($expediente->fechaRecepcion);
         $model->tipo_procedimiento_tupa_id = $expediente->tipoProcedimientoTupaId;
         $model->solicitante_id = $expediente->solicitanteId;
         $model->representante_id = $expediente->representanteId;
@@ -68,9 +68,9 @@ final readonly class EloquentExpedienteRepository implements ExpedienteRepositor
         $model->dias_ampliacion = $expediente->diasAmpliacion;
         $model->motivo_ampliacion = $expediente->motivoAmpliacion;
         $model->usuario_ampliacion = $expediente->usuarioAmpliacionId;
-        $model->fecha_digitacion_ampliacion = $expediente->fechaDigitacionAmpliacion;
+        $model->fecha_digitacion_ampliacion = $expediente->fechaDigitacionAmpliacion ? $this->toUtc($expediente->fechaDigitacionAmpliacion) : null;
         $model->usuario_id = $expediente->usuarioId;
-        $model->fecha_digitacion = $expediente->fechaDigitacion;
+        $model->fecha_digitacion = $this->toUtc($expediente->fechaDigitacion);
         $model->save();
 
         return $this->toEntity($model);
@@ -81,7 +81,7 @@ final readonly class EloquentExpedienteRepository implements ExpedienteRepositor
         /** @var ExpedienteModel $model */
         $model = ExpedienteModel::findOrFail($expediente->id);
         $model->numero_expediente = $expediente->numeroExpediente;
-        $model->fecha_recepcion = $expediente->fechaRecepcion;
+        $model->fecha_recepcion = $this->toUtc($expediente->fechaRecepcion);
         $model->tipo_procedimiento_tupa_id = $expediente->tipoProcedimientoTupaId;
         $model->solicitante_id = $expediente->solicitanteId;
         $model->representante_id = $expediente->representanteId;
@@ -92,7 +92,7 @@ final readonly class EloquentExpedienteRepository implements ExpedienteRepositor
         $model->dias_ampliacion = $expediente->diasAmpliacion;
         $model->motivo_ampliacion = $expediente->motivoAmpliacion;
         $model->usuario_ampliacion = $expediente->usuarioAmpliacionId;
-        $model->fecha_digitacion_ampliacion = $expediente->fechaDigitacionAmpliacion;
+        $model->fecha_digitacion_ampliacion = $expediente->fechaDigitacionAmpliacion ? $this->toUtc($expediente->fechaDigitacionAmpliacion) : null;
         $model->save();
 
         return $this->toEntity($model);
@@ -334,6 +334,16 @@ SQL;
         $models = $query->get();
 
         return $models->map(fn (ExpedienteModel $m): Expediente => $this->toEntity($m))->all();
+    }
+
+    /**
+     * Las columnas datetime se guardan en UTC (igual que Django con USE_TZ) y se leen como UTC
+     * (config app.timezone). Sin esta conversión, una fecha en hora de Lima se guardaba con su
+     * hora local y al leerla se desplazaba 5 horas (el 12 aparecía como el 11 a las 19:00).
+     */
+    private function toUtc(DateTimeImmutable $date): DateTimeImmutable
+    {
+        return $date->setTimezone(new \DateTimeZone('UTC'));
     }
 
     private function toDateTimeImmutable(\DateTimeInterface|string $date): DateTimeImmutable

@@ -7,6 +7,7 @@ use App\Modules\ITSE\Application\DTOs\InactivarItseDTO;
 use App\Modules\ITSE\Domain\Contracts\ItseEstadoRepositoryInterface;
 use App\Modules\ITSE\Domain\Contracts\ItseRepositoryInterface;
 use App\Modules\ITSE\Domain\Entities\Itse;
+use App\Modules\ITSE\Domain\Entities\ItseEstado;
 use App\Modules\ITSE\Domain\Exceptions\ItseInvalido;
 use App\Modules\ITSE\Domain\Exceptions\ItseNoEncontrado;
 use Carbon\CarbonImmutable;
@@ -27,17 +28,19 @@ final readonly class InactivarItseUseCase
                 throw ItseNoEncontrado::porId($dto->itseId);
             }
 
-            if ($this->estados->tieneEstado($dto->itseId, 'INACTIVO')) {
+            if ($this->estados->tieneEstadoInactivo($dto->itseId)) {
                 throw ItseInvalido::yaInactivo($dto->itseId);
             }
 
-            $this->estados->insertar(
-                itseId: $dto->itseId,
-                estado: 'INACTIVO',
-                fecha: CarbonImmutable::now()->toDateString(),
+            $this->estados->crear(ItseEstado::crear(
+                fechaEstado: $dto->fechaEstado,
+                documento: $dto->documento,
                 observaciones: $dto->observaciones,
+                fechaDigitacion: CarbonImmutable::now(),
+                estadoId: $dto->estadoId,
+                itseId: $dto->itseId,
                 usuarioId: $dto->usuarioId,
-            );
+            ));
 
             /** @var Itse $itseRecargado */
             $itseRecargado = $this->itses->buscarPorId($dto->itseId);

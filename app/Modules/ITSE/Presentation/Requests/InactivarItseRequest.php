@@ -17,7 +17,7 @@ final class InactivarItseRequest extends FormRequest
     {
         return [
             'itse_id' => ['required', 'integer'],
-            'estado_id' => ['required', 'integer'],
+            'estado_id' => ['required', 'integer', 'exists:estados,id'],
             'fecha_estado' => ['required', 'date'],
             'documento' => ['required', 'string', 'max:100'],
             'observaciones' => ['required', 'string', 'max:1000'],

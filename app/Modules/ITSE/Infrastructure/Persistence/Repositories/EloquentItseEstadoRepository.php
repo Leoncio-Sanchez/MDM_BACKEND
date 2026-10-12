@@ -13,42 +13,36 @@ final class EloquentItseEstadoRepository implements ItseEstadoRepositoryInterfac
 {
     public function crear(ItseEstado $estado): ItseEstado
     {
+        // Columnas del esquema Django (las mismas que lee listarPorItse)
         $model = ItseEstadoModel::create([
             'itse_id' => $estado->itseId,
-            'estado' => $estado->estadoId,
-            'fecha' => $estado->fechaEstado->format('Y-m-d'),
+            'estado_id' => $estado->estadoId,
+            'fecha_estado' => $estado->fechaEstado->format('Y-m-d'),
+            'documento' => $estado->documento,
             'observaciones' => $estado->observaciones,
             'usuario_id' => $estado->usuarioId,
+            'fecha_digitacion' => $estado->fechaDigitacion,
         ]);
 
         return new ItseEstado(
             id: $model->id,
-            fechaEstado: CarbonImmutable::parse($model->fecha),
-            documento: '',
+            fechaEstado: CarbonImmutable::parse($model->fecha_estado),
+            documento: (string) $model->documento,
             observaciones: (string) $model->observaciones,
-            fechaDigitacion: CarbonImmutable::now(), // mock
-            estadoId: (int) $model->estado,
+            fechaDigitacion: CarbonImmutable::parse($model->fecha_digitacion),
+            estadoId: (int) $model->estado_id,
             itseId: $model->itse_id,
             usuarioId: $model->usuario_id,
         );
     }
 
-    public function tieneEstado(int $itseId, string $estadoNombre): bool
+    public function tieneEstadoInactivo(int $itseId): bool
     {
-        return ItseEstadoModel::where('itse_id', $itseId)
-            ->where('estado', $estadoNombre)
+        return DB::table('itse_estados as ie')
+            ->join('estados as est', 'ie.estado_id', '=', 'est.id')
+            ->where('ie.itse_id', $itseId)
+            ->where('est.esta_activo', false)
             ->exists();
-    }
-
-    public function insertar(int $itseId, string $estado, string $fecha, string $observaciones, int $usuarioId): void
-    {
-        ItseEstadoModel::create([
-            'itse_id' => $itseId,
-            'estado' => $estado,
-            'fecha' => $fecha,
-            'observaciones' => $observaciones,
-            'usuario_id' => $usuarioId,
-        ]);
     }
 
     /**
