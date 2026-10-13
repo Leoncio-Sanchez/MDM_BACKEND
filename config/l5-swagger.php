@@ -51,6 +51,11 @@ return [
         ],
     ],
     'defaults' => [
+        /*
+         * Swagger solo se sirve en APP_ENV=local, salvo que esto sea true (ver DocumentacionApiHabilitada).
+         */
+        'publico' => env('L5_SWAGGER_PUBLICO', false),
+
         'routes' => [
             /*
              * Route for accessing parsed swagger annotations.
@@ -66,10 +71,10 @@ return [
              * Middleware allows to prevent unexpected access to API documentation
              */
             'middleware' => [
-                'api' => [],
-                'asset' => [],
-                'docs' => [],
-                'oauth2_callback' => [],
+                'api' => [\App\Modules\Seguridad\Presentation\Middleware\DocumentacionApiHabilitada::class],
+                'asset' => [\App\Modules\Seguridad\Presentation\Middleware\DocumentacionApiHabilitada::class],
+                'docs' => [\App\Modules\Seguridad\Presentation\Middleware\DocumentacionApiHabilitada::class],
+                'oauth2_callback' => [\App\Modules\Seguridad\Presentation\Middleware\DocumentacionApiHabilitada::class],
             ],
 
             /*
