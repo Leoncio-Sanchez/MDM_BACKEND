@@ -28,7 +28,8 @@ final readonly class TipoProcedimientoTupa
         bool $requiereLf,
         bool $requiereItse,
         int $unidadOrganicaId,
-        int $usuarioId
+        int $usuarioId,
+        bool $estaActivo = true
     ): self {
         return new self(
             id: null,
@@ -36,7 +37,7 @@ final readonly class TipoProcedimientoTupa
             nombre: trim($nombre),
             plazoAtencionDias: $plazoAtencionDias,
             diasAlertaVencimiento: $diasAlertaVencimiento,
-            estaActivo: true,
+            estaActivo: $estaActivo,
             requiereLf: $requiereLf,
             requiereItse: $requiereItse,
             fechaDigitacion: new \DateTimeImmutable,

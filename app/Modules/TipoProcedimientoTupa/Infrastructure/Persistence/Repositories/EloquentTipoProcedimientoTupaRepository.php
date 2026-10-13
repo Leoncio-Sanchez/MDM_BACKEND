@@ -7,6 +7,7 @@ namespace App\Modules\TipoProcedimientoTupa\Infrastructure\Persistence\Repositor
 use App\Modules\TipoProcedimientoTupa\Domain\Contracts\TipoProcedimientoTupaRepositoryInterface;
 use App\Modules\TipoProcedimientoTupa\Domain\Entities\TipoProcedimientoTupa;
 use App\Modules\TipoProcedimientoTupa\Infrastructure\Persistence\Models\TipoProcedimientoTupaModel;
+use Illuminate\Support\Facades\DB;
 
 class EloquentTipoProcedimientoTupaRepository implements TipoProcedimientoTupaRepositoryInterface
 {
@@ -61,6 +62,11 @@ class EloquentTipoProcedimientoTupaRepository implements TipoProcedimientoTupaRe
     public function eliminar(int $id): void
     {
         TipoProcedimientoTupaModel::destroy($id);
+    }
+
+    public function contarExpedientes(int $id): int
+    {
+        return DB::table('expedientes')->where('tipo_procedimiento_tupa_id', $id)->count();
     }
 
     private function toDomain(TipoProcedimientoTupaModel $m): TipoProcedimientoTupa

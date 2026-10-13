@@ -51,7 +51,8 @@ class TipoProcedimientoTupaController
             requiereLf: $request->has('requiere_lf') ? (bool) $request->requiere_lf : false,
             requiereItse: $request->has('requiere_itse') ? (bool) $request->requiere_itse : false,
             unidadOrganicaId: (int) $request->unidad_organica_id,
-            usuarioId: $user->id
+            usuarioId: $user->id,
+            estaActivo: $request->has('esta_activo') ? (bool) $request->esta_activo : true
         );
         $entity = $this->crear->execute($dto);
 

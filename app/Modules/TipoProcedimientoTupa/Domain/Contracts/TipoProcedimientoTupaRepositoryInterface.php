@@ -18,4 +18,7 @@ interface TipoProcedimientoTupaRepositoryInterface
     public function actualizar(TipoProcedimientoTupa $entity): TipoProcedimientoTupa;
 
     public function eliminar(int $id): void;
+
+    /** Cantidad de expedientes que usan el procedimiento. */
+    public function contarExpedientes(int $id): int;
 }

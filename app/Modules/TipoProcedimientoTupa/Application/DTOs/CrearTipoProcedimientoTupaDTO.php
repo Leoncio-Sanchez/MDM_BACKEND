@@ -14,6 +14,7 @@ final readonly class CrearTipoProcedimientoTupaDTO
         public bool $requiereLf,
         public bool $requiereItse,
         public int $unidadOrganicaId,
-        public int $usuarioId
+        public int $usuarioId,
+        public bool $estaActivo = true
     ) {}
 }

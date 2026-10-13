@@ -22,7 +22,8 @@ final readonly class CrearTipoProcedimientoTupaUseCase
             $dto->requiereLf,
             $dto->requiereItse,
             $dto->unidadOrganicaId,
-            $dto->usuarioId
+            $dto->usuarioId,
+            $dto->estaActivo
         );
 
         return $this->repository->guardar($entity);

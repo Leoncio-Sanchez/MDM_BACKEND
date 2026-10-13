@@ -13,18 +13,41 @@ class CrearTipoProcedimientoTupaRequest extends FormRequest
         return true;
     }
 
+    /** La entidad guarda el código en mayúsculas: se normaliza antes de validar que sea único. */
+    protected function prepareForValidation(): void
+    {
+        if (is_string($this->input('codigo'))) {
+            $this->merge(['codigo' => strtoupper(trim($this->input('codigo')))]);
+        }
+    }
+
     /** @return array<string, mixed> */
     public function rules(): array
     {
+        // Límites = columnas de tipos_procedimiento_tupa (codigo varchar 30, nombre varchar 200)
         return [
-            'codigo' => 'required|string|max:50',
-            'nombre' => 'required|string|max:250',
-            'plazo_atencion_dias' => 'required|integer|min:0',
-            'dias_alerta_vencimiento' => 'required|integer|min:0',
+            'codigo' => 'required|string|max:30|unique:tipos_procedimiento_tupa,codigo',
+            'nombre' => 'required|string|max:200',
+            'plazo_atencion_dias' => 'required|integer|min:1',
+            // La alerta se dispara antes del vencimiento: no puede superar el plazo
+            'dias_alerta_vencimiento' => 'required|integer|min:0|lte:plazo_atencion_dias',
             'esta_activo' => 'nullable|boolean',
             'requiere_lf' => 'nullable|boolean',
             'requiere_itse' => 'nullable|boolean',
-            'unidad_organica_id' => 'required|integer',
+            'unidad_organica_id' => 'required|integer|exists:unidades_organicas,id',
+        ];
+    }
+
+    /** @return array<string, string> */
+    public function messages(): array
+    {
+        return [
+            'codigo.unique' => 'Ya existe un procedimiento con ese código.',
+            'codigo.max' => 'El código no puede superar 30 caracteres.',
+            'nombre.max' => 'El nombre no puede superar 200 caracteres.',
+            'plazo_atencion_dias.min' => 'El plazo de atención debe ser de al menos 1 día.',
+            'dias_alerta_vencimiento.lte' => 'Los días de alerta no pueden superar el plazo de atención.',
+            'unidad_organica_id.exists' => 'La unidad orgánica seleccionada no existe.',
         ];
     }
 }
