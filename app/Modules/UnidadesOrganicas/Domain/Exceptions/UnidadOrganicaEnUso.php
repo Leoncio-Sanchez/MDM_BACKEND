@@ -6,15 +6,10 @@ namespace App\Modules\UnidadesOrganicas\Domain\Exceptions;
 
 final class UnidadOrganicaEnUso extends \DomainException
 {
-    public static function porDependencias(int $procedimientos, int $usuarios): self
+    public static function porProcedimientos(int $procedimientos): self
     {
-        $detalle = array_filter([
-            $procedimientos > 0 ? "{$procedimientos} procedimiento(s) TUPA" : null,
-            $usuarios > 0 ? "{$usuarios} usuario(s)" : null,
-        ]);
-
         return new self(
-            'No se puede eliminar: la unidad está asociada a ' . implode(' y ', $detalle) . '. '
+            "No se puede eliminar: la unidad está asociada a {$procedimientos} procedimiento(s) TUPA. "
             . 'Desactívela para que no se use en registros nuevos.'
         );
     }

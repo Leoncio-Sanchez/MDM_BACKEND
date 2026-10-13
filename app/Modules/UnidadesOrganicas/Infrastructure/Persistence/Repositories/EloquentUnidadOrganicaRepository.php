@@ -45,13 +45,10 @@ final class EloquentUnidadOrganicaRepository implements UnidadOrganicaRepository
         UnidadOrganicaModel::destroy($id);
     }
 
-    /** @return array{procedimientos: int, usuarios: int} */
-    public function contarDependencias(int $id): array
+    public function contarProcedimientos(int $id): int
     {
-        return [
-            'procedimientos' => DB::table('tipos_procedimiento_tupa')->where('unidad_organica_id', $id)->count(),
-            'usuarios' => DB::table('usuarios_perfiles')->where('unidad_organica_id', $id)->count(),
-        ];
+        // Única tabla del esquema real que referencia a unidades_organicas
+        return DB::table('tipos_procedimiento_tupa')->where('unidad_organica_id', $id)->count();
     }
 
     /** @return array<string, mixed> */

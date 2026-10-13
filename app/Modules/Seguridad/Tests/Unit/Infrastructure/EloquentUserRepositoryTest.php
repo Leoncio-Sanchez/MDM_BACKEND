@@ -6,7 +6,6 @@ namespace App\Modules\Seguridad\Tests\Unit\Infrastructure;
 
 use App\Modules\Seguridad\Infrastructure\Persistence\Models\UserAuthModel;
 use App\Modules\Seguridad\Infrastructure\Persistence\Repositories\EloquentUserRepository;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
@@ -32,17 +31,7 @@ class EloquentUserRepositoryTest extends TestCase
             });
         }
 
-        // El rol INSPECTOR se resuelve desde el perfil del usuario
-        if (! Schema::hasTable('usuarios_perfiles')) {
-            Schema::create('usuarios_perfiles', function ($table) {
-                $table->increments('id');
-                $table->unsignedInteger('user_id');
-                $table->boolean('es_inspector')->default(false);
-            });
-        }
-
         UserAuthModel::truncate();
-        DB::table('usuarios_perfiles')->truncate();
 
         UserAuthModel::create([
             'username' => 'admin',
@@ -100,19 +89,5 @@ class EloquentUserRepositoryTest extends TestCase
 
         $this->assertNotNull($user);
         $this->assertSame('CIUDADANO', $user->role);
-    }
-
-    public function test_asigna_role_inspector_si_su_perfil_lo_marca_como_inspector(): void
-    {
-        DB::table('usuarios_perfiles')->insert(['user_id' => 2, 'es_inspector' => true]);
-
-        $this->assertSame('INSPECTOR', (new EloquentUserRepository)->buscarPorUsername('inspector1')?->role);
-    }
-
-    public function test_un_administrador_inspector_sigue_siendo_administrador(): void
-    {
-        DB::table('usuarios_perfiles')->insert(['user_id' => 1, 'es_inspector' => true]);
-
-        $this->assertSame('ADMIN_MUNICIPALIDAD', (new EloquentUserRepository)->buscarPorUsername('admin')?->role);
     }
 }

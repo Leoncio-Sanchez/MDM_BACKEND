@@ -20,10 +20,10 @@ final readonly class EliminarUnidadOrganicaUseCase
             throw UnidadOrganicaNoEncontrada::porId($id);
         }
 
-        // Con procedimientos o usuarios asociados no se borra (se perdería la referencia): se desactiva.
-        ['procedimientos' => $procedimientos, 'usuarios' => $usuarios] = $this->repository->contarDependencias($id);
-        if ($procedimientos > 0 || $usuarios > 0) {
-            throw UnidadOrganicaEnUso::porDependencias($procedimientos, $usuarios);
+        // Con procedimientos TUPA asociados no se borra (se perdería la referencia): se desactiva.
+        $procedimientos = $this->repository->contarProcedimientos($id);
+        if ($procedimientos > 0) {
+            throw UnidadOrganicaEnUso::porProcedimientos($procedimientos);
         }
 
         $this->repository->eliminar($id);

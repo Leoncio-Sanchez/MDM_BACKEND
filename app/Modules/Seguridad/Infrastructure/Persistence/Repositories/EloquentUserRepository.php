@@ -8,7 +8,6 @@ use App\Modules\Seguridad\Domain\Contracts\UserRepositoryInterface;
 use App\Modules\Seguridad\Domain\ValueObjects\AuthenticatedUser;
 use App\Modules\Seguridad\Domain\ValueObjects\Rol;
 use App\Modules\Seguridad\Infrastructure\Persistence\Models\UserAuthModel;
-use Illuminate\Support\Facades\DB;
 
 final readonly class EloquentUserRepository implements UserRepositoryInterface
 {
@@ -44,12 +43,6 @@ final readonly class EloquentUserRepository implements UserRepositoryInterface
 
     private function computeRole(UserAuthModel $user): string
     {
-        $esAdmin = (bool) ($user->is_superuser || $user->is_staff);
-        $esInspector = ! $esAdmin && DB::table('usuarios_perfiles')
-            ->where('user_id', $user->id)
-            ->where('es_inspector', true)
-            ->exists();
-
-        return Rol::resolver($esAdmin, $esInspector)->value;
+        return Rol::resolver((bool) ($user->is_superuser || $user->is_staff))->value;
     }
 }

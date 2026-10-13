@@ -134,18 +134,6 @@ final class UnidadOrganicaCrudTest extends TestCase
         $this->assertDatabaseHas('unidades_organicas', ['id' => $id]);
     }
 
-    public function test_no_elimina_una_unidad_con_usuarios_asignados(): void
-    {
-        $id = $this->crearUnidad();
-        DB::table('usuarios_perfiles')->insert(['user_id' => $this->usuarioApi()->id, 'unidad_organica_id' => $id]);
-
-        $this->comoUsuarioApi()->deleteJson(self::URL . "/{$id}")
-            ->assertStatus(409)
-            ->assertJsonPath('error', fn (string $msg) => str_contains($msg, '1 usuario(s)'));
-
-        $this->assertDatabaseHas('unidades_organicas', ['id' => $id]);
-    }
-
     public function test_eliminar_inexistente_responde_404(): void
     {
         $this->comoUsuarioApi()->deleteJson(self::URL . '/999')->assertNotFound();

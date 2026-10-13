@@ -9,21 +9,18 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
-/** Las rutas de gestión (rol:ADMIN_MUNICIPALIDAD) rechazan a ciudadanos e inspectores. */
+/** Las rutas de gestión (rol:ADMIN_MUNICIPALIDAD) rechazan a los usuarios que no son administradores. */
 final class AutorizacionPorRolTest extends TestCase
 {
     use RefreshDatabase;
 
     private const RUTA_GESTION = '/api/lf-itse/giros';
 
-    private function crearUsuario(string $username, bool $esStaff = false, bool $esInspector = false): User
+    private function crearUsuario(string $username, bool $esStaff = false): User
     {
         $id = DB::table('auth_user')->insertGetId([
             'username' => $username, 'password' => 'x', 'is_active' => true, 'is_staff' => $esStaff,
         ]);
-        if ($esInspector) {
-            DB::table('usuarios_perfiles')->insert(['user_id' => $id, 'es_inspector' => true]);
-        }
 
         /** @var User $usuario */
         $usuario = User::find($id);
@@ -46,9 +43,9 @@ final class AutorizacionPorRolTest extends TestCase
             ->assertJsonPath('error', 'No tiene permisos para realizar esta operación.');
     }
 
-    public function test_un_inspector_no_accede_a_la_gestion(): void
+    public function test_un_ciudadano_no_puede_escribir_en_la_gestion(): void
     {
-        $this->actingAs($this->crearUsuario('inspector_t', esInspector: true), 'api')
+        $this->actingAs($this->crearUsuario('ciudadano_w'), 'api')
             ->postJson(self::RUTA_GESTION, ['nombre' => 'X', 'esta_activo' => true])
             ->assertForbidden();
 

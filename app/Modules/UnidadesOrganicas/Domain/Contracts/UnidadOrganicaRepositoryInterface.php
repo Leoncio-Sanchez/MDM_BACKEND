@@ -19,10 +19,6 @@ interface UnidadOrganicaRepositoryInterface
 
     public function eliminar(int $id): void;
 
-    /**
-     * Registros que dependen de la unidad.
-     *
-     * @return array{procedimientos: int, usuarios: int}
-     */
-    public function contarDependencias(int $id): array;
+    /** Cantidad de procedimientos TUPA que dependen de la unidad. */
+    public function contarProcedimientos(int $id): int;
 }
