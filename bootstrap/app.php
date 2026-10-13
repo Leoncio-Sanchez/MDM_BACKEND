@@ -46,6 +46,14 @@ return Application::configure(basePath: dirname(__DIR__))
             return response()->json(['error' => $e->getMessage()], 422);
         });
 
+        $exceptions->render(function (\App\Modules\UnidadesOrganicas\Domain\Exceptions\UnidadOrganicaNoEncontrada $e, Request $request) {
+            return response()->json(['error' => $e->getMessage()], 404);
+        });
+
+        $exceptions->render(function (\App\Modules\UnidadesOrganicas\Domain\Exceptions\UnidadOrganicaEnUso $e, Request $request) {
+            return response()->json(['error' => $e->getMessage()], 409);
+        });
+
         $exceptions->render(function (\App\Modules\TipoProcedimientoTupa\Domain\Exceptions\TipoProcedimientoTupaNoEncontrado $e, Request $request) {
             return response()->json(['error' => 'El procedimiento TUPA no existe.'], 404);
         });

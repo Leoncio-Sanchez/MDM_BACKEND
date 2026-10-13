@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Modules\UnidadesOrganicas\Presentation\Resources;
 
-use App\Modules\UnidadesOrganicas\Infrastructure\Persistence\Models\UnidadOrganicaModel;
+use App\Modules\UnidadesOrganicas\Domain\Entities\UnidadOrganica;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @mixin UnidadOrganicaModel
+ * @property UnidadOrganica $resource
  */
 final class UnidadOrganicaResource extends JsonResource
 {
@@ -19,11 +19,11 @@ final class UnidadOrganicaResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'codigo' => $this->codigo,
-            'nombre' => $this->nombre,
-            'sigla' => $this->sigla,
-            'esta_activo' => (bool) $this->esta_activo,
+            'id' => $this->resource->id,
+            'codigo' => $this->resource->codigo,
+            'nombre' => $this->resource->nombre,
+            'sigla' => $this->resource->sigla,
+            'esta_activo' => $this->resource->estaActivo,
         ];
     }
 }

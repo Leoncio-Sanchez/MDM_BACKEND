@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $id
  * @property string $codigo
  * @property string $nombre
- * @property string $sigla
+ * @property string|null $sigla
  * @property bool $esta_activo
  */
 final class UnidadOrganicaModel extends Model
