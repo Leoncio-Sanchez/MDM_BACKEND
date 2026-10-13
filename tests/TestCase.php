@@ -32,6 +32,7 @@ abstract class TestCase extends BaseTestCase
 
         $id = DB::table('auth_user')->insertGetId(\Tests\Fixtures\UsuarioAuth::datos([
             'is_staff' => true,
+            'is_superuser' => true, // todos los accesos del perfil (usuarios_perfiles)
             'username' => 'usuario_api_test',
             'email' => 'usuario_api_test@muni.test',
             'password' => 'secret',

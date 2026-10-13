@@ -12,6 +12,7 @@ uses(TestCase::class, RefreshDatabase::class);
 beforeEach(function () {
     DB::table('auth_user')->insert(\Tests\Fixtures\UsuarioAuth::datos([
         'is_staff' => true,
+        'is_superuser' => true, // todos los accesos del perfil
         'id' => 1,
         'username' => 'admin',
         'email' => 'admin@test.com',

@@ -190,11 +190,13 @@ final class JwtAuthControllerTest extends TestCase
         $meRes->assertStatus(200);
 
         $data = $meRes->json();
-        $this->assertCount(3, $data);
+        // Mismos campos que Django + role y permisos (los usa el frontend para el menú)
         $this->assertSame([
             'email' => 'admin@correo.com',
             'id' => 1,
             'username' => 'admin',
+            'role' => 'ADMIN_MUNICIPALIDAD',
+            'permisos' => ['expedientes' => true, 'licencias' => true, 'itse' => true, 'admin' => true],
         ], $data);
     }
 

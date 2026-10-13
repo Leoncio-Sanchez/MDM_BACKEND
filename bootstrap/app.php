@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'rol' => \App\Modules\Seguridad\Presentation\Middleware\VerificarRol::class,
+            'permiso' => \App\Modules\Seguridad\Presentation\Middleware\VerificarPermiso::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

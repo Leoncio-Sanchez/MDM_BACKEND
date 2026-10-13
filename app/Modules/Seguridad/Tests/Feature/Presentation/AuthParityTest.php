@@ -82,8 +82,8 @@ final class AuthParityTest extends TestCase
         $response->assertStatus(200);
 
         $data = $response->json();
-        $this->assertCount(3, $data);
-        $this->assertSame(['email', 'id', 'username'], array_keys($data));
+        // Campos de Django (email, id, username) + role y permisos para el menú del frontend
+        $this->assertSame(['email', 'id', 'username', 'role', 'permisos'], array_keys($data));
         $this->assertSame('admin@correo.com', $data['email']);
         $this->assertSame(1, $data['id']);
         $this->assertSame('admin', $data['username']);

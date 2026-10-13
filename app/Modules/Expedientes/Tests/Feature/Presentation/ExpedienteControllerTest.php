@@ -57,6 +57,7 @@ function crearAutorizacionFeatureFixture(int $id = 1, int $expedienteId = 10, Ti
 beforeEach(function () {
     DB::table('auth_user')->insert(\Tests\Fixtures\UsuarioAuth::datos([
         'is_staff' => true,
+        'is_superuser' => true, // todos los accesos del perfil
         'id' => 1,
         'username' => 'admin',
         'email' => 'admin@test.com',

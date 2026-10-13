@@ -6,6 +6,7 @@ namespace Database\Factories;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Usuarios de `auth_user` (esquema de Django).
@@ -35,6 +36,18 @@ class UserFactory extends Factory
     /** Personal municipal con acceso a la gestión (rol ADMIN_MUNICIPALIDAD). */
     public function administrador(): static
     {
-        return $this->state(fn () => ['is_staff' => true]);
+        // Personal municipal con todos los accesos del perfil operativo
+        return $this->state(fn () => ['is_staff' => true])
+            ->afterCreating(function (User $usuario): void {
+                DB::table('usuarios_perfiles')->insert([
+                    'user_id' => $usuario->id,
+                    'expedientes' => true,
+                    'licencias' => true,
+                    'itse' => true,
+                    'admin' => true,
+                    'fecha_digitacion' => now(),
+                    'user_id_digitador' => $usuario->id,
+                ]);
+            });
     }
 }

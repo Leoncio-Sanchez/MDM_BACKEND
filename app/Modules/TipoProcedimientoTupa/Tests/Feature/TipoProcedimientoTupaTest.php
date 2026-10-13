@@ -26,6 +26,7 @@ class TipoProcedimientoTupaTest extends TestCase
 
         $id = DB::table('auth_user')->insertGetId(\Tests\Fixtures\UsuarioAuth::datos([
             'is_staff' => true,
+            'is_superuser' => true, // todos los accesos del perfil
             'username' => 'test_user',
             'password' => 'secret',
             'is_active' => true,

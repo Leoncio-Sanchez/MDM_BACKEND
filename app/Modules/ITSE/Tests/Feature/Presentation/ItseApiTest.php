@@ -18,7 +18,7 @@ use App\Models\User;
 uses(Tests\TestCase::class, RefreshDatabase::class);
 
 beforeEach(function () {
-    DB::table('auth_user')->insert(\Tests\Fixtures\UsuarioAuth::datos(['is_staff' => true, 'id' => 1, 'username' => 'test', 'email' => 'test@test.com', 'password' => 'secret']));
+    DB::table('auth_user')->insert(\Tests\Fixtures\UsuarioAuth::datos(['is_staff' => true, 'is_superuser' => true, 'id' => 1, 'username' => 'test', 'email' => 'test@test.com', 'password' => 'secret']));
     $this->user = User::find(1);
     
     $this->mockItse = Itse::crear(

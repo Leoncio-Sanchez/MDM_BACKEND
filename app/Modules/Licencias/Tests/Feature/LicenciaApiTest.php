@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 const URL_LICENCIAS = '/api/lf-itse/licencias-funcionamiento';
 
 beforeEach(function () {
-    DB::table('auth_user')->insert(\Tests\Fixtures\UsuarioAuth::datos(['is_staff' => true, 'id' => 1, 'username' => 'test', 'email' => 'test@test.com', 'password' => 'secret']));
+    DB::table('auth_user')->insert(\Tests\Fixtures\UsuarioAuth::datos(['is_staff' => true, 'is_superuser' => true, 'id' => 1, 'username' => 'test', 'email' => 'test@test.com', 'password' => 'secret']));
     $this->user = User::find(1);
 
     DB::table('tipos_licencia')->insert(\Tests\Fixtures\Registros::tipoLicencia(['id' => 1, 'nombre' => 'INDETERMINADA']));

@@ -12,6 +12,7 @@ beforeEach(function () {
 
     $userId = DB::table('auth_user')->insertGetId(\Tests\Fixtures\UsuarioAuth::datos([
         'is_staff' => true,
+        'is_superuser' => true, // todos los accesos del perfil
         'username' => 'admin_'.uniqid(),
         'password' => 'admin',
         'is_active' => true,
