@@ -25,7 +25,7 @@ final class EloquentItseRepository implements ItseRepositoryInterface
             'area' => $itse->area,
             'capacidad_aforo' => $itse->capacidadAforo,
             'numero_recibo_pago' => $itse->numeroReciboPago,
-            'observaciones' => $itse->observaciones,
+            'observaciones' => $itse->observaciones ?? '', // columna NOT NULL en producción
             'se_puede_publicar' => $itse->sePuedePublicar,
             'fecha_notificacion' => $itse->fechaNotificacion?->format('Y-m-d'),
             'fecha_digitacion' => $itse->fechaDigitacion->format("Y-m-d H:i:s"),
@@ -55,7 +55,7 @@ final class EloquentItseRepository implements ItseRepositoryInterface
             'area' => $itse->area,
             'capacidad_aforo' => $itse->capacidadAforo,
             'numero_recibo_pago' => $itse->numeroReciboPago,
-            'observaciones' => $itse->observaciones,
+            'observaciones' => $itse->observaciones ?? '', // columna NOT NULL en producción
             'se_puede_publicar' => $itse->sePuedePublicar,
             'fecha_notificacion' => $itse->fechaNotificacion?->format('Y-m-d'),
             'tipo_itse_id' => $itse->tipoItseId,

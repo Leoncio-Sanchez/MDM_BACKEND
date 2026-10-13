@@ -72,7 +72,8 @@ final readonly class Itse
             uuid: $uuid,
             numeroItse: $numeroItse,
             fechaExpedicion: $fechaExpedicion,
-            fechaSolicitudRenovacion: $fechaSolicitudRenovacion,
+            // La columna es obligatoria: si no es una renovación se usa la fecha de expedición
+            fechaSolicitudRenovacion: $fechaSolicitudRenovacion ?? $fechaExpedicion,
             fechaCaducidad: $fechaCaducidad,
             nombreComercial: $nombreComercial,
             direccion: $direccion,
@@ -116,7 +117,8 @@ final readonly class Itse
             uuid: $this->uuid,
             numeroItse: $this->numeroItse,
             fechaExpedicion: $fechaExpedicion,
-            fechaSolicitudRenovacion: $fechaSolicitudRenovacion,
+            // La columna es obligatoria: si no es una renovación se usa la fecha de expedición
+            fechaSolicitudRenovacion: $fechaSolicitudRenovacion ?? $fechaExpedicion,
             fechaCaducidad: $fechaCaducidad,
             nombreComercial: $nombreComercial,
             direccion: $direccion,

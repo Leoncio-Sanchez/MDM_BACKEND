@@ -48,6 +48,9 @@ it('crea un ITSE correctamente', function () {
     $this->assertDatabaseHas('itse', [
         'numero_itse' => 12345,
         'nombre_comercial' => 'TEST',
+        // Sin renovación: la fecha de solicitud toma la de expedición; sin observaciones: texto vacío
+        'fecha_solicitud_renovacion' => CarbonImmutable::now()->toDateString(),
+        'observaciones' => '',
     ]);
 });
 
@@ -57,6 +60,8 @@ it('actualiza un ITSE correctamente', function () {
         'numero_itse' => 999,
         'fecha_expedicion' => now()->toDateString(),
         'fecha_caducidad' => now()->addYear()->toDateString(),
+        'fecha_solicitud_renovacion' => now()->toDateString(),
+        'observaciones' => '',
         'nombre_comercial' => 'OLD',
         'direccion' => 'DIR',
         'resolucion_numero' => 'RES',
@@ -104,6 +109,8 @@ it('busca un ITSE por ID', function () {
         'numero_itse' => 111,
         'fecha_expedicion' => now()->toDateString(),
         'fecha_caducidad' => now()->addYear()->toDateString(),
+        'fecha_solicitud_renovacion' => now()->toDateString(),
+        'observaciones' => '',
         'nombre_comercial' => 'N',
         'direccion' => 'D',
         'resolucion_numero' => 'R',
@@ -132,6 +139,8 @@ it('verifica si existe numero o recibo', function () {
         'numero_itse' => 222,
         'fecha_expedicion' => now()->toDateString(),
         'fecha_caducidad' => now()->addYear()->toDateString(),
+        'fecha_solicitud_renovacion' => now()->toDateString(),
+        'observaciones' => '',
         'nombre_comercial' => 'N',
         'direccion' => 'D',
         'resolucion_numero' => 'R',
