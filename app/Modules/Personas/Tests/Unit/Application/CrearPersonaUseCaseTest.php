@@ -12,6 +12,8 @@ use App\Modules\Personas\Domain\ValueObjects\TipoPersona;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 
+uses(Tests\TestCase::class); // arranca Laravel: el test usa facades / helpers HTTP
+
 it('crea una persona correctamente', function () {
     $repo = Mockery::mock(PersonaRepositoryInterface::class);
     $docRepo = Mockery::mock(PersonaDocumentoRepositoryInterface::class);

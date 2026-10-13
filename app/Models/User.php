@@ -15,19 +15,28 @@ class User extends Authenticatable implements JWTSubject
     protected $table = 'auth_user';
     public $timestamps = false;
 
+    // Columnas reales de auth_user (Django). No hay name/role/ruc: el rol se calcula (Seguridad).
     protected $fillable = [
-        'name', 'username', 'role', 'ruc', 'email', 'password'
+        'username', 'password', 'first_name', 'last_name', 'email',
+        'is_superuser', 'is_staff', 'is_active', 'date_joined', 'last_login',
     ];
 
     protected $hidden = [
-        'password', 'remember_token',
+        'password',
     ];
 
+    /**
+     * Sin cast 'hashed': las contraseñas usan el formato de Django (pbkdf2_sha256, ver
+     * DjangoPbkdf2Hasher). Un cast a bcrypt las dejaría imposibles de verificar.
+     */
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'is_superuser' => 'boolean',
+            'is_staff' => 'boolean',
+            'is_active' => 'boolean',
+            'date_joined' => 'datetime',
+            'last_login' => 'datetime',
         ];
     }
 

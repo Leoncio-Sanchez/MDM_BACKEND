@@ -11,6 +11,8 @@ use App\Modules\ITSE\Domain\Exceptions\ItseNoEncontrado;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 
+uses(Tests\TestCase::class); // arranca Laravel: el test usa facades / helpers HTTP
+
 beforeEach(function () {
     $this->itses = Mockery::mock(ItseRepositoryInterface::class);
     $this->personas = Mockery::mock(PersonaReadRepositoryInterface::class);

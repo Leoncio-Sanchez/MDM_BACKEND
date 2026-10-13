@@ -33,12 +33,12 @@ beforeEach(function () {
         });
     }
 
-    $userId = DB::table('auth_user')->insertGetId([
+    $userId = DB::table('auth_user')->insertGetId(\Tests\Fixtures\UsuarioAuth::datos([
         'is_staff' => true,
         'username' => 'admin_'.uniqid(),
         'password' => 'admin',
         'is_active' => true,
-    ]);
+    ]));
     $this->user = User::find($userId);
 
 });
@@ -59,18 +59,18 @@ it('crea persona', function () {
 });
 
 it('obtiene persona por id', function () {
-    $personaId = DB::table('personas')->insertGetId([
+    $personaId = DB::table('personas')->insertGetId(\Tests\Fixtures\Registros::persona([
         'tipo_persona' => 'N', 'sexo' => 'M', 'nombres' => 'Juan', 'direccion' => 'D', 'distrito' => 'D', 'provincia' => 'P', 'departamento' => 'D', 'fecha_creacion' => now(), 'fecha_actualizacion' => now(), 'user_id' => $this->user->id,
-    ]);
+    ]));
 
     $response = $this->actingAs($this->user, 'api')->getJson('/api/lf-itse/personas/'.$personaId.'/');
     $response->assertStatus(200)->assertJsonPath('nombres', 'Juan');
 });
 
 it('actualiza persona', function () {
-    $personaId = DB::table('personas')->insertGetId([
+    $personaId = DB::table('personas')->insertGetId(\Tests\Fixtures\Registros::persona([
         'tipo_persona' => 'N', 'sexo' => 'M', 'nombres' => 'Juan', 'direccion' => 'D', 'distrito' => 'D', 'provincia' => 'P', 'departamento' => 'D', 'fecha_creacion' => now(), 'fecha_actualizacion' => now(), 'user_id' => $this->user->id,
-    ]);
+    ]));
 
     $response = $this->actingAs($this->user, 'api')->putJson('/api/lf-itse/personas/'.$personaId.'/', [
         'nombres' => 'Pedro',
@@ -79,9 +79,9 @@ it('actualiza persona', function () {
 });
 
 it('elimina persona', function () {
-    $personaId = DB::table('personas')->insertGetId([
+    $personaId = DB::table('personas')->insertGetId(\Tests\Fixtures\Registros::persona([
         'tipo_persona' => 'N', 'sexo' => 'M', 'nombres' => 'Juan', 'direccion' => 'D', 'distrito' => 'D', 'provincia' => 'P', 'departamento' => 'D', 'fecha_creacion' => now(), 'fecha_actualizacion' => now(), 'user_id' => $this->user->id,
-    ]);
+    ]));
 
     $response = $this->actingAs($this->user, 'api')->deleteJson('/api/lf-itse/personas/'.$personaId.'/');
     $response->assertStatus(204);
@@ -102,9 +102,9 @@ it('sexos devuelve lista', function () {
 });
 
 it('documentos devuelve lista', function () {
-    $personaId = DB::table('personas')->insertGetId([
+    $personaId = DB::table('personas')->insertGetId(\Tests\Fixtures\Registros::persona([
         'tipo_persona' => 'N', 'sexo' => 'M', 'nombres' => 'Juan', 'direccion' => 'D', 'distrito' => 'D', 'provincia' => 'P', 'departamento' => 'D', 'fecha_creacion' => now(), 'fecha_actualizacion' => now(), 'user_id' => $this->user->id,
-    ]);
+    ]));
     $response = $this->actingAs($this->user, 'api')->getJson('/api/lf-itse/personas/'.$personaId.'/documentos/');
     $response->assertStatus(200);
 });

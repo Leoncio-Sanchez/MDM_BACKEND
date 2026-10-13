@@ -50,14 +50,14 @@ final class InspectorApiTest extends TestCase
 
         UsuarioModel::truncate();
 
-        UsuarioModel::create([
+        UsuarioModel::create(\Tests\Fixtures\UsuarioAuth::datos([
             'id' => 1,
             'username' => 'admin',
             'password' => 'somehash',
             'is_superuser' => true,
             'is_staff' => true,
             'is_active' => true,
-        ]);
+        ]));
 
         /** @var TokenServiceInterface $tokenService */
         $tokenService = app(TokenServiceInterface::class);
@@ -74,13 +74,13 @@ final class InspectorApiTest extends TestCase
 
     public function test_listar_inspectores_devuelve_200(): void
     {
-        UsuarioModel::create([
+        UsuarioModel::create(\Tests\Fixtures\UsuarioAuth::datos([
             'username' => 'inspector_carlos',
             'first_name' => 'Carlos',
             'last_name' => 'Sanchez',
             'is_active' => true,
             'password' => 'somehash',
-        ]);
+        ]));
 
         $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
             ->getJson('/api/lf-itse/inspectores/');
@@ -108,12 +108,12 @@ final class InspectorApiTest extends TestCase
 
     public function test_obtener_inspector_por_id(): void
     {
-        $insp = UsuarioModel::create([
+        $insp = UsuarioModel::create(\Tests\Fixtures\UsuarioAuth::datos([
             'username' => 'inspector_detalle',
             'first_name' => 'Pedro',
             'password' => 'somehash',
             'is_active' => true,
-        ]);
+        ]));
 
         $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
             ->getJson('/api/lf-itse/inspectores/'.$insp->id.'/');
@@ -124,12 +124,12 @@ final class InspectorApiTest extends TestCase
 
     public function test_buscar_inspectores(): void
     {
-        UsuarioModel::create([
+        UsuarioModel::create(\Tests\Fixtures\UsuarioAuth::datos([
             'username' => 'inspector_busqueda',
             'first_name' => 'Mariana',
             'password' => 'somehash',
             'is_active' => true,
-        ]);
+        ]));
 
         $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
             ->getJson('/api/lf-itse/inspectores/buscar/?busqueda=Mariana');
@@ -141,12 +141,12 @@ final class InspectorApiTest extends TestCase
 
     public function test_actualizar_inspector(): void
     {
-        $insp = UsuarioModel::create([
+        $insp = UsuarioModel::create(\Tests\Fixtures\UsuarioAuth::datos([
             'username' => 'inspector_mod',
             'first_name' => 'Luis',
             'password' => 'somehash',
             'is_active' => true,
-        ]);
+        ]));
 
         $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
             ->putJson('/api/lf-itse/inspectores/'.$insp->id.'/', [
@@ -160,11 +160,11 @@ final class InspectorApiTest extends TestCase
 
     public function test_eliminar_inspector(): void
     {
-        $insp = UsuarioModel::create([
+        $insp = UsuarioModel::create(\Tests\Fixtures\UsuarioAuth::datos([
             'username' => 'inspector_eliminar',
             'password' => 'somehash',
             'is_active' => true,
-        ]);
+        ]));
 
         $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
             ->deleteJson('/api/lf-itse/inspectores/'.$insp->id.'/');

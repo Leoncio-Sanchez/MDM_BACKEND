@@ -8,5 +8,5 @@ interface LicenciaGiroRepositoryInterface
     public function obtenerGiros(int $licenciaId): array;
     public function eliminarGiros(int $licenciaId): void;
     /** @param int[] $giroIds */
-    public function insertarGiros(int $licenciaId, array $giroIds): void;
+    public function insertarGiros(int $licenciaId, array $giroIds, int $usuarioId): void;
 }

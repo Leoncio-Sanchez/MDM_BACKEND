@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Modules\Personas\Presentation\Controllers\PersonaController;
-use App\Modules\Personas\Presentation\Controllers\ReniecController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:api', 'rol:ADMIN_MUNICIPALIDAD'])->prefix('api/lf-itse')->group(function () {
@@ -19,6 +18,4 @@ Route::middleware(['auth:api', 'rol:ADMIN_MUNICIPALIDAD'])->prefix('api/lf-itse'
     Route::delete('personas/{pk}/', [PersonaController::class, 'destroy'])->whereNumber('pk');
 
     Route::get('personas/{pk}/documentos/', [PersonaController::class, 'documentos'])->whereNumber('pk');
-
-    Route::get('reniec/consultar/', [ReniecController::class, 'consultar']);
 });

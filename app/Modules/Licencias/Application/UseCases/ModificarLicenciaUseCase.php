@@ -73,7 +73,7 @@ final readonly class ModificarLicenciaUseCase
 
             $this->giros->eliminarGiros($dto->licenciaId);
             if (!empty($dto->giros)) {
-                $this->giros->insertarGiros($dto->licenciaId, $dto->giros);
+                $this->giros->insertarGiros($dto->licenciaId, $dto->giros, $dto->usuarioId);
             }
 
             return $persistida;

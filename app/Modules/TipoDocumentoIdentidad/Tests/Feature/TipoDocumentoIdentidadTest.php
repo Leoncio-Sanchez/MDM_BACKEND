@@ -16,12 +16,12 @@ class TipoDocumentoIdentidadTest extends TestCase
 
     private function getAuthUser(): User
     {
-        $id = DB::table('auth_user')->insertGetId([
+        $id = DB::table('auth_user')->insertGetId(\Tests\Fixtures\UsuarioAuth::datos([
             'is_staff' => true,
             'username' => 'test_user',
             'password' => 'secret',
             'is_active' => true,
-        ]);
+        ]));
 
         /** @var User $user */
         $user = User::find($id);
@@ -31,10 +31,7 @@ class TipoDocumentoIdentidadTest extends TestCase
     /** tipo_persona es opcional desde TD-006: sin él se listan todos (lo usa la pantalla de Personas). */
     public function test_lista_todos_sin_query_param(): void
     {
-        DB::table('tipos_documento_identidad')->insert([
-            ['codigo' => '01', 'nombre' => 'DNI', 'esta_activo' => true, 'es_para_natural' => true, 'es_para_juridica' => false],
-            ['codigo' => '06', 'nombre' => 'RUC', 'esta_activo' => true, 'es_para_natural' => true, 'es_para_juridica' => true],
-        ]);
+        DB::table('tipos_documento_identidad')->insert([\Tests\Fixtures\Registros::tipoDocumentoIdentidad(['codigo' => '01', 'nombre' => 'DNI', 'esta_activo' => true, 'es_para_natural' => true, 'es_para_juridica' => false]), \Tests\Fixtures\Registros::tipoDocumentoIdentidad(['codigo' => '06', 'nombre' => 'RUC', 'esta_activo' => true, 'es_para_natural' => true, 'es_para_juridica' => true])]);
 
         $this->comoUsuarioApi()->getJson('/api/lf-itse/tipos-documento-identidad')
             ->assertOk()

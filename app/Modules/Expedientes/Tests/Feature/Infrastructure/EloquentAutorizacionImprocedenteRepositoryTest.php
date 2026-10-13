@@ -47,8 +47,9 @@ it('verifica existencia de autorizacion improcedente', function () {
         expedienteId: 20,
         tipo: TipoAutorizacion::ITSE,
         fechaRechazo: new DateTimeImmutable('2026-09-20'),
-        documento: null,
-        observaciones: null,
+        // NOT NULL en el esquema real (la API también los exige)
+        documento: 'RES-20-2026',
+        observaciones: 'Sin observaciones',
         usuarioId: 1,
     );
     $this->repo->crear($auto);

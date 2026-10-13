@@ -33,23 +33,23 @@ class EloquentUserRepositoryTest extends TestCase
 
         UserAuthModel::truncate();
 
-        UserAuthModel::create([
+        UserAuthModel::create(\Tests\Fixtures\UsuarioAuth::datos([
             'username' => 'admin',
             'password' => 'pbkdf2_sha256$1200000$salt$hash',
             'email' => 'admin@muni.gob.pe',
             'is_superuser' => true,
             'is_staff' => true,
             'is_active' => true,
-        ]);
+        ]));
 
-        UserAuthModel::create([
+        UserAuthModel::create(\Tests\Fixtures\UsuarioAuth::datos([
             'username' => 'inspector1',
             'password' => 'pbkdf2_sha256$1200000$salt$hash2',
             'email' => 'inspector1@muni.gob.pe',
             'is_superuser' => false,
             'is_staff' => false,
             'is_active' => true,
-        ]);
+        ]));
     }
 
     public function test_busca_usuario_por_username_existente(): void

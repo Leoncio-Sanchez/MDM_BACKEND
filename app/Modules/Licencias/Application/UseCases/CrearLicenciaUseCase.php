@@ -54,6 +54,6 @@ final readonly class CrearLicenciaUseCase {
             observaciones: $dto->observaciones,
             sePuedePublicar: $dto->sePuedePublicar,
         );
-        return $this->licencias->crear($licencia);
+        return $this->licencias->crear($licencia, $dto->usuarioId);
     }
 }

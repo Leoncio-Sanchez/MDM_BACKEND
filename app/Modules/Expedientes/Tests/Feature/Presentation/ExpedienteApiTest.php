@@ -10,23 +10,23 @@ use Tests\TestCase;
 uses(TestCase::class, RefreshDatabase::class);
 
 beforeEach(function () {
-    DB::table('auth_user')->insert([
+    DB::table('auth_user')->insert(\Tests\Fixtures\UsuarioAuth::datos([
         'is_staff' => true,
         'id' => 1,
         'username' => 'admin',
         'email' => 'admin@test.com',
         'password' => 'secret',
-    ]);
+    ]));
     $this->user = User::find(1);
 
-    DB::table('unidades_organicas')->insert([
+    DB::table('unidades_organicas')->insert(\Tests\Fixtures\Registros::unidadOrganica([
         'id' => 1,
         'codigo' => 'UO-01',
         'nombre' => 'Unidad 1',
         'esta_activo' => true,
-    ]);
+    ]));
 
-    DB::table('tipos_procedimiento_tupa')->insert([
+    DB::table('tipos_procedimiento_tupa')->insert(\Tests\Fixtures\Registros::tipoProcedimientoTupa([
         'id' => 1,
         'codigo' => 'TUPA-01',
         'nombre' => 'Procedimiento TUPA 1',
@@ -38,10 +38,9 @@ beforeEach(function () {
         'fecha_digitacion' => '2026-01-01 00:00:00',
         'usuario_id' => 1,
         'unidad_organica_id' => 1,
-        'monto' => 50.00,
-    ]);
+    ]));
 
-    DB::table('personas')->insert([
+    DB::table('personas')->insert(\Tests\Fixtures\Registros::persona([
         'id' => 1,
         'tipo_persona' => 'N',
         'sexo' => 'M',
@@ -49,9 +48,9 @@ beforeEach(function () {
         'apellido_paterno' => 'Perez',
         'apellido_materno' => 'Gomez',
         'user_id' => 1,
-    ]);
+    ]));
 
-    DB::table('personas')->insert([
+    DB::table('personas')->insert(\Tests\Fixtures\Registros::persona([
         'id' => 2,
         'tipo_persona' => 'N',
         'sexo' => 'F',
@@ -59,7 +58,7 @@ beforeEach(function () {
         'apellido_paterno' => 'Lopez',
         'apellido_materno' => 'Diaz',
         'user_id' => 1,
-    ]);
+    ]));
 });
 
 it('POST /api/lf-itse/expedientes/ crea un expediente correctamente y retorna 201 con 19 keys', function () {
@@ -321,7 +320,7 @@ it('DELETE /api/lf-itse/expedientes/{pk}/ retorna 409 cuando tiene licencia asoc
     ]);
     $id = $createRes->json('id');
 
-    DB::table('licencias_funcionamiento')->insert([
+    DB::table('licencias_funcionamiento')->insert(\Tests\Fixtures\Registros::licencia([
         'id' => 1,
         'uuid' => '11111111-1111-1111-1111-111111111111',
         'numero_licencia' => 101,
@@ -341,8 +340,7 @@ it('DELETE /api/lf-itse/expedientes/{pk}/ retorna 409 cuando tiene licencia asoc
         'resolucion_numero' => 'RES-101',
         'area' => 50.00,
         'numero_recibo_pago' => 'REC-101',
-        'estado' => 'EMITIDA',
-    ]);
+    ]));
 
     $response = $this->actingAs($this->user, 'api')
         ->deleteJson("/api/lf-itse/expedientes/{$id}/");
@@ -358,7 +356,7 @@ it('DELETE /api/lf-itse/expedientes/{pk}/ retorna 409 cuando tiene ITSE asociado
     ]);
     $id = $createRes->json('id');
 
-    DB::table('itse')->insert([
+    DB::table('itse')->insert(\Tests\Fixtures\Registros::itse([
         'id' => 1,
         'uuid' => '22222222-2222-2222-2222-222222222222',
         'numero_itse' => 201,
@@ -376,7 +374,7 @@ it('DELETE /api/lf-itse/expedientes/{pk}/ retorna 409 cuando tiene ITSE asociado
         'nivel_riesgo_id' => 1,
         'conductor_id' => 1,
         'titular_id' => 1,
-    ]);
+    ]));
 
     $response = $this->actingAs($this->user, 'api')
         ->deleteJson("/api/lf-itse/expedientes/{$id}/");

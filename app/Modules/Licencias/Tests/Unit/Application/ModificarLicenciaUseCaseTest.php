@@ -80,10 +80,11 @@ it('modifica una licencia correctamente y actualiza giros', function () {
     $this->licencias->shouldReceive('actualizar')->once()->andReturnUsing(fn ($l) => $l);
 
     $this->giros->shouldReceive('eliminarGiros')->with(1)->once();
-    $this->giros->shouldReceive('insertarGiros')->with(1, [5, 6])->once();
+    $this->giros->shouldReceive('insertarGiros')->with(1, [5, 6], 9)->once();
 
     $dto = new ModificarLicenciaDTO(
         licenciaId: 1,
+        usuarioId: 9,
         numeroLicencia: 12345,
         nombreComercial: 'Nuevo Nombre',
         tipoLicenciaId: 1,
@@ -107,7 +108,8 @@ it('lanza LicenciaNoEncontrada si no existe', function () {
     $this->licencias->shouldReceive('buscarPorId')->with(1)->once()->andReturnNull();
 
     $dto = new ModificarLicenciaDTO(
-        licenciaId: 1, numeroLicencia: 12345, nombreComercial: 'Test',
+        licenciaId: 1,
+        usuarioId: 9, numeroLicencia: 12345, nombreComercial: 'Test',
         tipoLicenciaId: 1, titularId: 1, conductorId: 1, expedienteId: 1, nivelRiesgoId: 1, zonificacionId: 1
     );
 
@@ -121,7 +123,8 @@ it('lanza LicenciaDenegadaError si expediente tiene autorización improcedente',
         ->with(30, 'LF')->once()->andReturn(true);
 
     $dto = new ModificarLicenciaDTO(
-        licenciaId: 1, numeroLicencia: 12345, nombreComercial: 'Test',
+        licenciaId: 1,
+        usuarioId: 9, numeroLicencia: 12345, nombreComercial: 'Test',
         tipoLicenciaId: 1, titularId: 1, conductorId: 1, expedienteId: 30, nivelRiesgoId: 1, zonificacionId: 1
     );
 
@@ -134,7 +137,8 @@ it('lanza LicenciaDuplicadaError si número existe', function () {
     $this->licencias->shouldReceive('existeNumeroLicencia')->with(12345, 1)->once()->andReturn(true);
 
     $dto = new ModificarLicenciaDTO(
-        licenciaId: 1, numeroLicencia: 12345, nombreComercial: 'Test',
+        licenciaId: 1,
+        usuarioId: 9, numeroLicencia: 12345, nombreComercial: 'Test',
         tipoLicenciaId: 1, titularId: 1, conductorId: 1, expedienteId: 30, nivelRiesgoId: 1, zonificacionId: 1
     );
 
@@ -148,7 +152,8 @@ it('lanza ReciboPagoDuplicadoError si recibo existe', function () {
     $this->licencias->shouldReceive('existeReciboPago')->with('REC-001', 1)->once()->andReturn(true);
 
     $dto = new ModificarLicenciaDTO(
-        licenciaId: 1, numeroLicencia: 12345, nombreComercial: 'Test',
+        licenciaId: 1,
+        usuarioId: 9, numeroLicencia: 12345, nombreComercial: 'Test',
         tipoLicenciaId: 1, titularId: 1, conductorId: 1, expedienteId: 30, nivelRiesgoId: 1, zonificacionId: 1,
         numeroReciboPago: 'REC-001'
     );
@@ -164,7 +169,8 @@ it('fuerza fechas null si es_vigencia_indeterminada', function () {
     $this->giros->shouldReceive('eliminarGiros')->once();
 
     $dto = new ModificarLicenciaDTO(
-        licenciaId: 1, numeroLicencia: 12345, nombreComercial: 'Test',
+        licenciaId: 1,
+        usuarioId: 9, numeroLicencia: 12345, nombreComercial: 'Test',
         tipoLicenciaId: 1, titularId: 1, conductorId: 1, expedienteId: 30, nivelRiesgoId: 1, zonificacionId: 1,
         esVigenciaIndeterminada: true,
         fechaInicioVigencia: \Carbon\CarbonImmutable::now(),

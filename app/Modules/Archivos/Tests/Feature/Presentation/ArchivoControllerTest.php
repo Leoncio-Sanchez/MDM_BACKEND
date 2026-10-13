@@ -22,13 +22,13 @@ uses(TestCase::class, RefreshDatabase::class);
 beforeEach(function () {
     Storage::fake('media');
 
-    DB::table('auth_user')->insert([
+    DB::table('auth_user')->insert(\Tests\Fixtures\UsuarioAuth::datos([
         'is_staff' => true,
         'id' => 1,
         'username' => 'admin',
         'email' => 'admin@muni.gob.pe',
         'password' => 'secret',
-    ]);
+    ]));
     $this->user = User::find(1);
 
     $this->expRepo = app(ExpedienteArchivoRepositoryInterface::class);

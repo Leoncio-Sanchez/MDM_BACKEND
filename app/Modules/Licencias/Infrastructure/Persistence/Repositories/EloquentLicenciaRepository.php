@@ -51,11 +51,13 @@ final readonly class EloquentLicenciaRepository implements LicenciaRepositoryInt
         return $models->map(fn (LicenciaModel $m) => $this->mapper->toDomain($m))->all();
     }
 
-    public function crear(Licencia $licencia): Licencia {
-        /** @var LicenciaModel $model */
+    public function crear(Licencia $licencia, int $usuarioId): Licencia {
         $data = $this->mapper->toPersistence($licencia);
         $model = new LicenciaModel();
         $model->fill($data);
+        // Auditoría: obligatorias en el esquema real; solo se fijan al crear (actualizar las conserva)
+        $model->usuario_id = $usuarioId;
+        $model->fecha_digitacion = now();
         $model->uuid = $licencia->uuid;
         $model->save();
         return $this->mapper->toDomain($model);
@@ -70,13 +72,6 @@ final readonly class EloquentLicenciaRepository implements LicenciaRepositoryInt
 
     public function eliminar(int $id): void {
         LicenciaModel::destroy($id);
-    }
-
-    public function inactivar(int $id): Licencia {
-        /** @var LicenciaModel $model */
-        $model = LicenciaModel::findOrFail($id);
-        $model->update(['estado' => 'INACTIVA']);
-        return $this->mapper->toDomain($model->refresh());
     }
 
 

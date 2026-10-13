@@ -107,8 +107,8 @@ final class LicenciaResourceNullSafetyTest extends TestCase
 
     public function test_licencia_resource_mapea_correctamente_entidad_con_null_safety(): void
     {
-        $id = \Illuminate\Support\Facades\DB::table('licencias_funcionamiento')->insertGetId([
-            'uuid' => 'test-uuid-1234',
+        $id = \Illuminate\Support\Facades\DB::table('licencias_funcionamiento')->insertGetId(\Tests\Fixtures\Registros::licencia([
+            'uuid' => '00000000-0000-4000-8000-000000001234',
             'numero_licencia' => 101,
             'nombre_comercial' => 'Bodega Test',
             'tipo_licencia_id' => 1,
@@ -121,7 +121,7 @@ final class LicenciaResourceNullSafetyTest extends TestCase
             'es_vigencia_indeterminada' => true,
             'se_puede_publicar' => true,
             'usuario_id' => 1,
-        ]);
+        ]));
 
         $resource = new LicenciaResource(['id' => $id]);
         $result = $resource->toArray(Request::create('/'));

@@ -16,12 +16,12 @@ class GiroTest extends TestCase {
         $existing = User::where('username', 'test_user')->first();
         if ($existing) return $existing;
 
-        $id = DB::table('auth_user')->insertGetId([
+        $id = DB::table('auth_user')->insertGetId(\Tests\Fixtures\UsuarioAuth::datos([
             'is_staff' => true,
             'username' => 'test_user',
             'password' => 'secret',
             'is_active' => true,
-        ]);
+        ]));
         /** @var User $user */
         $user = User::find($id);
         return $user;
@@ -58,7 +58,7 @@ class GiroTest extends TestCase {
         $data = ['ciiu_id' => 5678, 'nombre' => 'Giro auth', 'esta_activo' => true];
         $response = $this->actingAs($this->getAuthUser(), 'api')->postJson('/api/lf-itse/giros', $data);
         $response->assertStatus(201);
-        $this->assertDatabaseHas('giros', ['ciiu_id' => 5678, 'usuario_id' => 1]);
+        $this->assertDatabaseHas('giros', ['ciiu_id' => 5678, 'usuario_id' => $this->getAuthUser()->id]);
     }
 
     public function test_puede_actualizar_giro(): void {

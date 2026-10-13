@@ -73,19 +73,19 @@ final class CompatibilidadRutasTest extends TestCase
         }
 
         UsuarioModel::truncate();
-        $admin = UsuarioModel::create([
+        $admin = UsuarioModel::create(\Tests\Fixtures\UsuarioAuth::datos([
             'id' => 1,
             'username' => 'admin',
             'password' => 'hash',
             'is_superuser' => true,
             'is_staff' => true,
             'is_active' => true,
-        ]);
+        ]));
 
         /** @var TokenServiceInterface $tokenService */
         $tokenService = app(TokenServiceInterface::class);
         $authUser = new AuthenticatedUser(
-            id: 1,
+            id: (int) $admin->id, // el id real (la secuencia no siempre arranca en 1)
             username: 'admin',
             email: 'admin@muni.gob.pe',
             role: 'ADMIN_MUNICIPALIDAD',
@@ -107,11 +107,7 @@ final class CompatibilidadRutasTest extends TestCase
     public function test_estados_inactivos_itse_filtra_correctamente(): void
     {
         DB::table('estados')->truncate();
-        DB::table('estados')->insert([
-            ['id' => 1, 'nombre' => 'ACTIVO', 'es_para_lf' => true, 'es_para_itse' => true, 'esta_activo' => true],
-            ['id' => 2, 'nombre' => 'VENCIDO ITSE', 'es_para_lf' => false, 'es_para_itse' => true, 'esta_activo' => false],
-            ['id' => 3, 'nombre' => 'CANCELADO LF', 'es_para_lf' => true, 'es_para_itse' => false, 'esta_activo' => false],
-        ]);
+        DB::table('estados')->insert([\Tests\Fixtures\Registros::estado(['id' => 1, 'nombre' => 'ACTIVO', 'es_para_lf' => true, 'es_para_itse' => true, 'esta_activo' => true]), \Tests\Fixtures\Registros::estado(['id' => 2, 'nombre' => 'VENCIDO ITSE', 'es_para_lf' => false, 'es_para_itse' => true, 'esta_activo' => false]), \Tests\Fixtures\Registros::estado(['id' => 3, 'nombre' => 'CANCELADO LF', 'es_para_lf' => true, 'es_para_itse' => false, 'esta_activo' => false])]);
 
         $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
             ->getJson('/api/lf-itse/estados/inactivos-itse/');
@@ -125,11 +121,7 @@ final class CompatibilidadRutasTest extends TestCase
     public function test_estados_inactivos_lf_filtra_correctamente(): void
     {
         DB::table('estados')->truncate();
-        DB::table('estados')->insert([
-            ['id' => 1, 'nombre' => 'ACTIVO', 'es_para_lf' => true, 'es_para_itse' => true, 'esta_activo' => true],
-            ['id' => 2, 'nombre' => 'VENCIDO ITSE', 'es_para_lf' => false, 'es_para_itse' => true, 'esta_activo' => false],
-            ['id' => 3, 'nombre' => 'CANCELADO LF', 'es_para_lf' => true, 'es_para_itse' => false, 'esta_activo' => false],
-        ]);
+        DB::table('estados')->insert([\Tests\Fixtures\Registros::estado(['id' => 1, 'nombre' => 'ACTIVO', 'es_para_lf' => true, 'es_para_itse' => true, 'esta_activo' => true]), \Tests\Fixtures\Registros::estado(['id' => 2, 'nombre' => 'VENCIDO ITSE', 'es_para_lf' => false, 'es_para_itse' => true, 'esta_activo' => false]), \Tests\Fixtures\Registros::estado(['id' => 3, 'nombre' => 'CANCELADO LF', 'es_para_lf' => true, 'es_para_itse' => false, 'esta_activo' => false])]);
 
         $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
             ->getJson('/api/lf-itse/estados/inactivos-lf/');
@@ -146,12 +138,14 @@ final class CompatibilidadRutasTest extends TestCase
         DB::table('giros')->truncate();
         DB::table('licencias_funcionamiento_giros')->truncate();
 
-        DB::table('licencias_funcionamiento')->insert(['id' => 10, 'nombre_comercial' => 'Bodega Test']);
-        DB::table('giros')->insert(['id' => 5, 'ciiu_id' => '4711', 'nombre' => 'VENTA AL POR MENOR']);
+        DB::table('licencias_funcionamiento')->insert(\Tests\Fixtures\Registros::licencia(['id' => 10, 'nombre_comercial' => 'Bodega Test']));
+        DB::table('giros')->insert(\Tests\Fixtures\Registros::giro(['id' => 5, 'ciiu_id' => '4711', 'nombre' => 'VENTA AL POR MENOR']));
         DB::table('licencias_funcionamiento_giros')->insert([
             'id' => 1,
             'licencia_funcionamiento_id' => 10,
             'giro_id' => 5,
+            'fecha_digitacion' => now(),
+            'usuario_id' => 1,
         ]);
 
         $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
@@ -160,7 +154,7 @@ final class CompatibilidadRutasTest extends TestCase
         $response->assertStatus(200);
         $data = $response->json();
         $this->assertCount(1, $data);
-        $this->assertSame('4711', $data[0]['ciiu_id']);
+        $this->assertSame(4711, $data[0]['ciiu_id']); // giros.ciiu_id es integer en el esquema real
         $this->assertSame('VENTA AL POR MENOR', $data[0]['nombre']);
     }
 }

@@ -6,42 +6,35 @@ namespace Database\Factories;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 /**
+ * Usuarios de `auth_user` (esquema de Django).
+ *
  * @extends Factory<User>
  */
 class UserFactory extends Factory
 {
-    /**
-     * The current password being used by the factory.
-     */
-    protected static ?string $password;
+    protected $model = User::class;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
+            'username' => fake()->unique()->userName(),
             'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
-            'remember_token' => Str::random(10),
+            'first_name' => fake()->firstName(),
+            'last_name' => fake()->lastName(),
+            // Hash con formato Django válido (pbkdf2_sha256) aunque no se use para iniciar sesión
+            'password' => 'pbkdf2_sha256$1200000$factorysalt$' . base64_encode(random_bytes(32)),
+            'is_superuser' => false,
+            'is_staff' => false,
+            'is_active' => true,
+            'date_joined' => now(),
         ];
     }
 
-    /**
-     * Indicate that the model's email address should be unverified.
-     */
-    public function unverified(): static
+    /** Personal municipal con acceso a la gestión (rol ADMIN_MUNICIPALIDAD). */
+    public function administrador(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
-        ]);
+        return $this->state(fn () => ['is_staff' => true]);
     }
 }

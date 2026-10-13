@@ -55,13 +55,13 @@ function crearAutorizacionFeatureFixture(int $id = 1, int $expedienteId = 10, Ti
 }
 
 beforeEach(function () {
-    DB::table('auth_user')->insert([
+    DB::table('auth_user')->insert(\Tests\Fixtures\UsuarioAuth::datos([
         'is_staff' => true,
         'id' => 1,
         'username' => 'admin',
         'email' => 'admin@test.com',
         'password' => 'secret',
-    ]);
+    ]));
     $this->user = User::find(1);
 
     $this->repo = Mockery::mock(ExpedienteRepositoryInterface::class);

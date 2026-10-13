@@ -18,7 +18,7 @@ use App\Models\User;
 uses(Tests\TestCase::class, RefreshDatabase::class);
 
 beforeEach(function () {
-    DB::table('auth_user')->insert(['is_staff' => true, 'id' => 1, 'username' => 'test', 'email' => 'test@test.com', 'password' => 'secret']);
+    DB::table('auth_user')->insert(\Tests\Fixtures\UsuarioAuth::datos(['is_staff' => true, 'id' => 1, 'username' => 'test', 'email' => 'test@test.com', 'password' => 'secret']));
     $this->user = User::find(1);
     
     $this->mockItse = Itse::crear(
@@ -202,7 +202,7 @@ it('inactivar ITSE', function () {
     $this->mock(ItseRepositoryInterface::class, function ($mock) {
         $mock->shouldReceive('buscarPorId')->zeroOrMoreTimes()->andReturn($this->mockItse);
     });
-    $estadoId = DB::table('estados')->insertGetId(['nombre' => 'CLAUSURA', 'es_para_lf' => false, 'es_para_itse' => true, 'esta_activo' => false]);
+    $estadoId = DB::table('estados')->insertGetId(\Tests\Fixtures\Registros::estado(['nombre' => 'CLAUSURA', 'es_para_lf' => false, 'es_para_itse' => true, 'esta_activo' => false]));
     $this->mock(ItseEstadoRepositoryInterface::class, function ($mock) use ($estadoId) {
         $mock->shouldReceive('tieneEstadoInactivo')->andReturn(false);
         $mock->shouldReceive('crear')->once()

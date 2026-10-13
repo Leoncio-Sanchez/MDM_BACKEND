@@ -32,7 +32,6 @@ class LicenciaModel extends Model
         'observaciones',
         'se_puede_publicar',
         'fecha_notificacion',
-        'estado',
     ];
 
     protected function casts(): array

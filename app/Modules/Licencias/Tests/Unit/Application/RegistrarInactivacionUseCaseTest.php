@@ -112,9 +112,8 @@ it('NO modifica el estado de la licencia (solo inserta historial)', function () 
     $this->licencias->shouldReceive('existeEstado')->with(1, 5)->once()->andReturn(false);
     $this->licencias->shouldReceive('insertarEstado')->once();
 
-    // ⚠️ CRÍTICO: NO debe llamar a actualizar() ni inactivar()
+    // ⚠️ CRÍTICO: NO debe modificar la licencia (solo inserta historial)
     $this->licencias->shouldNotReceive('actualizar');
-    $this->licencias->shouldNotReceive('inactivar');
 
     $dto = new InactivarLicenciaDTO(
         licenciaId: 1,

@@ -36,7 +36,7 @@ final class AuthParityTest extends TestCase
 
         $this->passwordHash = 'pbkdf2_sha256$1200000$bCyHs02f8l03epJzsd0N0D$s+PXHa+tN/qJkDe7bnCgcCFghprjFNI2xLALtbqwW3U=';
 
-        UserAuthModel::create([
+        UserAuthModel::create(\Tests\Fixtures\UsuarioAuth::datos([
             'id' => 1,
             'username' => 'admin',
             'password' => $this->passwordHash,
@@ -44,7 +44,7 @@ final class AuthParityTest extends TestCase
             'is_superuser' => true,
             'is_staff' => true,
             'is_active' => true,
-        ]);
+        ]));
     }
 
     public function test_login_exitoso_payload_jwt_contiene_los_claims_exactos(): void

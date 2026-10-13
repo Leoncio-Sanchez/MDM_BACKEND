@@ -35,8 +35,8 @@ it('crea un ItseEstado', function () {
 });
 
 it('detecta si el ITSE tiene un estado inactivo', function () {
-    $activo = \Illuminate\Support\Facades\DB::table('estados')->insertGetId(['nombre' => 'VIGENTE', 'es_para_lf' => false, 'es_para_itse' => true, 'esta_activo' => true]);
-    $inactivo = \Illuminate\Support\Facades\DB::table('estados')->insertGetId(['nombre' => 'CLAUSURA', 'es_para_lf' => false, 'es_para_itse' => true, 'esta_activo' => false]);
+    $activo = \Illuminate\Support\Facades\DB::table('estados')->insertGetId(\Tests\Fixtures\Registros::estado(['nombre' => 'VIGENTE', 'es_para_lf' => false, 'es_para_itse' => true, 'esta_activo' => true]));
+    $inactivo = \Illuminate\Support\Facades\DB::table('estados')->insertGetId(\Tests\Fixtures\Registros::estado(['nombre' => 'CLAUSURA', 'es_para_lf' => false, 'es_para_itse' => true, 'esta_activo' => false]));
 
     $this->repo->crear(ItseEstado::crear(CarbonImmutable::now(), 'D', 'O', CarbonImmutable::now(), $activo, 1, 1));
     expect($this->repo->tieneEstadoInactivo(1))->toBeFalse();

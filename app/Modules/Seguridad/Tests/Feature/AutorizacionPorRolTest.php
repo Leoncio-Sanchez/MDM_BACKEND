@@ -18,9 +18,9 @@ final class AutorizacionPorRolTest extends TestCase
 
     private function crearUsuario(string $username, bool $esStaff = false): User
     {
-        $id = DB::table('auth_user')->insertGetId([
+        $id = DB::table('auth_user')->insertGetId(\Tests\Fixtures\UsuarioAuth::datos([
             'username' => $username, 'password' => 'x', 'is_active' => true, 'is_staff' => $esStaff,
-        ]);
+        ]));
 
         /** @var User $usuario */
         $usuario = User::find($id);

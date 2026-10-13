@@ -24,12 +24,12 @@ class TipoProcedimientoTupaTest extends TestCase
             return $existing;
         }
 
-        $id = DB::table('auth_user')->insertGetId([
+        $id = DB::table('auth_user')->insertGetId(\Tests\Fixtures\UsuarioAuth::datos([
             'is_staff' => true,
             'username' => 'test_user',
             'password' => 'secret',
             'is_active' => true,
-        ]);
+        ]));
         /** @var User $user */
         $user = User::find($id);
 
@@ -39,9 +39,9 @@ class TipoProcedimientoTupaTest extends TestCase
     private function seedDeps(): void
     {
         $this->getAuthUser(); // usuario_id tiene FK a auth_user
-        DB::table('unidades_organicas')->insert([
+        DB::table('unidades_organicas')->insert(\Tests\Fixtures\Registros::unidadOrganica([
             'id' => 1, 'codigo' => 'U01', 'nombre' => 'Unidad 1', 'esta_activo' => true,
-        ]);
+        ]));
     }
 
     private function crearTipo(string $codigo = 'T01'): TipoProcedimientoTupaModel
@@ -110,7 +110,7 @@ class TipoProcedimientoTupaTest extends TestCase
 
         $this->autenticado()->postJson(self::URL, $this->datos())->assertCreated();
 
-        $this->assertDatabaseHas('tipos_procedimiento_tupa', ['codigo' => 'T02', 'usuario_id' => 1, 'esta_activo' => true]);
+        $this->assertDatabaseHas('tipos_procedimiento_tupa', ['codigo' => 'T02', 'usuario_id' => $this->getAuthUser()->id, 'esta_activo' => true]);
     }
 
     public function test_respeta_esta_activo_al_crear(): void
@@ -181,7 +181,7 @@ class TipoProcedimientoTupaTest extends TestCase
     {
         $this->seedDeps();
         $m = $this->crearTipo();
-        DB::table('expedientes')->insert(['tipo_procedimiento_tupa_id' => $m->id]);
+        DB::table('expedientes')->insert(\Tests\Fixtures\Registros::expediente(['tipo_procedimiento_tupa_id' => $m->id]));
 
         $this->autenticado()->deleteJson(self::URL . '/' . $m->id)
             ->assertStatus(409)

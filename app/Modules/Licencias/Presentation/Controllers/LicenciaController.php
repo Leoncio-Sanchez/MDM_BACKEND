@@ -57,7 +57,10 @@ class LicenciaController
 
     public function store(CrearLicenciaRequest $request): JsonResponse
     {
-        $licencia = $this->crear->execute(CrearLicenciaDTO::fromArray($request->validated()));
+        $licencia = $this->crear->execute(CrearLicenciaDTO::fromArray([
+            ...$request->validated(),
+            'usuario_id' => $request->user('api')?->getAuthIdentifier(),
+        ]));
 
         return (new LicenciaResource($licencia))->response()->setStatusCode(201);
     }
@@ -71,7 +74,10 @@ class LicenciaController
 
     public function update(ModificarLicenciaRequest $request, int $pk): LicenciaResource
     {
-        $licencia = $this->modificar->execute(ModificarLicenciaDTO::fromArray(array_merge($request->validated(), ['licencia_id' => $pk])));
+        $licencia = $this->modificar->execute(ModificarLicenciaDTO::fromArray(array_merge($request->validated(), [
+            'licencia_id' => $pk,
+            'usuario_id' => $request->user('api')?->getAuthIdentifier(),
+        ])));
 
         return new LicenciaResource($licencia);
     }

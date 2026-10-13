@@ -10,6 +10,15 @@ use Database\Factories\App\Modules\Estados\Infrastructure\Persistence\Models\Est
 /**
  * @method static \Database\Factories\App\Modules\Estados\Infrastructure\Persistence\Models\EstadoModelFactory factory($count = null, $state = [])
  */
+/**
+ * Columnas según database/sql/esquema_produccion.sql (Larastan no puede leerlas del SQL).
+ *
+ * @property int $id
+ * @property string $nombre
+ * @property bool $es_para_lf
+ * @property bool $es_para_itse
+ * @property bool $esta_activo
+ */
 final class EstadoModel extends Model
 {
     /** @use HasFactory<\Database\Factories\App\Modules\Estados\Infrastructure\Persistence\Models\EstadoModelFactory> */

@@ -190,7 +190,7 @@ it('detecta licencias asociadas', function () {
 
     expect($this->repo->tieneLicencia($id))->toBeFalse();
 
-    DB::table('licencias_funcionamiento')->insert([
+    DB::table('licencias_funcionamiento')->insert(\Tests\Fixtures\Registros::licencia([
         'uuid' => Uuid::uuid4()->toString(),
         'expediente_id' => $id,
         'numero_licencia' => 1234,
@@ -208,8 +208,7 @@ it('detecta licencias asociadas', function () {
         'resolucion_numero' => 'RES-100',
         'area' => 50.0,
         'numero_recibo_pago' => 'REC-1234',
-        'estado' => 'EMITIDA',
-    ]);
+    ]));
 
     expect($this->repo->tieneLicencia($id))->toBeTrue();
 });
@@ -230,7 +229,7 @@ it('detecta ITSE asociadas', function () {
 
     expect($this->repo->tieneItse($id))->toBeFalse();
 
-    DB::table('itse')->insert([
+    DB::table('itse')->insert(\Tests\Fixtures\Registros::itse([
         'uuid' => Uuid::uuid4()->toString(),
         'expediente_id' => $id,
         'numero_itse' => 9876,
@@ -246,7 +245,7 @@ it('detecta ITSE asociadas', function () {
         'nivel_riesgo_id' => 1,
         'conductor_id' => 1,
         'titular_id' => 1,
-    ]);
+    ]));
 
     expect($this->repo->tieneItse($id))->toBeTrue();
 });
@@ -264,7 +263,7 @@ it('lanza excepcion en buscarPorFiltro con filtro no valido', function () {
 
 it('consulta expedientes hidratados con o sin filtro de numero', function () {
     $exp = Expediente::crear(
-        uuid: 'test-uuid-999',
+        uuid: '00000000-0000-4000-8000-000000000999',
         numeroExpediente: 888,
         fechaRecepcion: new DateTimeImmutable('2025-01-03 10:00:00'),
         tipoProcedimientoTupaId: 1,

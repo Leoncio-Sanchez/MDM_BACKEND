@@ -13,6 +13,7 @@ use App\Modules\Licencias\Domain\Exceptions\LicenciaDuplicadaError;
 function payloadLicencia(array $cambios = []): array
 {
     return [
+        'usuario_id' => 1,
         'numero_licencia' => '1001',
         'nombre_comercial' => 'Restaurante El Buen Sabor',
         'tipo_licencia_id' => 1,

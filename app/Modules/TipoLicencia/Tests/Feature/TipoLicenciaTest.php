@@ -6,14 +6,14 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 
 it('can list tipos licencia', function () {
-    TipoLicenciaModel::create(['id' => 1, 'codigo' => 'EST', 'nombre' => 'ESTANDAR', 'esta_activo' => true]);
+    $tipo = TipoLicenciaModel::create(['codigo' => 'EST', 'nombre' => 'ESTANDAR', 'esta_activo' => true]);
     $response = $this->comoUsuarioApi()->getJson('/api/lf-itse/tipos-licencia');
     $response->assertStatus(200)->assertJsonCount(1);
 });
 
 it('can get a tipo licencia', function () {
-    TipoLicenciaModel::create(['id' => 1, 'codigo' => 'EST', 'nombre' => 'ESTANDAR', 'esta_activo' => true]);
-    $response = $this->comoUsuarioApi()->getJson('/api/lf-itse/tipos-licencia/1');
+    $tipo = TipoLicenciaModel::create(['codigo' => 'EST', 'nombre' => 'ESTANDAR', 'esta_activo' => true]);
+    $response = $this->comoUsuarioApi()->getJson('/api/lf-itse/tipos-licencia/' . $tipo->id);
     $response->assertStatus(200)->assertJsonPath('codigo', 'EST');
 });
 
@@ -28,8 +28,8 @@ it('can create a tipo licencia', function () {
 });
 
 it('can update a tipo licencia', function () {
-    TipoLicenciaModel::create(['id' => 1, 'codigo' => 'EST', 'nombre' => 'ESTANDAR', 'esta_activo' => true]);
-    $response = $this->comoUsuarioApi()->putJson('/api/lf-itse/tipos-licencia/1', [
+    $tipo = TipoLicenciaModel::create(['codigo' => 'EST', 'nombre' => 'ESTANDAR', 'esta_activo' => true]);
+    $response = $this->comoUsuarioApi()->putJson('/api/lf-itse/tipos-licencia/' . $tipo->id, [
         'codigo' => 'UPD',
         'nombre' => 'UPDATED TIPO',
         'esta_activo' => false
@@ -39,8 +39,8 @@ it('can update a tipo licencia', function () {
 });
 
 it('can delete a tipo licencia', function () {
-    TipoLicenciaModel::create(['id' => 1, 'codigo' => 'EST', 'nombre' => 'ESTANDAR', 'esta_activo' => true]);
-    $response = $this->comoUsuarioApi()->deleteJson('/api/lf-itse/tipos-licencia/1');
+    $tipo = TipoLicenciaModel::create(['codigo' => 'EST', 'nombre' => 'ESTANDAR', 'esta_activo' => true]);
+    $response = $this->comoUsuarioApi()->deleteJson('/api/lf-itse/tipos-licencia/' . $tipo->id);
     $response->assertStatus(204);
     expect(TipoLicenciaModel::count())->toBe(0);
 });
@@ -53,4 +53,10 @@ it('rechaza todas las operaciones sin autenticación', function () {
     $this->postJson($url, [])->assertUnauthorized();
     $this->putJson($url . '/1', [])->assertUnauthorized();
     $this->deleteJson($url . '/1')->assertUnauthorized();
+});
+
+it('responde 404 si el tipo de licencia no existe', function () {
+    $this->comoUsuarioApi()->getJson('/api/lf-itse/tipos-licencia/999999')
+        ->assertNotFound()
+        ->assertJsonStructure(['error']);
 });

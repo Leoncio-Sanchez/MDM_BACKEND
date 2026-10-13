@@ -9,15 +9,15 @@ use Illuminate\Support\Facades\DB;
 const URL_LICENCIAS = '/api/lf-itse/licencias-funcionamiento';
 
 beforeEach(function () {
-    DB::table('auth_user')->insert(['is_staff' => true, 'id' => 1, 'username' => 'test', 'email' => 'test@test.com', 'password' => 'secret']);
+    DB::table('auth_user')->insert(\Tests\Fixtures\UsuarioAuth::datos(['is_staff' => true, 'id' => 1, 'username' => 'test', 'email' => 'test@test.com', 'password' => 'secret']));
     $this->user = User::find(1);
 
-    DB::table('tipos_licencia')->insert(['id' => 1, 'nombre' => 'INDETERMINADA']);
-    DB::table('personas')->insert([['id' => 1, 'nombres' => 'TITULAR'], ['id' => 2, 'nombres' => 'CONDUCTOR']]);
-    DB::table('expedientes')->insert([['id' => 1], ['id' => 2]]);
-    DB::table('niveles_riesgo')->insert(['id' => 1, 'codigo' => 'B', 'nombre' => 'BAJO']);
-    DB::table('zonificaciones')->insert(['id' => 1, 'codigo' => 'CZ', 'nombre' => 'COMERCIO ZONAL']);
-    DB::table('estados')->insert(['id' => 1, 'nombre' => 'CLAUSURA', 'es_para_lf' => true, 'es_para_itse' => false, 'esta_activo' => false]);
+    DB::table('tipos_licencia')->insert(\Tests\Fixtures\Registros::tipoLicencia(['id' => 1, 'nombre' => 'INDETERMINADA']));
+    DB::table('personas')->insert([\Tests\Fixtures\Registros::persona(['id' => 1, 'nombres' => 'TITULAR']), \Tests\Fixtures\Registros::persona(['id' => 2, 'nombres' => 'CONDUCTOR'])]);
+    DB::table('expedientes')->insert([\Tests\Fixtures\Registros::expediente(['id' => 1]), \Tests\Fixtures\Registros::expediente(['id' => 2])]);
+    DB::table('niveles_riesgo')->insert(\Tests\Fixtures\Registros::nivelRiesgo(['id' => 1, 'codigo' => 'B', 'nombre' => 'BAJO']));
+    DB::table('zonificaciones')->insert(\Tests\Fixtures\Registros::zonificacion(['id' => 1, 'codigo' => 'CZ', 'nombre' => 'COMERCIO ZONAL']));
+    DB::table('estados')->insert(\Tests\Fixtures\Registros::estado(['id' => 1, 'nombre' => 'CLAUSURA', 'es_para_lf' => true, 'es_para_itse' => false, 'esta_activo' => false]));
 });
 
 function datosLicencia(array $cambios = []): array
@@ -63,6 +63,7 @@ it('crea una licencia guardando todos los datos enviados', function () {
 
     $this->assertDatabaseHas('licencias_funcionamiento', [
         'numero_licencia' => 1001,
+        'usuario_id' => 1, // auditoría: obligatoria en el esquema real
         'conductor_id' => 2,
         'actividad' => 'VENTA DE ABARROTES',
         'direccion' => 'AV. GRAU 450',

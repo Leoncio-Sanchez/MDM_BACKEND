@@ -13,10 +13,10 @@ interface LicenciaRepositoryInterface
     public function buscarPorFiltro(string $filtro, string $valor): array;
     /** @return Licencia[] */
     public function buscarParaReporte(string $fechaInicio, string $fechaFin): array;
-    public function crear(Licencia $licencia): Licencia;
+    /** @param int $usuarioId Usuario que registra la licencia (auditoría: usuario_id, fecha_digitacion). */
+    public function crear(Licencia $licencia, int $usuarioId): Licencia;
     public function actualizar(Licencia $licencia): Licencia;
     public function eliminar(int $id): void;
-    public function inactivar(int $id): Licencia;
 
     public function existeNumeroLicencia(int $numero, ?int $exceptoId = null): bool;
     public function existeReciboPago(string $numero, ?int $exceptoId = null): bool;

@@ -22,7 +22,7 @@ final readonly class EloquentLicenciaGiroRepository implements LicenciaGiroRepos
             ->delete();
     }
 
-    public function insertarGiros(int $licenciaId, array $giroIds): void
+    public function insertarGiros(int $licenciaId, array $giroIds, int $usuarioId): void
     {
         if (empty($giroIds)) return;
         
@@ -30,6 +30,7 @@ final readonly class EloquentLicenciaGiroRepository implements LicenciaGiroRepos
             'licencia_funcionamiento_id' => $licenciaId,
             'giro_id' => $giroId,
             'fecha_digitacion' => now(),
+            'usuario_id' => $usuarioId, // obligatorio en el esquema real
         ], $giroIds);
 
         DB::table('licencias_funcionamiento_giros')->insert($rows);

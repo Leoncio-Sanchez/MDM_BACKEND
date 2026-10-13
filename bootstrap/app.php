@@ -48,6 +48,11 @@ return Application::configure(basePath: dirname(__DIR__))
             return response()->json(['error' => $e->getMessage()], 422);
         });
 
+        // Catálogos: registro inexistente → 404 (antes respondían 500)
+        $exceptions->render(function (\App\Modules\Estados\Domain\Exceptions\EstadoNoEncontrado|\App\Modules\Giros\Domain\Exceptions\GiroNoEncontrado|\App\Modules\NivelRiesgo\Domain\Exceptions\NivelRiesgoNoEncontrado|\App\Modules\TipoDocumentoIdentidad\Domain\Exceptions\TipoDocumentoIdentidadNoEncontrado|\App\Modules\TipoLicencia\Domain\Exceptions\TipoLicenciaNoEncontrado|\App\Modules\Zonificacion\Domain\Exceptions\ZonificacionNoEncontrado $e, Request $request) {
+            return response()->json(['error' => $e->getMessage()], 404);
+        });
+
         $exceptions->render(function (\App\Modules\UnidadesOrganicas\Domain\Exceptions\UnidadOrganicaNoEncontrada $e, Request $request) {
             return response()->json(['error' => $e->getMessage()], 404);
         });

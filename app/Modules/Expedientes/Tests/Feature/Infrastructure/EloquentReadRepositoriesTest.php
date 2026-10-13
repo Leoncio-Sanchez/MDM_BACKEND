@@ -17,25 +17,23 @@ it('EloquentTipoProcedimientoTupaReadRepository busca por id y verifica existenc
     expect($repo->buscarPorId(1))->toBeNull()
         ->and($repo->existe(1))->toBeFalse();
 
-    DB::table('unidades_organicas')->insert([
+    DB::table('unidades_organicas')->insert(\Tests\Fixtures\Registros::unidadOrganica([
         'id' => 1,
         'codigo' => 'UO-01',
         'nombre' => 'Unidad Organica 1',
         'esta_activo' => true,
-    ]);
+    ]));
 
-    DB::table('auth_user')->insert([
+    DB::table('auth_user')->insert(\Tests\Fixtures\UsuarioAuth::datos([
         'id' => 1,
         'username' => 'admin_u',
         'password' => 'secret',
         'is_active' => true,
         'is_staff' => false,
         'is_superuser' => false,
-        'created_at' => now(),
-        'updated_at' => now(),
-    ]);
+    ]));
 
-    DB::table('tipos_procedimiento_tupa')->insert([
+    DB::table('tipos_procedimiento_tupa')->insert(\Tests\Fixtures\Registros::tipoProcedimientoTupa([
         'id' => 1,
         'codigo' => 'TUPA-01',
         'nombre' => 'Procedimiento 1',
@@ -47,7 +45,7 @@ it('EloquentTipoProcedimientoTupaReadRepository busca por id y verifica existenc
         'fecha_digitacion' => now(),
         'usuario_id' => 1,
         'unidad_organica_id' => 1,
-    ]);
+    ]));
 
     $tipo = $repo->buscarPorId(1);
     expect($tipo)->not->toBeNull()
@@ -63,13 +61,13 @@ it('EloquentPersonaReadRepository busca por id y verifica existencia', function 
     expect($repo->buscarPorId(10))->toBeNull()
         ->and($repo->existe(10))->toBeFalse();
 
-    DB::table('personas')->insert([
+    DB::table('personas')->insert(\Tests\Fixtures\Registros::persona([
         'id' => 10,
         'nombres' => 'Juan Perez',
         'tipo_persona' => 'N',
         'sexo' => 'M',
         'user_id' => 1,
-    ]);
+    ]));
 
     $persona = $repo->buscarPorId(10);
     expect($persona)->not->toBeNull()
@@ -85,16 +83,14 @@ it('EloquentUsuarioReadRepository busca por id y verifica existencia', function 
     expect($repo->buscarPorId(5))->toBeNull()
         ->and($repo->existe(5))->toBeFalse();
 
-    DB::table('auth_user')->insert([
+    DB::table('auth_user')->insert(\Tests\Fixtures\UsuarioAuth::datos([
         'id' => 5,
         'username' => 'testuser',
         'password' => 'secret',
         'is_active' => true,
         'is_staff' => false,
         'is_superuser' => false,
-        'created_at' => now(),
-        'updated_at' => now(),
-    ]);
+    ]));
 
     $user = $repo->buscarPorId(5);
     expect($user)->not->toBeNull()

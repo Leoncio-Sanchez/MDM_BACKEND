@@ -47,19 +47,19 @@ final class UnidadOrganicaApiTest extends TestCase
         }
 
         UsuarioModel::truncate();
-        UsuarioModel::create([
+        $admin = UsuarioModel::create(\Tests\Fixtures\UsuarioAuth::datos([
             'id' => 1,
             'username' => 'admin',
             'password' => 'somehash',
             'is_superuser' => true,
             'is_staff' => true,
             'is_active' => true,
-        ]);
+        ]));
 
         /** @var TokenServiceInterface $tokenService */
         $tokenService = app(TokenServiceInterface::class);
         $authUser = new AuthenticatedUser(
-            id: 1,
+            id: (int) $admin->id, // el id real (la secuencia no siempre arranca en 1)
             username: 'admin',
             email: 'admin@muni.gob.pe',
             role: 'ADMIN_MUNICIPALIDAD',

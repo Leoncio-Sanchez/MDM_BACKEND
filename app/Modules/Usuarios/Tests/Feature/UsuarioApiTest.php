@@ -54,7 +54,7 @@ final class UsuarioApiTest extends TestCase
         UsuarioPerfilModel::truncate();
         UsuarioModel::truncate();
 
-        $this->adminUser = UsuarioModel::create([
+        $this->adminUser = UsuarioModel::create(\Tests\Fixtures\UsuarioAuth::datos([
             'id' => 1,
             'username' => 'admin',
             'password' => 'somehash',
@@ -64,7 +64,7 @@ final class UsuarioApiTest extends TestCase
             'is_superuser' => true,
             'is_staff' => true,
             'is_active' => true,
-        ]);
+        ]));
 
         UsuarioPerfilModel::create([
             'user_id' => 1,
@@ -160,11 +160,11 @@ final class UsuarioApiTest extends TestCase
 
     public function test_eliminar_usuario_desactiva_logicamente_con_204(): void
     {
-        $target = UsuarioModel::create([
+        $target = UsuarioModel::create(\Tests\Fixtures\UsuarioAuth::datos([
             'username' => 'para_eliminar',
             'password' => 'somehash',
             'is_active' => true,
-        ]);
+        ]));
 
         $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
             ->deleteJson('/api/lf-itse/usuarios/'.$target->id.'/');

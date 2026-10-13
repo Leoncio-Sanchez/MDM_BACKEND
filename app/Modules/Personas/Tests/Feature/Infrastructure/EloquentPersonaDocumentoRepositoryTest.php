@@ -26,7 +26,7 @@ beforeEach(function () {
 
 it('crea y lista documentos por persona', function () {
     // Para que SQLite no falle con foreign keys, insertamos la persona y tipo_documento directamente o usamos Model::insert
-    $personaId = DB::table('personas')->insertGetId([
+    $personaId = DB::table('personas')->insertGetId(\Tests\Fixtures\Registros::persona([
         'tipo_persona' => 'N',
         'sexo' => 'M',
         'nombres' => 'A',
@@ -37,11 +37,11 @@ it('crea y lista documentos por persona', function () {
         'fecha_creacion' => now(),
         'fecha_actualizacion' => now(),
         'user_id' => 1,
-    ]);
+    ]));
 
-    $tipoId = DB::table('tipos_documento_identidad')->insertGetId([
-        'codigo' => 'DNI', 'nombre' => 'DNI', 'numero_digitos' => 8, 'tipo_persona' => 'N',
-    ]);
+    $tipoId = DB::table('tipos_documento_identidad')->insertGetId(\Tests\Fixtures\Registros::tipoDocumentoIdentidad([
+        'codigo' => 'DNI', 'nombre' => 'DNI',
+    ]));
 
     $doc = new PersonaDocumento(null, $personaId, $tipoId, '12345678');
     $creado = $this->repo->crear($doc);
@@ -54,12 +54,12 @@ it('crea y lista documentos por persona', function () {
 });
 
 it('elimina documentos por persona', function () {
-    $personaId = DB::table('personas')->insertGetId([
+    $personaId = DB::table('personas')->insertGetId(\Tests\Fixtures\Registros::persona([
         'tipo_persona' => 'N', 'sexo' => 'M', 'nombres' => 'A', 'direccion' => 'D', 'distrito' => 'D', 'provincia' => 'P', 'departamento' => 'D', 'fecha_creacion' => now(), 'fecha_actualizacion' => now(), 'user_id' => 1,
-    ]);
-    $tipoId = DB::table('tipos_documento_identidad')->insertGetId([
-        'codigo' => 'DNI', 'nombre' => 'DNI', 'numero_digitos' => 8, 'tipo_persona' => 'N',
-    ]);
+    ]));
+    $tipoId = DB::table('tipos_documento_identidad')->insertGetId(\Tests\Fixtures\Registros::tipoDocumentoIdentidad([
+        'codigo' => 'DNI', 'nombre' => 'DNI',
+    ]));
 
     $this->repo->crear(new PersonaDocumento(null, $personaId, $tipoId, '12345678'));
 

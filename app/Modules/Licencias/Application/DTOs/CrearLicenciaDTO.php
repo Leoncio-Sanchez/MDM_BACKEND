@@ -7,6 +7,8 @@ use Carbon\CarbonImmutable;
 final readonly class CrearLicenciaDTO
 {
     public function __construct(
+        /** Usuario autenticado que registra la licencia (auditoría) */
+        public int $usuarioId,
         public int|string $numeroLicencia,
         public string $nombreComercial,
         public int $tipoLicenciaId,
@@ -36,6 +38,7 @@ final readonly class CrearLicenciaDTO
     public static function fromArray(array $data): self
     {
         return new self(
+            usuarioId: (int) $data['usuario_id'],
             numeroLicencia: (int) $data['numero_licencia'],
             nombreComercial: (string) $data['nombre_comercial'],
             tipoLicenciaId: (int) $data['tipo_licencia_id'],

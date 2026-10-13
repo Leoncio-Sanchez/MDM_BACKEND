@@ -16,9 +16,9 @@ final class UnidadOrganicaCrudTest extends TestCase
 
     private function crearUnidad(string $codigo = 'SGLC', string $nombre = 'SUBGERENCIA DE LICENCIAS'): int
     {
-        return DB::table('unidades_organicas')->insertGetId([
+        return DB::table('unidades_organicas')->insertGetId(\Tests\Fixtures\Registros::unidadOrganica([
             'codigo' => $codigo, 'nombre' => $nombre, 'sigla' => $codigo, 'esta_activo' => true,
-        ]);
+        ]));
     }
 
     public function test_rechaza_escritura_y_detalle_sin_auth(): void
@@ -122,10 +122,10 @@ final class UnidadOrganicaCrudTest extends TestCase
     public function test_no_elimina_una_unidad_con_procedimientos_tupa(): void
     {
         $id = $this->crearUnidad();
-        DB::table('tipos_procedimiento_tupa')->insert([
+        DB::table('tipos_procedimiento_tupa')->insert(\Tests\Fixtures\Registros::tipoProcedimientoTupa([
             'codigo' => 'PE-01', 'nombre' => 'X', 'plazo_atencion_dias' => 5, 'dias_alerta_vencimiento' => 1,
             'fecha_digitacion' => now(), 'usuario_id' => $this->usuarioApi()->id, 'unidad_organica_id' => $id,
-        ]);
+        ]));
 
         $this->comoUsuarioApi()->deleteJson(self::URL . "/{$id}")
             ->assertStatus(409)

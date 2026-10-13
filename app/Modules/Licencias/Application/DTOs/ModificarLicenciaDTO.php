@@ -8,6 +8,8 @@ final readonly class ModificarLicenciaDTO
 {
     public function __construct(
         public int $licenciaId,
+        /** Usuario autenticado que modifica (auditoría de los giros que se registran) */
+        public int $usuarioId,
         public ?int $numeroLicencia = null,
         public string $nombreComercial = '',
         public int $tipoLicenciaId = 1,
@@ -38,6 +40,7 @@ final readonly class ModificarLicenciaDTO
     {
         return new self(
             licenciaId: (int) ($data['licencia_id'] ?? 0),
+            usuarioId: (int) $data['usuario_id'],
             numeroLicencia: !empty($data['numero_licencia']) ? (int) $data['numero_licencia'] : null,
             nombreComercial: (string) ($data['nombre_comercial'] ?? ''),
             tipoLicenciaId: (int) ($data['tipo_licencia_id'] ?? 1),

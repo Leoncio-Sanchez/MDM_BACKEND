@@ -40,7 +40,7 @@ final class JwtAuthControllerTest extends TestCase
         // Hash real de Django para "admin"
         $this->passwordHash = 'pbkdf2_sha256$1200000$bCyHs02f8l03epJzsd0N0D$s+PXHa+tN/qJkDe7bnCgcCFghprjFNI2xLALtbqwW3U=';
 
-        UserAuthModel::create([
+        UserAuthModel::create(\Tests\Fixtures\UsuarioAuth::datos([
             'id' => 1,
             'username' => 'admin',
             'password' => $this->passwordHash,
@@ -48,7 +48,7 @@ final class JwtAuthControllerTest extends TestCase
             'is_superuser' => true,
             'is_staff' => true,
             'is_active' => true,
-        ]);
+        ]));
     }
 
     public function test_login_con_credenciales_validas_devuelve_200_con_access_y_refresh(): void

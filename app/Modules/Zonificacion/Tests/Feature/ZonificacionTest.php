@@ -12,12 +12,12 @@ class ZonificacionTest extends TestCase {
     use RefreshDatabase;
 
     private function getAuthUser(): User {
-        $id = DB::table('auth_user')->insertGetId([
+        $id = DB::table('auth_user')->insertGetId(\Tests\Fixtures\UsuarioAuth::datos([
             'is_staff' => true,
             'username' => 'test_user',
             'password' => 'secret',
             'is_active' => true,
-        ]);
+        ]));
         return User::find($id);
     }
 

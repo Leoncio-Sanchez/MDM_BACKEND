@@ -70,7 +70,6 @@ final class LicenciaMapper
             'observaciones' => $licencia->observaciones,
             'se_puede_publicar' => $licencia->sePuedePublicar,
             'fecha_notificacion' => $licencia->fechaNotificacion?->toDateTimeString(),
-            'estado' => $licencia->estado->value,
         ];
     }
 }
