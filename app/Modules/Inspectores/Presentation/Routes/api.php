@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Modules\Inspectores\Presentation\Controllers\InspectorController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth:api')->prefix('api/lf-itse')->group(function (): void {
+Route::middleware(['auth:api', 'rol:ADMIN_MUNICIPALIDAD'])->prefix('api/lf-itse')->group(function (): void {
     Route::get('inspectores/buscar', [InspectorController::class, 'buscar']);
     Route::get('inspectores', [InspectorController::class, 'index']);
     Route::post('inspectores', [InspectorController::class, 'store']);

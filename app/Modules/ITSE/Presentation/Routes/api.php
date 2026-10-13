@@ -4,7 +4,7 @@ declare(strict_types=1);
 use App\Modules\ITSE\Presentation\Controllers\ItseController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth:api')->prefix('api/lf-itse')->group(function () {
+Route::middleware(['auth:api', 'rol:ADMIN_MUNICIPALIDAD'])->prefix('api/lf-itse')->group(function () {
     // ── 6B estáticas (ANTES de las dinámicas con {pk}) ───────────────────────
     Route::get('itse/por-renovar/', [ItseController::class, 'porRenovar']);
     Route::get('itse/consulta/', [ItseController::class, 'consulta']);

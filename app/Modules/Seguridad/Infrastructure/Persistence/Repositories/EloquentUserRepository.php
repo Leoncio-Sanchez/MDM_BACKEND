@@ -6,7 +6,9 @@ namespace App\Modules\Seguridad\Infrastructure\Persistence\Repositories;
 
 use App\Modules\Seguridad\Domain\Contracts\UserRepositoryInterface;
 use App\Modules\Seguridad\Domain\ValueObjects\AuthenticatedUser;
+use App\Modules\Seguridad\Domain\ValueObjects\Rol;
 use App\Modules\Seguridad\Infrastructure\Persistence\Models\UserAuthModel;
+use Illuminate\Support\Facades\DB;
 
 final readonly class EloquentUserRepository implements UserRepositoryInterface
 {
@@ -42,10 +44,12 @@ final readonly class EloquentUserRepository implements UserRepositoryInterface
 
     private function computeRole(UserAuthModel $user): string
     {
-        if ($user->is_superuser || $user->is_staff) {
-            return 'ADMIN_MUNICIPALIDAD';
-        }
+        $esAdmin = (bool) ($user->is_superuser || $user->is_staff);
+        $esInspector = ! $esAdmin && DB::table('usuarios_perfiles')
+            ->where('user_id', $user->id)
+            ->where('es_inspector', true)
+            ->exists();
 
-        return 'CIUDADANO';
+        return Rol::resolver($esAdmin, $esInspector)->value;
     }
 }

@@ -11,7 +11,8 @@ use Illuminate\Support\Facades\DB;
 abstract class TestCase extends BaseTestCase
 {
     /**
-     * Usuario de prueba en `auth_user` (tabla de Django que usa el guard JWT).
+     * Usuario administrador de prueba en `auth_user` (tabla de Django que usa el guard JWT).
+     * Es staff → rol ADMIN_MUNICIPALIDAD, el que exigen las rutas de gestión.
      * Se crea una sola vez por test y se reutiliza en llamadas siguientes.
      */
     protected function usuarioApi(): User
@@ -23,6 +24,7 @@ abstract class TestCase extends BaseTestCase
         }
 
         $id = DB::table('auth_user')->insertGetId([
+            'is_staff' => true,
             'username' => 'usuario_api_test',
             'email' => 'usuario_api_test@muni.test',
             'password' => 'secret',
@@ -35,7 +37,7 @@ abstract class TestCase extends BaseTestCase
         return $usuario;
     }
 
-    /** Autentica la siguiente petición contra el guard `api` (rutas protegidas con auth:api). */
+    /** Autentica la siguiente petición como administrador (rutas con auth:api + rol:ADMIN_MUNICIPALIDAD). */
     protected function comoUsuarioApi(): static
     {
         return $this->actingAs($this->usuarioApi(), 'api');

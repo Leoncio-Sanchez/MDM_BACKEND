@@ -6,7 +6,7 @@ use App\Modules\Personas\Presentation\Controllers\PersonaController;
 use App\Modules\Personas\Presentation\Controllers\ReniecController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth:api')->prefix('api/lf-itse')->group(function () {
+Route::middleware(['auth:api', 'rol:ADMIN_MUNICIPALIDAD'])->prefix('api/lf-itse')->group(function () {
     Route::get('personas/', [PersonaController::class, 'index']);
     Route::post('personas/', [PersonaController::class, 'store']);
 

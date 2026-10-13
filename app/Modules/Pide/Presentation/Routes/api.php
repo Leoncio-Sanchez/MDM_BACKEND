@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Modules\Pide\Presentation\Controllers\PideController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth:api')->prefix('api/lf-itse')->group(function () {
+Route::middleware(['auth:api', 'rol:ADMIN_MUNICIPALIDAD'])->prefix('api/lf-itse')->group(function () {
     // ── PIDE: RENIEC ─────────────────────────────────────────────────────────
     Route::get('reniec/consultar/', [PideController::class, 'reniec'])
         ->name('pide.reniec.consultar');

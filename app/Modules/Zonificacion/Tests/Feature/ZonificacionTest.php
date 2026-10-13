@@ -13,6 +13,7 @@ class ZonificacionTest extends TestCase {
 
     private function getAuthUser(): User {
         $id = DB::table('auth_user')->insertGetId([
+            'is_staff' => true,
             'username' => 'test_user',
             'password' => 'secret',
             'is_active' => true,

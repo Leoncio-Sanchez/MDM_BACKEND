@@ -18,6 +18,7 @@ uses(TestCase::class, RefreshDatabase::class);
 
 beforeEach(function () {
     DB::table('auth_user')->insert([
+        'is_staff' => true,
         'id' => 1,
         'username' => 'admin',
         'email' => 'admin@test.com',

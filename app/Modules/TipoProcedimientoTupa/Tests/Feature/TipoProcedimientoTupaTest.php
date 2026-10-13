@@ -25,6 +25,7 @@ class TipoProcedimientoTupaTest extends TestCase
         }
 
         $id = DB::table('auth_user')->insertGetId([
+            'is_staff' => true,
             'username' => 'test_user',
             'password' => 'secret',
             'is_active' => true,

@@ -7,7 +7,7 @@ use App\Modules\Archivos\Presentation\Controllers\ItseArchivoController;
 use App\Modules\Archivos\Presentation\Controllers\LicenciaFuncionamientoArchivoController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth:api')->prefix('api/lf-itse')->group(function () {
+Route::middleware(['auth:api', 'rol:ADMIN_MUNICIPALIDAD'])->prefix('api/lf-itse')->group(function () {
     // ═══════════════════════════════════════════════════════════════════════════
     // EXPEDIENTES (3 rutas, 4 operaciones)
     // ═══════════════════════════════════════════════════════════════════════════

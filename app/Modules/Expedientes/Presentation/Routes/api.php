@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Modules\Expedientes\Presentation\Controllers\ExpedienteController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth:api')->prefix('api/lf-itse')->group(function () {
+Route::middleware(['auth:api', 'rol:ADMIN_MUNICIPALIDAD'])->prefix('api/lf-itse')->group(function () {
     // ── 7A Estáticas ──────────────────────────────────────────────────────────
     Route::get('expedientes/', [ExpedienteController::class, 'index']);
     Route::post('expedientes/', [ExpedienteController::class, 'store']);

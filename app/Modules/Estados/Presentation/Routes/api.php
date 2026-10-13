@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Modules\Estados\Presentation\Controllers\EstadoController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth:api')->prefix('api/lf-itse')->group(function () {
+Route::middleware(['auth:api', 'rol:ADMIN_MUNICIPALIDAD'])->prefix('api/lf-itse')->group(function () {
     Route::get('estados/inactivos-itse', [EstadoController::class, 'inactivosItse']);
     Route::get('estados/inactivos-lf', [EstadoController::class, 'inactivosLf']);
     Route::get('estados', [EstadoController::class, 'index']);

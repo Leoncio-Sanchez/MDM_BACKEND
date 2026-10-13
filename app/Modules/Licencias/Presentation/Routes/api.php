@@ -4,7 +4,7 @@ declare(strict_types=1);
 use App\Modules\Licencias\Presentation\Controllers\LicenciaController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth:api')->prefix('api/lf-itse')->group(function () {
+Route::middleware(['auth:api', 'rol:ADMIN_MUNICIPALIDAD'])->prefix('api/lf-itse')->group(function () {
     Route::post('licencias-funcionamiento', [LicenciaController::class, 'store']);
     Route::get('licencias-funcionamiento/buscar', [LicenciaController::class, 'buscar']);
     Route::get('licencias-funcionamiento/reporte', [LicenciaController::class, 'reporte']);

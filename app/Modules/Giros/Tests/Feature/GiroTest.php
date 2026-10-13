@@ -17,6 +17,7 @@ class GiroTest extends TestCase {
         if ($existing) return $existing;
 
         $id = DB::table('auth_user')->insertGetId([
+            'is_staff' => true,
             'username' => 'test_user',
             'password' => 'secret',
             'is_active' => true,

@@ -23,6 +23,7 @@ beforeEach(function () {
     Storage::fake('media');
 
     DB::table('auth_user')->insert([
+        'is_staff' => true,
         'id' => 1,
         'username' => 'admin',
         'email' => 'admin@muni.gob.pe',

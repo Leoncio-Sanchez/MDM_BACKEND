@@ -11,6 +11,7 @@ uses(TestCase::class, RefreshDatabase::class);
 
 beforeEach(function () {
     $userId = DB::table('auth_user')->insertGetId([
+        'is_staff' => true,
         'username' => 'admin_'.uniqid(),
         'password' => 'admin',
         'is_active' => true,
