@@ -27,18 +27,24 @@ class TipoDocumentoIdentidadTest extends TestCase
         return $user;
     }
 
-    public function test_rechaza_lista_sin_query_param(): void
+    /** tipo_persona es opcional desde TD-006: sin él se listan todos (lo usa la pantalla de Personas). */
+    public function test_lista_todos_sin_query_param(): void
     {
-        $response = $this->getJson('/api/lf-itse/tipos-documento-identidad');
-        $response->assertStatus(400)
-            ->assertExactJson(['error' => "El parámetro 'tipo_persona' es obligatorio."]);
+        DB::table('tipos_documento_identidad')->insert([
+            ['codigo' => '01', 'nombre' => 'DNI', 'esta_activo' => true, 'es_para_natural' => true, 'es_para_juridica' => false],
+            ['codigo' => '06', 'nombre' => 'RUC', 'esta_activo' => true, 'es_para_natural' => true, 'es_para_juridica' => true],
+        ]);
+
+        $this->comoUsuarioApi()->getJson('/api/lf-itse/tipos-documento-identidad')
+            ->assertOk()
+            ->assertJsonCount(2);
     }
 
     public function test_rechaza_lista_con_query_param_invalido(): void
     {
-        $response = $this->getJson('/api/lf-itse/tipos-documento-identidad?tipo_persona=X');
-        $response->assertStatus(400)
-            ->assertExactJson(['error' => "El parámetro 'tipo_persona' es obligatorio."]);
+        $this->comoUsuarioApi()->getJson('/api/lf-itse/tipos-documento-identidad?tipo_persona=X')
+            ->assertStatus(400)
+            ->assertExactJson(['error' => "tipo_persona 'X' no válido. Opciones: N (natural), J (jurídica)."]);
     }
 
     public function test_puede_listar_naturales(): void
@@ -50,7 +56,7 @@ class TipoDocumentoIdentidadTest extends TestCase
             'codigo' => 'RUC', 'nombre' => 'RUC Test', 'esta_activo' => true, 'es_para_natural' => false, 'es_para_juridica' => true,
         ]);
 
-        $response = $this->getJson('/api/lf-itse/tipos-documento-identidad?tipo_persona=N');
+        $response = $this->comoUsuarioApi()->getJson('/api/lf-itse/tipos-documento-identidad?tipo_persona=N');
         $response->assertStatus(200);
         $response->assertJsonCount(1);
         $this->assertEquals('DNI', $response->json()[0]['codigo']);
@@ -65,7 +71,7 @@ class TipoDocumentoIdentidadTest extends TestCase
             'codigo' => 'RUC', 'nombre' => 'RUC Test', 'esta_activo' => true, 'es_para_natural' => false, 'es_para_juridica' => true,
         ]);
 
-        $response = $this->getJson('/api/lf-itse/tipos-documento-identidad?tipo_persona=J');
+        $response = $this->comoUsuarioApi()->getJson('/api/lf-itse/tipos-documento-identidad?tipo_persona=J');
         $response->assertStatus(200);
         $response->assertJsonCount(1);
         $this->assertEquals('RUC', $response->json()[0]['codigo']);
@@ -95,8 +101,19 @@ class TipoDocumentoIdentidadTest extends TestCase
         $m = TipoDocumentoIdentidadModel::create([
             'codigo' => 'NEW', 'nombre' => 'New Doc', 'esta_activo' => true, 'es_para_natural' => true, 'es_para_juridica' => true,
         ]);
-        $response = $this->deleteJson('/api/lf-itse/tipos-documento-identidad/'.$m->id);
+        $response = $this->comoUsuarioApi()->deleteJson('/api/lf-itse/tipos-documento-identidad/'.$m->id);
         $response->assertStatus(204);
         $this->assertDatabaseMissing('tipos_documento_identidad', ['id' => $m->id]);
+    }
+
+    public function test_rechaza_todas_las_operaciones_sin_auth(): void
+    {
+        $url = '/api/lf-itse/tipos-documento-identidad';
+
+        $this->getJson($url)->assertUnauthorized();
+        $this->getJson($url . '/1')->assertUnauthorized();
+        $this->postJson($url, [])->assertUnauthorized();
+        $this->putJson($url . '/1', [])->assertUnauthorized();
+        $this->deleteJson($url . '/1')->assertUnauthorized();
     }
 }

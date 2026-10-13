@@ -32,7 +32,7 @@ class GiroTest extends TestCase {
             'ciiu_id' => 1234, 'nombre' => 'Test Giro', 'esta_activo' => true, 'fecha_digitacion' => '2026-04-14 13:41:31', 'usuario_id' => 1
         ]);
         
-        $response = $this->getJson('/api/lf-itse/giros');
+        $response = $this->comoUsuarioApi()->getJson('/api/lf-itse/giros');
         $response->assertStatus(200);
         $response->assertJsonCount(1);
     }
@@ -42,7 +42,7 @@ class GiroTest extends TestCase {
         $m = GiroModel::create([
             'ciiu_id' => 1234, 'nombre' => 'Test Giro', 'esta_activo' => true, 'fecha_digitacion' => '2026-04-14 13:41:31', 'usuario_id' => 1
         ]);
-        $response = $this->getJson('/api/lf-itse/giros/' . $m->id);
+        $response = $this->comoUsuarioApi()->getJson('/api/lf-itse/giros/' . $m->id);
         $response->assertStatus(200);
         $this->assertEquals(1234, $response->json('ciiu_id'));
     }
@@ -76,7 +76,7 @@ class GiroTest extends TestCase {
         $m = GiroModel::create([
             'ciiu_id' => 1234, 'nombre' => 'Test Giro', 'esta_activo' => true, 'fecha_digitacion' => '2026-04-14 13:41:31', 'usuario_id' => 1
         ]);
-        $response = $this->deleteJson('/api/lf-itse/giros/' . $m->id);
+        $response = $this->comoUsuarioApi()->deleteJson('/api/lf-itse/giros/' . $m->id);
         $response->assertStatus(204);
         $this->assertDatabaseMissing('giros', ['id' => $m->id]);
     }
@@ -88,5 +88,16 @@ class GiroTest extends TestCase {
         ]);
         $response = $this->putJson('/api/lf-itse/giros/' . $m->id, []);
         $response->assertStatus(401);
+    }
+
+    public function test_rechaza_todas_las_operaciones_sin_auth(): void
+    {
+        $url = '/api/lf-itse/giros';
+
+        $this->getJson($url)->assertUnauthorized();
+        $this->getJson($url . '/1')->assertUnauthorized();
+        $this->postJson($url, [])->assertUnauthorized();
+        $this->putJson($url . '/1', [])->assertUnauthorized();
+        $this->deleteJson($url . '/1')->assertUnauthorized();
     }
 }

@@ -23,7 +23,7 @@
 
 ## TD-006 — Frontend no envía `tipo_persona` en TiposDocumentoIdentidad
 
-- **Estado:** Activo
+- **Estado:** Resuelto (2026-10-12) — el backend hace `tipo_persona` opcional (commit 5eeb35e) y los tests se actualizaron: sin el parámetro lista todos; con un valor inválido responde 400.
 - **Impacto:** Alto (página `/admin/tipos-documento-identidad` está rota en frontend)
 - **Descripción:** Vue llama a `/api/lf-itse/tipos-documento-identidad/` sin el query param `?tipo_persona=N|J`. Django (y Laravel que replica el contrato) devuelve 400 Bad Request.
 - **Ubicación:** `frontend-reversed-pro_vue/src/infrastructure/repositories/TiposDocumentoIdentidadRepository.impl.ts`

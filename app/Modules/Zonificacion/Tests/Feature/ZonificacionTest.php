@@ -29,7 +29,7 @@ class ZonificacionTest extends TestCase {
             'usuario_id' => 1
         ]);
         
-        $response = $this->getJson('/api/lf-itse/zonificaciones');
+        $response = $this->comoUsuarioApi()->getJson('/api/lf-itse/zonificaciones');
         
         $response->assertStatus(200);
         $response->assertJsonCount(1);
@@ -69,9 +69,20 @@ class ZonificacionTest extends TestCase {
             'usuario_id' => 1
         ]);
         
-        $response = $this->deleteJson('/api/lf-itse/zonificaciones/' . $m->id);
+        $response = $this->comoUsuarioApi()->deleteJson('/api/lf-itse/zonificaciones/' . $m->id);
         
         $response->assertStatus(204);
         $this->assertDatabaseMissing('zonificaciones', ['id' => $m->id]);
+    }
+
+    public function test_rechaza_todas_las_operaciones_sin_auth(): void
+    {
+        $url = '/api/lf-itse/zonificaciones';
+
+        $this->getJson($url)->assertUnauthorized();
+        $this->getJson($url . '/1')->assertUnauthorized();
+        $this->postJson($url, [])->assertUnauthorized();
+        $this->putJson($url . '/1', [])->assertUnauthorized();
+        $this->deleteJson($url . '/1')->assertUnauthorized();
     }
 }
