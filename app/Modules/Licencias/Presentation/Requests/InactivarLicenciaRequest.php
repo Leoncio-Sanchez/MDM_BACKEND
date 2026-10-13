@@ -18,7 +18,10 @@ final class InactivarLicenciaRequest extends FormRequest
     {
         return [
             'licencia_id' => ['required', 'integer'],
-            'motivo' => ['required', 'string'],
+            'estado_id' => ['required', 'integer', 'exists:estados,id'],
+            'fecha_estado' => ['required', 'date'],
+            'documento' => ['required', 'string', 'max:100'],
+            'observaciones' => ['required', 'string', 'max:1000'],
         ];
     }
 }

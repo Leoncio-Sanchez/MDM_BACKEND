@@ -8,6 +8,8 @@ use Illuminate\Foundation\Http\FormRequest;
 
 final class CrearLicenciaRequest extends FormRequest
 {
+    use ReglasDatosLicencia;
+
     public function authorize(): bool
     {
         return true;
@@ -17,13 +19,8 @@ final class CrearLicenciaRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'numero_licencia' => ['required', 'string', 'max:50'],
-            'nombre_comercial' => ['required', 'string', 'max:200'],
-            'tipo_licencia_id' => ['required', 'integer', 'exists:tipos_licencia,id'],
-            'titular_id' => ['nullable', 'integer', 'exists:personas,id'],
-            'expediente_id' => ['nullable', 'integer', 'exists:expedientes,id'],
-            'nivel_riesgo_id' => ['nullable', 'integer', 'exists:niveles_riesgo,id'],
-            'zonificacion_id' => ['nullable', 'integer', 'exists:zonificaciones,id'],
+            'numero_licencia' => ['required', 'integer', 'min:1'],
+            ...$this->reglasDatosLicencia(),
         ];
     }
 }

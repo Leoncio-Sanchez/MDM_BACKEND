@@ -55,11 +55,11 @@ class LicenciaController
         private readonly ListarEstadosLicenciaUseCase $listarEstados
     ) {}
 
-    public function store(CrearLicenciaRequest $request): LicenciaResource
+    public function store(CrearLicenciaRequest $request): JsonResponse
     {
         $licencia = $this->crear->execute(CrearLicenciaDTO::fromArray($request->validated()));
 
-        return new LicenciaResource($licencia);
+        return (new LicenciaResource($licencia))->response()->setStatusCode(201);
     }
 
     public function buscar(BuscarLicenciasRequest $request): AnonymousResourceCollection
@@ -92,7 +92,10 @@ class LicenciaController
 
     public function inactivar(InactivarLicenciaRequest $request): LicenciaResource
     {
-        $licencia = $this->inactivar->execute(InactivarLicenciaDTO::fromArray($request->validated()));
+        $licencia = $this->inactivar->execute(InactivarLicenciaDTO::fromArray([
+            ...$request->validated(),
+            'usuario_id' => $request->user('api')?->getAuthIdentifier(),
+        ]));
 
         return new LicenciaResource($licencia);
     }

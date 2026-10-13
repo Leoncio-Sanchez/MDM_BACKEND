@@ -79,3 +79,24 @@ it('actualiza una licencia sin mutar la original', function () {
         ->and($modificada->numeroLicencia->value)->toBe(54321)
         ->and($modificada->nombreComercial->value)->toBe('Nuevo Nombre');
 });
+
+it('usa la fecha de Lima como fecha de emisión aunque en UTC ya sea el día siguiente', function () {
+    // 02:00 UTC del 13 = 21:00 del 12 en Lima
+    CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-10-13 02:00:00', 'UTC'));
+
+    $licencia = Licencia::crear(
+        uuid: 'uuid',
+        numeroLicencia: 1,
+        nombreComercial: 'X',
+        tipoLicenciaId: 1,
+        titularId: 1,
+        conductorId: 1,
+        expedienteId: 1,
+        nivelRiesgoId: 1,
+        zonificacionId: 1,
+    );
+
+    expect($licencia->fechaEmision->format('Y-m-d'))->toBe('2026-10-12');
+
+    CarbonImmutable::setTestNow();
+});

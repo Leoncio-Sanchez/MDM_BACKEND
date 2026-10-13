@@ -25,6 +25,6 @@ interface LicenciaRepositoryInterface
     /** @return array<int, array<string, mixed>> */
     public function listarEstados(int $licenciaId): array;
     public function existeEstado(int $licenciaId, int $estadoId): bool;
-    public function insertarEstado(int $licenciaId, int $estadoId, string $fecha, string $documento, string $observaciones): void;
+    public function insertarEstado(int $licenciaId, int $estadoId, string $fecha, string $documento, string $observaciones, ?int $usuarioId = null): void;
     public function actualizarFechaNotificacion(int $licenciaId, string $fecha): void;
 }

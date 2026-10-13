@@ -46,6 +46,18 @@ return Application::configure(basePath: dirname(__DIR__))
             return response()->json(['error' => $e->getMessage()], 422);
         });
 
+        $exceptions->render(function (\App\Modules\Licencias\Domain\Exceptions\LicenciaNoEncontrada $e, Request $request) {
+            return response()->json(['error' => $e->getMessage()], 404);
+        });
+
+        $exceptions->render(function (\App\Modules\Licencias\Domain\Exceptions\LicenciaDuplicadaError|\App\Modules\Licencias\Domain\Exceptions\ReciboPagoDuplicadoError|\App\Modules\Licencias\Domain\Exceptions\EstadoInactivacionDuplicadoError|\App\Modules\Licencias\Domain\Exceptions\LicenciaTieneDependientesError|\App\Modules\Licencias\Domain\Exceptions\LicenciaDenegadaError $e, Request $request) {
+            return response()->json(['error' => $e->getMessage()], 409);
+        });
+
+        $exceptions->render(function (\App\Modules\Licencias\Domain\Exceptions\ExpedienteNoValido|\App\Modules\Licencias\Domain\Exceptions\LicenciaInvalida|\App\Modules\Licencias\Domain\Exceptions\NombreComercialInvalido|\App\Modules\Licencias\Domain\Exceptions\NotificacionFechaInvalidaError|\App\Modules\Licencias\Domain\Exceptions\NumeroLicenciaInvalido $e, Request $request) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        });
+
         $exceptions->render(function (\App\Modules\Personas\Domain\Exceptions\PersonaNoEncontrada $e, Request $request) {
             return response()->json(['error' => $e->getMessage()], 404);
         });

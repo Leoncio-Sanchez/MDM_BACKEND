@@ -33,7 +33,17 @@ it('retorna que el expediente es válido', function () {
 
 it('retorna false si el expediente ya tiene licencia', function () {
     $expediente = (object) ['id' => 1, 'numero_expediente' => 12345];
-    $licencia = Licencia::crear('uuid', 'LIC-1', 'A', 1);
+    $licencia = Licencia::crear(
+        uuid: 'uuid',
+        numeroLicencia: 1001,
+        nombreComercial: 'A',
+        tipoLicenciaId: 1,
+        titularId: 1,
+        conductorId: 1,
+        expedienteId: 1,
+        nivelRiesgoId: 1,
+        zonificacionId: 1,
+    );
 
     $expRepo = Mockery::mock(ExpedienteReadRepositoryInterface::class);
     $expRepo->shouldReceive('buscarPorNumeroYAnio')

@@ -5,6 +5,7 @@ namespace App\Modules\Licencias\Application\UseCases;
 
 use App\Modules\Licencias\Application\DTOs\InactivarLicenciaDTO;
 use App\Modules\Licencias\Domain\Contracts\LicenciaRepositoryInterface;
+use App\Modules\Licencias\Domain\Entities\Licencia;
 use App\Modules\Licencias\Domain\Exceptions\EstadoInactivacionDuplicadoError;
 use App\Modules\Licencias\Domain\Exceptions\LicenciaNoEncontrada;
 use Illuminate\Support\Facades\DB;
@@ -15,9 +16,10 @@ final readonly class RegistrarInactivacionUseCase
         private LicenciaRepositoryInterface $licencias,
     ) {}
 
-    public function execute(InactivarLicenciaDTO $dto): void
+    /** Registra el estado de inactivación en el historial y devuelve la licencia afectada. */
+    public function execute(InactivarLicenciaDTO $dto): Licencia
     {
-        DB::transaction(function () use ($dto): void {
+        return DB::transaction(function () use ($dto): Licencia {
             $licencia = $this->licencias->buscarPorId($dto->licenciaId);
             if (!$licencia) {
                 throw LicenciaNoEncontrada::porId($dto->licenciaId);
@@ -36,7 +38,10 @@ final readonly class RegistrarInactivacionUseCase
                 fecha: $dto->fechaEstado->toDateString(),
                 documento: $dto->documento,
                 observaciones: $dto->observaciones,
+                usuarioId: $dto->usuarioId,
             );
+
+            return $licencia;
         });
     }
 }

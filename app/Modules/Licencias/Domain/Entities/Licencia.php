@@ -71,7 +71,8 @@ final readonly class Licencia
             id: null,
             uuid: $uuid,
             numeroLicencia: NumeroLicencia::fromInt($numeroLicencia),
-            fechaEmision: CarbonImmutable::now(),
+            // Fecha de calendario de la municipalidad: en UTC, después de las 19:00 en Lima ya sería el día siguiente
+            fechaEmision: CarbonImmutable::now('America/Lima'),
             nombreComercial: NombreComercial::fromString($nombreComercial),
             titularId: $titularId,
             conductorId: $conductorId,

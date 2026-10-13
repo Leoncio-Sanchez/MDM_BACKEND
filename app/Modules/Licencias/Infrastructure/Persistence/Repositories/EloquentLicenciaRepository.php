@@ -139,7 +139,7 @@ final readonly class EloquentLicenciaRepository implements LicenciaRepositoryInt
             ->exists();
     }
 
-    public function insertarEstado(int $licenciaId, int $estadoId, string $fecha, string $documento, string $observaciones): void
+    public function insertarEstado(int $licenciaId, int $estadoId, string $fecha, string $documento, string $observaciones, ?int $usuarioId = null): void
     {
         \Illuminate\Support\Facades\DB::table('licencias_funcionamiento_estados')->insert([
             'licencia_funcionamiento_id' => $licenciaId,
@@ -147,6 +147,7 @@ final readonly class EloquentLicenciaRepository implements LicenciaRepositoryInt
             'fecha_estado' => $fecha,
             'documento' => $documento,
             'observaciones' => $observaciones,
+            'usuario_id' => $usuarioId,
             'fecha_digitacion' => now(),
         ]);
     }

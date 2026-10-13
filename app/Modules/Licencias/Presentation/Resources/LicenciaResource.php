@@ -42,7 +42,7 @@ class LicenciaResource extends JsonResource
                 ])
                 ->get()
                 ->map(function ($g) {
-                    $g->fecha_digitacion = Carbon::parse($g->fecha_digitacion)->setTimezone('America/Lima')->format('Y-m-dTH:i:s.uP');
+                    $g->fecha_digitacion = Carbon::parse($g->fecha_digitacion)->setTimezone('America/Lima')->format('Y-m-d\TH:i:s.uP');
 
                     return $g;
                 })
@@ -64,7 +64,7 @@ class LicenciaResource extends JsonResource
                 ])
                 ->get()
                 ->map(function ($a) {
-                    $a->fecha_digitacion = Carbon::parse($a->fecha_digitacion)->setTimezone('America/Lima')->format('Y-m-dTH:i:s.uP');
+                    $a->fecha_digitacion = Carbon::parse($a->fecha_digitacion)->setTimezone('America/Lima')->format('Y-m-d\TH:i:s.uP');
 
                     return $a;
                 })
@@ -84,7 +84,7 @@ class LicenciaResource extends JsonResource
                 ])
                 ->get()
                 ->map(function ($h) {
-                    $h->fecha_digitacion = Carbon::parse($h->fecha_digitacion)->setTimezone('America/Lima')->format('Y-m-dTH:i:s.uP');
+                    $h->fecha_digitacion = Carbon::parse($h->fecha_digitacion)->setTimezone('America/Lima')->format('Y-m-d\TH:i:s.uP');
 
                     return $h;
                 })
@@ -124,7 +124,7 @@ class LicenciaResource extends JsonResource
             'se_puede_publicar' => (bool) $model?->se_puede_publicar,
             'fecha_notificacion' => $model?->fecha_notificacion ? Carbon::parse($model->fecha_notificacion)->toIso8601String() : null,
             'usuario' => $model?->usuario_id,
-            'fecha_digitacion' => $model?->fecha_digitacion ? Carbon::parse($model->fecha_digitacion)->setTimezone('America/Lima')->format('Y-m-dTH:i:s.uP') : null,
+            'fecha_digitacion' => $model?->fecha_digitacion ? Carbon::parse($model->fecha_digitacion)->setTimezone('America/Lima')->format('Y-m-d\TH:i:s.uP') : null,
             'archivos' => $archivos,
             'historial_estados' => $historial_estados,
             'giros' => $giros,

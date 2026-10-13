@@ -58,7 +58,7 @@ it('registra una inactivación correctamente', function () {
     $this->licencias->shouldReceive('buscarPorId')->with(1)->once()->andReturn($this->licenciaMock);
     $this->licencias->shouldReceive('existeEstado')->with(1, 5)->once()->andReturn(false);
     $this->licencias->shouldReceive('insertarEstado')
-        ->with(1, 5, '2025-01-15', 'DOC-001', 'Inactivación por resolución')
+        ->with(1, 5, '2025-01-15', 'DOC-001', 'Inactivación por resolución', 9)
         ->once();
 
     $dto = new InactivarLicenciaDTO(
@@ -67,11 +67,10 @@ it('registra una inactivación correctamente', function () {
         fechaEstado: CarbonImmutable::parse('2025-01-15'),
         documento: 'DOC-001',
         observaciones: 'Inactivación por resolución',
+        usuarioId: 9,
     );
 
-    $this->useCase->execute($dto);
-
-    expect(true)->toBeTrue(); // Si no lanza excepción, éxito
+    expect($this->useCase->execute($dto))->toBe($this->licenciaMock);
 });
 
 it('lanza LicenciaNoEncontrada si no existe', function () {

@@ -6,6 +6,8 @@ use App\Modules\Licencias\Domain\Contracts\ExpedienteReadRepositoryInterface;
 use App\Modules\Licencias\Domain\Contracts\LicenciaRepositoryInterface;
 use App\Modules\Licencias\Domain\Entities\Licencia;
 use App\Modules\Licencias\Domain\Exceptions\ExpedienteNoValido;
+use App\Modules\Licencias\Domain\Exceptions\LicenciaDuplicadaError;
+use App\Modules\Licencias\Domain\Exceptions\ReciboPagoDuplicadoError;
 use Ramsey\Uuid\Uuid;
 final readonly class CrearLicenciaUseCase {
     public function __construct(
@@ -19,6 +21,15 @@ final readonly class CrearLicenciaUseCase {
                 throw ExpedienteNoValido::porId($dto->expedienteId);
             }
         }
+
+        // Validar antes de insertar: si no, la BD rechaza con un 500 (restricción UNIQUE)
+        if ($this->licencias->existeNumeroLicencia((int) $dto->numeroLicencia)) {
+            throw LicenciaDuplicadaError::porNumero((string) $dto->numeroLicencia);
+        }
+        if ($dto->numeroReciboPago !== '' && $this->licencias->existeReciboPago($dto->numeroReciboPago)) {
+            throw ReciboPagoDuplicadoError::porNumero($dto->numeroReciboPago);
+        }
+
         $licencia = Licencia::crear(
             uuid: Uuid::uuid4()->toString(),
             numeroLicencia: (int) $dto->numeroLicencia,

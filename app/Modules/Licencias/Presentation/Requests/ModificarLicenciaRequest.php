@@ -8,6 +8,8 @@ use Illuminate\Foundation\Http\FormRequest;
 
 final class ModificarLicenciaRequest extends FormRequest
 {
+    use ReglasDatosLicencia;
+
     public function authorize(): bool
     {
         return true;
@@ -16,13 +18,11 @@ final class ModificarLicenciaRequest extends FormRequest
     /** @return array<string, mixed> */
     public function rules(): array
     {
+        // PUT reemplaza la licencia completa: se exigen los mismos datos que al crear.
+        // El número de licencia es opcional (si no se envía se conserva el actual).
         return [
-            'nombre_comercial' => ['required', 'string', 'max:200'],
-            'tipo_licencia_id' => ['required', 'integer', 'exists:tipos_licencia,id'],
-            'titular_id' => ['nullable', 'integer', 'exists:personas,id'],
-            'expediente_id' => ['nullable', 'integer', 'exists:expedientes,id'],
-            'nivel_riesgo_id' => ['nullable', 'integer', 'exists:niveles_riesgo,id'],
-            'zonificacion_id' => ['nullable', 'integer', 'exists:zonificaciones,id'],
+            'numero_licencia' => ['sometimes', 'integer', 'min:1'],
+            ...$this->reglasDatosLicencia(),
         ];
     }
 }
