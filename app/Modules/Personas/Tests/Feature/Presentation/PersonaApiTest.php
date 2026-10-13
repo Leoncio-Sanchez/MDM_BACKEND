@@ -4,34 +4,11 @@ declare(strict_types=1);
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
 beforeEach(function () {
-
-    if (! Schema::hasTable('itse')) {
-        Schema::create('itse', function ($table) {
-            $table->id();
-            $table->integer('titular_id');
-            $table->integer('conductor_id');
-        });
-    }
-    if (! Schema::hasTable('licencias_funcionamiento')) {
-        Schema::create('licencias_funcionamiento', function ($table) {
-            $table->id();
-            $table->integer('titular_id');
-            $table->integer('conductor_id');
-        });
-    }
-    if (! Schema::hasTable('expedientes')) {
-        Schema::create('expedientes', function ($table) {
-            $table->id();
-            $table->integer('solicitante_id');
-            $table->integer('representante_id');
-        });
-    }
 
     $userId = DB::table('auth_user')->insertGetId(\Tests\Fixtures\UsuarioAuth::datos([
         'is_staff' => true,

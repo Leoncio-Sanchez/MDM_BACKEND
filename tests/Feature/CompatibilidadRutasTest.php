@@ -7,7 +7,6 @@ namespace Tests\Feature;
 use App\Modules\Seguridad\Domain\Contracts\TokenServiceInterface;
 use App\Modules\Seguridad\Domain\ValueObjects\AuthenticatedUser;
 use App\Modules\Usuarios\Infrastructure\Persistence\Models\UsuarioModel;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
@@ -19,58 +18,6 @@ final class CompatibilidadRutasTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-
-        if (! Schema::hasTable('auth_user')) {
-            Schema::create('auth_user', function (Blueprint $table) {
-                $table->increments('id');
-                $table->string('username')->unique();
-                $table->string('password');
-                $table->string('first_name')->default('');
-                $table->string('last_name')->default('');
-                $table->string('email')->default('');
-                $table->boolean('is_superuser')->default(false);
-                $table->boolean('is_staff')->default(false);
-                $table->boolean('is_active')->default(true);
-                $table->timestamp('last_login')->nullable();
-                $table->timestamp('date_joined')->nullable();
-            });
-        }
-
-        if (! Schema::hasTable('estados')) {
-            Schema::create('estados', function (Blueprint $table) {
-                $table->increments('id');
-                $table->string('nombre');
-                $table->boolean('es_para_lf')->default(false);
-                $table->boolean('es_para_itse')->default(false);
-                $table->boolean('esta_activo')->default(true);
-            });
-        }
-
-        if (! Schema::hasTable('giros')) {
-            Schema::create('giros', function (Blueprint $table) {
-                $table->increments('id');
-                $table->string('ciiu_id');
-                $table->string('nombre');
-            });
-        }
-
-        if (! Schema::hasTable('licencias_funcionamiento_giros')) {
-            Schema::create('licencias_funcionamiento_giros', function (Blueprint $table) {
-                $table->increments('id');
-                $table->integer('licencia_funcionamiento_id');
-                $table->integer('giro_id');
-                $table->integer('usuario_id')->nullable();
-                $table->timestamp('fecha_digitacion')->nullable();
-            });
-        }
-
-        if (! Schema::hasTable('licencias_funcionamiento')) {
-            Schema::create('licencias_funcionamiento', function (Blueprint $table) {
-                $table->increments('id');
-                $table->string('uuid')->nullable();
-                $table->string('nombre_comercial')->nullable();
-            });
-        }
 
         UsuarioModel::truncate();
         $admin = UsuarioModel::create(\Tests\Fixtures\UsuarioAuth::datos([

@@ -8,7 +8,6 @@ use App\Modules\Seguridad\Domain\Contracts\TokenServiceInterface;
 use App\Modules\Seguridad\Domain\ValueObjects\AuthenticatedUser;
 use App\Modules\Seguridad\Infrastructure\Jwt\DjangoJwtTokenService;
 use App\Modules\Seguridad\Infrastructure\Persistence\Models\UserAuthModel;
-use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 final class JwtAuthControllerTest extends TestCase
@@ -18,22 +17,6 @@ final class JwtAuthControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-
-        if (! Schema::hasTable('auth_user')) {
-            Schema::create('auth_user', function ($table) {
-                $table->increments('id');
-                $table->string('username')->unique();
-                $table->string('password');
-                $table->string('first_name')->default('');
-                $table->string('last_name')->default('');
-                $table->string('email')->default('');
-                $table->boolean('is_superuser')->default(false);
-                $table->boolean('is_staff')->default(false);
-                $table->boolean('is_active')->default(true);
-                $table->timestamp('last_login')->nullable();
-                $table->timestamp('date_joined')->nullable();
-            });
-        }
 
         UserAuthModel::truncate();
 

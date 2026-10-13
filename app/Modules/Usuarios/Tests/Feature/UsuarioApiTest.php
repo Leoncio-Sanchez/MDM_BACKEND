@@ -8,7 +8,6 @@ use App\Modules\Seguridad\Domain\Contracts\TokenServiceInterface;
 use App\Modules\Seguridad\Domain\ValueObjects\AuthenticatedUser;
 use App\Modules\Usuarios\Infrastructure\Persistence\Models\UsuarioModel;
 use App\Modules\Usuarios\Infrastructure\Persistence\Models\UsuarioPerfilModel;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
@@ -21,35 +20,6 @@ final class UsuarioApiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-
-        if (! Schema::hasTable('auth_user')) {
-            Schema::create('auth_user', function (Blueprint $table) {
-                $table->increments('id');
-                $table->string('username')->unique();
-                $table->string('password');
-                $table->string('first_name')->default('');
-                $table->string('last_name')->default('');
-                $table->string('email')->default('');
-                $table->boolean('is_superuser')->default(false);
-                $table->boolean('is_staff')->default(false);
-                $table->boolean('is_active')->default(true);
-                $table->timestamp('last_login')->nullable();
-                $table->timestamp('date_joined')->nullable();
-            });
-        }
-
-        if (! Schema::hasTable('usuarios_perfiles')) {
-            Schema::create('usuarios_perfiles', function (Blueprint $table) {
-                $table->increments('id');
-                $table->integer('user_id');
-                $table->boolean('expedientes')->default(false);
-                $table->boolean('licencias')->default(false);
-                $table->boolean('itse')->default(false);
-                $table->boolean('admin')->default(false);
-                $table->integer('user_id_digitador')->default(1);
-                $table->timestamp('fecha_digitacion')->nullable();
-            });
-        }
 
         UsuarioPerfilModel::truncate();
         UsuarioModel::truncate();

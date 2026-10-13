@@ -5,22 +5,11 @@ use App\Modules\Personas\Domain\Entities\PersonaDocumento;
 use App\Modules\Personas\Infrastructure\Persistence\Repositories\EloquentPersonaDocumentoRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
 beforeEach(function () {
-    if (! Schema::hasTable('tipos_documento_identidad')) {
-        Schema::create('tipos_documento_identidad', function ($table) {
-            $table->id();
-            $table->string('codigo');
-            $table->string('nombre');
-            $table->integer('numero_digitos');
-            $table->string('tipo_persona');
-        });
-    }
-
     $this->repo = new EloquentPersonaDocumentoRepository;
 });
 

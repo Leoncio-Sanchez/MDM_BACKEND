@@ -8,7 +8,6 @@ use App\Modules\Seguridad\Domain\Contracts\TokenServiceInterface;
 use App\Modules\Seguridad\Domain\ValueObjects\AuthenticatedUser;
 use App\Modules\UnidadesOrganicas\Infrastructure\Persistence\Models\UnidadOrganicaModel;
 use App\Modules\Usuarios\Infrastructure\Persistence\Models\UsuarioModel;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
@@ -19,32 +18,6 @@ final class UnidadOrganicaApiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-
-        if (! Schema::hasTable('auth_user')) {
-            Schema::create('auth_user', function (Blueprint $table) {
-                $table->increments('id');
-                $table->string('username')->unique();
-                $table->string('password');
-                $table->string('first_name')->default('');
-                $table->string('last_name')->default('');
-                $table->string('email')->default('');
-                $table->boolean('is_superuser')->default(false);
-                $table->boolean('is_staff')->default(false);
-                $table->boolean('is_active')->default(true);
-                $table->timestamp('last_login')->nullable();
-                $table->timestamp('date_joined')->nullable();
-            });
-        }
-
-        if (! Schema::hasTable('unidades_organicas')) {
-            Schema::create('unidades_organicas', function (Blueprint $table) {
-                $table->increments('id');
-                $table->string('codigo', 50)->unique();
-                $table->string('nombre', 200);
-                $table->string('sigla', 50);
-                $table->boolean('esta_activo')->default(true);
-            });
-        }
 
         UsuarioModel::truncate();
         $admin = UsuarioModel::create(\Tests\Fixtures\UsuarioAuth::datos([
