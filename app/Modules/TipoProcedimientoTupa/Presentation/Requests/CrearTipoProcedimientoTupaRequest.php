@@ -28,7 +28,7 @@ class CrearTipoProcedimientoTupaRequest extends FormRequest
         return [
             'codigo' => 'required|string|max:30|unique:tipos_procedimiento_tupa,codigo',
             'nombre' => 'required|string|max:200',
-            'plazo_atencion_dias' => 'required|integer|min:1',
+            'plazo_atencion_dias' => 'required|integer|min:0',
             // La alerta se dispara antes del vencimiento: no puede superar el plazo
             'dias_alerta_vencimiento' => 'required|integer|min:0|lte:plazo_atencion_dias',
             'esta_activo' => 'nullable|boolean',
@@ -45,7 +45,7 @@ class CrearTipoProcedimientoTupaRequest extends FormRequest
             'codigo.unique' => 'Ya existe un procedimiento con ese código.',
             'codigo.max' => 'El código no puede superar 30 caracteres.',
             'nombre.max' => 'El nombre no puede superar 200 caracteres.',
-            'plazo_atencion_dias.min' => 'El plazo de atención debe ser de al menos 1 día.',
+            'plazo_atencion_dias.min' => 'El plazo de atención no puede ser negativo.',
             'dias_alerta_vencimiento.lte' => 'Los días de alerta no pueden superar el plazo de atención.',
             'unidad_organica_id.exists' => 'La unidad orgánica seleccionada no existe.',
         ];

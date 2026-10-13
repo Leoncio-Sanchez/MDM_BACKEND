@@ -4,41 +4,46 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Modules\Seguridad\Infrastructure\Hashing\DjangoPbkdf2Hasher;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
+    /** Datos para desarrollo local: administrador + catálogos reales. */
     public function run(): void
     {
-        // Usuario administrador inicial compatible con Django
-        $hasher = new \App\Modules\Seguridad\Infrastructure\Hashing\DjangoPbkdf2Hasher();
+        // Administrador local (contraseña de desarrollo: admin123). Contraseña en formato Django.
         DB::table('auth_user')->updateOrInsert(
             ['id' => 1],
             [
                 'username' => 'admin',
+                'password' => (new DjangoPbkdf2Hasher())->hash('admin123'),
+                'first_name' => '',
+                'last_name' => '',
                 'email' => 'admin@muni.gob.pe',
-                'password' => $hasher->hash('admin123'),
-                'role' => 'admin',
-                'is_active' => true,
-                'is_staff' => true,
                 'is_superuser' => true,
+                'is_staff' => true,
+                'is_active' => true,
+                'date_joined' => now(),
+            ]
+        );
+        // Se insertó con id explícito: avanzar la secuencia para que el próximo usuario no choque
+        DB::statement("SELECT setval(pg_get_serial_sequence('auth_user', 'id'), (SELECT MAX(id) FROM auth_user))");
+
+        // Perfil de accesos (columnas reales: expedientes, licencias, itse, admin)
+        DB::table('usuarios_perfiles')->updateOrInsert(
+            ['user_id' => 1],
+            [
+                'expedientes' => true,
+                'licencias' => true,
+                'itse' => true,
+                'admin' => true,
+                'fecha_digitacion' => now(),
+                'user_id_digitador' => 1,
             ]
         );
 
-        if (DB::table('usuarios_perfiles')->where('user_id', 1)->doesntExist()) {
-            DB::table('usuarios_perfiles')->insert([
-                'user_id' => 1,
-                'es_inspector' => false,
-                'cargo' => 'Administrador General',
-                'es_administrador' => true,
-                'acceso_licencias' => true,
-                'acceso_itse' => true,
-                'acceso_expedientes' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        }
+        $this->call(CatalogosSeeder::class);
     }
 }

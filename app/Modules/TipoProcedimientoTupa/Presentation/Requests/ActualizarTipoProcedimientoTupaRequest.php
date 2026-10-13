@@ -34,7 +34,7 @@ class ActualizarTipoProcedimientoTupaRequest extends FormRequest
         return [
             'codigo' => ['nullable', 'string', 'max:30', Rule::unique('tipos_procedimiento_tupa', 'codigo')->ignore((int) $this->route('id'))],
             'nombre' => 'nullable|string|max:200',
-            'plazo_atencion_dias' => 'nullable|integer|min:1',
+            'plazo_atencion_dias' => 'nullable|integer|min:0',
             'dias_alerta_vencimiento' => $diasAlerta,
             'esta_activo' => 'nullable|boolean',
             'requiere_lf' => 'nullable|boolean',
@@ -50,7 +50,7 @@ class ActualizarTipoProcedimientoTupaRequest extends FormRequest
             'codigo.unique' => 'Ya existe un procedimiento con ese código.',
             'codigo.max' => 'El código no puede superar 30 caracteres.',
             'nombre.max' => 'El nombre no puede superar 200 caracteres.',
-            'plazo_atencion_dias.min' => 'El plazo de atención debe ser de al menos 1 día.',
+            'plazo_atencion_dias.min' => 'El plazo de atención no puede ser negativo.',
             'dias_alerta_vencimiento.lte' => 'Los días de alerta no pueden superar el plazo de atención.',
             'unidad_organica_id.exists' => 'La unidad orgánica seleccionada no existe.',
         ];
