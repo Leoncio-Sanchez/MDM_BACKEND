@@ -27,7 +27,7 @@ beforeEach(function () {
 });
 
 it('crea un ITSE correctamente', function () {
-    $dto = new CrearItseDTO(123, CarbonImmutable::now(), null, CarbonImmutable::now()->addYear(), 'A', 'B', 'C', 10.5, 100, 'R123', null, false, 1, 1, null, 1, 1, 1, 1);
+    $dto = new CrearItseDTO(123, CarbonImmutable::now(), null, CarbonImmutable::now()->addYear(), 'A', 'B', 'C', 10.5, 20, 'R123', null, false, 1, 1, null, 1, 1, 1, 1);
     
     $this->itses->shouldReceive('existeNumero')->with(123)->once()->andReturn(false);
     $this->itses->shouldReceive('existeRecibo')->with('R123')->once()->andReturn(false);
@@ -43,7 +43,7 @@ it('crea un ITSE correctamente', function () {
 });
 
 it('lanza ExpedienteNoValidoItse si expediente no existe', function () {
-    $dto = new CrearItseDTO(123, CarbonImmutable::now(), null, CarbonImmutable::now()->addYear(), 'A', 'B', 'C', 10.5, 100, 'R123', null, false, 1, 1, null, 1, 1, 1, 1);
+    $dto = new CrearItseDTO(123, CarbonImmutable::now(), null, CarbonImmutable::now()->addYear(), 'A', 'B', 'C', 10.5, 20, 'R123', null, false, 1, 1, null, 1, 1, 1, 1);
     
     $this->itses->shouldReceive('existeNumero')->with(123)->once()->andReturn(false);
     $this->itses->shouldReceive('existeRecibo')->with('R123')->once()->andReturn(false);

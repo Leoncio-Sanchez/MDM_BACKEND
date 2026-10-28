@@ -37,6 +37,13 @@ final class ItseInvalido extends DomainException
         return new self("El recibo de pago {$recibo} ya existe.");
     }
 
+    public static function aforoExcedido(int $maximo, float $area): self
+    {
+        $m2 = rtrim(rtrim(number_format($area, 2, '.', ''), '0'), '.');
+
+        return new self("Aforo excedido: el aforo máximo permitido es de {$maximo} personas para un área de {$m2} m².");
+    }
+
     public static function yaInactivo(int $id): self
     {
         return new self("El ITSE {$id} ya tiene un estado inactivo registrado.");

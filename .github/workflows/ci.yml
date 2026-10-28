@@ -1,0 +1,83 @@
+# CI del backend — Sistema LF-ITSE
+# Basado en el pipeline del Corte 2 (equipo), adaptado a este repositorio:
+#   - El backend está en la raíz del repo (no en backend-php/); el frontend tiene su propio repo.
+#   - Los tests usan PostgreSQL real: el esquema de producción y las funciones/trigger
+#     del Corte 2 son de PostgreSQL (con SQLite fallarían).
+#   - PHP 8.4: las dependencias instaladas (Symfony 8) exigen PHP >= 8.4.1.
+#   - Pint (estilo de código) queda fuera hasta formatear el proyecto completo; hoy fallaría.
+name: CI backend
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: PHPStan y tests (PHP 8.4 + PostgreSQL 16)
+    runs-on: ubuntu-latest
+
+    services:
+      pgsql:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: testing
+          POSTGRES_USER: sail
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      # Entorno de pruebas desde el primer paso: sin esto, "composer install" arranca Laravel
+      # como producción (aún no hay .env) y la protección de JWT_SECRET lo detiene a propósito.
+      APP_ENV: testing
+      JWT_SECRET: clave-solo-para-ci-no-usar-en-produccion
+      # Mismos datos que phpunit.xml, pero apuntando al servicio del runner
+      DB_CONNECTION: pgsql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_DATABASE: testing
+      DB_USERNAME: sail
+      DB_PASSWORD: password
+
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Instalar PHP 8.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo, pdo_pgsql, pgsql, bcmath, fileinfo
+          coverage: none
+
+      - name: Caché de dependencias
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Instalar dependencias
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Preparar el entorno
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Análisis estático (PHPStan nivel 8)
+        run: ./vendor/bin/phpstan analyse --no-progress --memory-limit=1G --error-format=github
+
+      - name: Tests (PostgreSQL)
+        run: php artisan test --compact

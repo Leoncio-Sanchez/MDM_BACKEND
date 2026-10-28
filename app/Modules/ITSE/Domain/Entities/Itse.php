@@ -4,10 +4,26 @@ declare(strict_types=1);
 namespace App\Modules\ITSE\Domain\Entities;
 
 use App\Modules\ITSE\Domain\Exceptions\ItseFechaInvalida;
+use App\Modules\ITSE\Domain\Exceptions\ItseInvalido;
 use DateTimeImmutable;
 
 final readonly class Itse
 {
+    /** Aforo máximo según CNE / RNE: personas por m² de área útil (igual que el trigger trg_itse_aforo_maximo). */
+    public const AFORO_POR_M2 = 2;
+
+    /** @throws ItseInvalido */
+    private static function validarAforo(float $area, int $capacidadAforo): void
+    {
+        if ($area <= 0) {
+            return;
+        }
+        $maximo = (int) floor($area * self::AFORO_POR_M2);
+        if ($capacidadAforo > $maximo) {
+            throw ItseInvalido::aforoExcedido($maximo, $area);
+        }
+    }
+
     public function __construct(
         public ?int $id,
         public string $uuid,
@@ -67,6 +83,8 @@ final readonly class Itse
         int $titularId,
         DateTimeImmutable $fechaDigitacion,
     ): self {
+        self::validarAforo($area, $capacidadAforo);
+
         return new self(
             id: null,
             uuid: $uuid,
@@ -112,6 +130,11 @@ final readonly class Itse
         int $conductorId,
         int $titularId,
     ): self {
+        // Solo si cambian: un certificado antiguo que no cumpla la regla se puede seguir editando en lo demás
+        if ($area !== $this->area || $capacidadAforo !== $this->capacidadAforo) {
+            self::validarAforo($area, $capacidadAforo);
+        }
+
         return new self(
             id: $this->id,
             uuid: $this->uuid,

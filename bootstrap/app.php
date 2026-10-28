@@ -29,6 +29,15 @@ return Application::configure(basePath: dirname(__DIR__))
             return response()->json(['error' => $e->getMessage()], 404);
         });
 
+        // Trigger trg_itse_aforo_maximo (Corte 2): la app valida antes, esto es la última defensa
+        $exceptions->render(function (\Illuminate\Database\QueryException $e, Request $request) {
+            if (($e->errorInfo[0] ?? null) !== 'LF001') {
+                return null; // cualquier otro error de BD sigue el manejo normal
+            }
+
+            return response()->json(['error' => 'Aforo excedido: la capacidad supera el máximo permitido para el área del local (2 personas por m²).'], 422);
+        });
+
         $exceptions->render(function (\App\Modules\ITSE\Domain\Exceptions\ItseNoEncontrado $e, Request $request) {
             return response()->json(['error' => $e->getMessage()], 404);
         });

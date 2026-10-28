@@ -24,7 +24,7 @@ it('inactiva un ITSE correctamente', function () {
     $estados = Mockery::mock(ItseEstadoRepositoryInterface::class);
     $dto = new InactivarItseDTO(1, 7, CarbonImmutable::parse('2026-10-12'), 'RES 120-2026', 'Obs', 1);
     
-    $itse = Itse::crear('uuid', 123, CarbonImmutable::now(), null, CarbonImmutable::now()->addYear(), 'A', 'B', 'C', 10.5, 100, 'R123', null, false, 1, 1, null, 1, 1, 1, 1, CarbonImmutable::now());
+    $itse = Itse::crear('uuid', 123, CarbonImmutable::now(), null, CarbonImmutable::now()->addYear(), 'A', 'B', 'C', 10.5, 20, 'R123', null, false, 1, 1, null, 1, 1, 1, 1, CarbonImmutable::now());
     
     $itses->shouldReceive('buscarPorId')->with(1)->twice()->andReturn($itse);
     $estados->shouldReceive('tieneEstadoInactivo')->with(1)->once()->andReturn(false);
@@ -48,7 +48,7 @@ it('lanza ItseInvalido si ya está inactivo', function () {
     $estados = Mockery::mock(ItseEstadoRepositoryInterface::class);
     $dto = new InactivarItseDTO(1, 7, CarbonImmutable::parse('2026-10-12'), 'RES 120-2026', 'Obs', 1);
     
-    $itse = Itse::crear('uuid', 123, CarbonImmutable::now(), null, CarbonImmutable::now()->addYear(), 'A', 'B', 'C', 10.5, 100, 'R123', null, false, 1, 1, null, 1, 1, 1, 1, CarbonImmutable::now());
+    $itse = Itse::crear('uuid', 123, CarbonImmutable::now(), null, CarbonImmutable::now()->addYear(), 'A', 'B', 'C', 10.5, 20, 'R123', null, false, 1, 1, null, 1, 1, 1, 1, CarbonImmutable::now());
     
     $itses->shouldReceive('buscarPorId')->with(1)->once()->andReturn($itse);
     $estados->shouldReceive('tieneEstadoInactivo')->with(1)->once()->andReturn(true);

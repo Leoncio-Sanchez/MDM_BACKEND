@@ -26,7 +26,7 @@ it('crea un ITSE correctamente', function () {
         'DIR',
         'RES',
         10.5,
-        100,
+        20,
         'REC',
         null,
         false,

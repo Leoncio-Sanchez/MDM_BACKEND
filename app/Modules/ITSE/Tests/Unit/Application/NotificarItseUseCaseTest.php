@@ -21,7 +21,7 @@ it('notifica un ITSE con fecha válida', function () {
     $repo = Mockery::mock(ItseRepositoryInterface::class);
     $dto = new NotificarItseDTO(1, CarbonImmutable::now());
     
-    $itse = Itse::crear('uuid', 123, CarbonImmutable::now()->subDay(), null, CarbonImmutable::now()->addYear(), 'A', 'B', 'C', 10.5, 100, 'R123', null, false, 1, 1, null, 1, 1, 1, 1, CarbonImmutable::now());
+    $itse = Itse::crear('uuid', 123, CarbonImmutable::now()->subDay(), null, CarbonImmutable::now()->addYear(), 'A', 'B', 'C', 10.5, 20, 'R123', null, false, 1, 1, null, 1, 1, 1, 1, CarbonImmutable::now());
     
     $repo->shouldReceive('buscarPorId')->with(1)->once()->andReturn($itse);
     $repo->shouldReceive('actualizar')->once()->andReturnUsing(fn(Itse $i) => $i);
@@ -36,7 +36,7 @@ it('lanza ItseFechaInvalida si fecha < expedición', function () {
     $repo = Mockery::mock(ItseRepositoryInterface::class);
     $dto = new NotificarItseDTO(1, CarbonImmutable::now()->subDays(2));
     
-    $itse = Itse::crear('uuid', 123, CarbonImmutable::now()->subDay(), null, CarbonImmutable::now()->addYear(), 'A', 'B', 'C', 10.5, 100, 'R123', null, false, 1, 1, null, 1, 1, 1, 1, CarbonImmutable::now());
+    $itse = Itse::crear('uuid', 123, CarbonImmutable::now()->subDay(), null, CarbonImmutable::now()->addYear(), 'A', 'B', 'C', 10.5, 20, 'R123', null, false, 1, 1, null, 1, 1, 1, 1, CarbonImmutable::now());
     
     $repo->shouldReceive('buscarPorId')->with(1)->once()->andReturn($itse);
     
