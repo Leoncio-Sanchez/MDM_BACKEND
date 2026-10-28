@@ -1,0 +1,112 @@
+name: CI / CD Pipeline — LF-ITSE
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend-tests:
+    name: Backend QA & Automated Tests (PHP 8.3)
+    runs-on: ubuntu-latest
+
+    services:
+      pgsql:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_DB: muni_db_test
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    defaults:
+      run:
+        working-directory: backend-php
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP Environment
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo, pdo_pgsql, pgsql, redis, bcmath
+          coverage: none
+
+      - name: Cache Composer Dependencies
+        uses: actions/cache@v4
+        with:
+          path: backend-php/vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('backend-php/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install Composer Dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Copy Environment Testing File
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Run Laravel Pint (PSR-12 Code Style)
+        run: ./vendor/bin/pint --test
+
+      - name: Run PHPStan (Static Analysis Level 8)
+        run: ./vendor/bin/phpstan analyse --error-format=github
+
+      - name: Run Pest / PHPUnit Test Suite
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+        run: php artisan test --parallel
+
+  frontend-build:
+    name: Frontend Build & Typecheck (Node.js 20)
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend-reversed-pro_vue
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend-reversed-pro_vue/package-lock.json
+
+      - name: Install Node Dependencies
+        run: npm ci
+
+      - name: Run TypeScript Typecheck
+        run: npx vue-tsc --noEmit
+
+      - name: Build Vite Production Assets
+        run: npm run build
