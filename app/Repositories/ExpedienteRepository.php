@@ -104,6 +104,8 @@ SELECT
     ) AS persona_nombre,
     texpedientes.licencia_pendiente,
     texpedientes.itse_pendiente,
+    fn_plazo.estado AS estado_plazo,
+    fn_plazo.dias_restantes AS dias_habiles_restantes,
     e.fecha_alerta <= CURRENT_DATE AS mostrar_alerta
 FROM (
     SELECT
@@ -146,6 +148,7 @@ LEFT JOIN tipos_procedimiento_tupa tpt
     ON e.tipo_procedimiento_tupa_id = tpt.id
 LEFT JOIN personas tsolicitante
     ON e.solicitante_id = tsolicitante.id
+LEFT JOIN LATERAL fn_estado_plazo_expediente(e.id) AS fn_plazo ON TRUE
 WHERE texpedientes.licencia_pendiente = TRUE
    OR texpedientes.itse_pendiente = TRUE
 ORDER BY e.fecha_alerta DESC

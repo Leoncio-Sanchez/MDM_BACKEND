@@ -55,6 +55,51 @@ class LicenciaService
                 }
             }
 
+            // En PostgreSQL invocamos el Stored Procedure nativo sp_emitir_licencia_funcionamiento
+            if (DB::getDriverName() === 'pgsql') {
+                $girosJson = ! empty($data['giros']) && is_array($data['giros']) ? json_encode($data['giros']) : null;
+                $uuid = (string) ($data['uuid'] ?? Str::uuid()->toString());
+                $fechaEmision = ! empty($data['fecha_emision']) ? Carbon::parse($data['fecha_emision'])->toDateString() : Carbon::now()->toDateString();
+                $fechaInicio = ! empty($data['fecha_inicio_vigencia']) ? Carbon::parse($data['fecha_inicio_vigencia'])->toDateString() : null;
+                $fechaFin = ! empty($data['fecha_fin_vigencia']) ? Carbon::parse($data['fecha_fin_vigencia'])->toDateString() : null;
+
+                $result = DB::select('CALL sp_emitir_licencia_funcionamiento(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+                    $uuid,
+                    $fechaEmision,
+                    (string) $data['nombre_comercial'],
+                    (bool) ($data['es_vigencia_indeterminada'] ?? true),
+                    $fechaInicio,
+                    $fechaFin,
+                    (string) ($data['actividad'] ?? ''),
+                    (string) ($data['direccion'] ?? ''),
+                    isset($data['hora_desde']) ? (int) $data['hora_desde'] : 0,
+                    isset($data['hora_hasta']) ? (int) $data['hora_hasta'] : 0,
+                    (string) ($data['resolucion_numero'] ?? ''),
+                    isset($data['area']) ? (float) $data['area'] : 0,
+                    (string) ($data['numero_recibo_pago'] ?? ''),
+                    isset($data['observaciones']) ? (string) $data['observaciones'] : null,
+                    (bool) ($data['se_puede_publicar'] ?? false),
+                    $expedienteId,
+                    isset($data['licencia_principal_id']) ? (int) $data['licencia_principal_id'] : null,
+                    $usuarioId,
+                    isset($data['nivel_riesgo_id']) ? (int) $data['nivel_riesgo_id'] : null,
+                    isset($data['conductor_id']) ? (int) $data['conductor_id'] : null,
+                    isset($data['titular_id']) ? (int) $data['titular_id'] : null,
+                    (int) $data['tipo_licencia_id'],
+                    isset($data['zonificacion_id']) ? (int) $data['zonificacion_id'] : null,
+                    $girosJson,
+                    null, // INOUT p_licencia_id
+                ]);
+
+                $licenciaId = isset($result[0]->p_licencia_id) ? (int) $result[0]->p_licencia_id : null;
+                $licencia = LicenciaFuncionamiento::find($licenciaId);
+                if (! $licencia) {
+                    throw new \RuntimeException('Error al recuperar la licencia emitida por el Stored Procedure.');
+                }
+
+                return $licencia;
+            }
+
             $licencia = new LicenciaFuncionamiento;
             $licencia->uuid = (string) ($data['uuid'] ?? Str::uuid()->toString());
             $licencia->expediente_id = $expedienteId;
