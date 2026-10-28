@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace App\Modules\Seguridad\Infrastructure\Providers;
 
 use App\Modules\Seguridad\Domain\Contracts\PasswordHasherInterface;
+use App\Modules\Seguridad\Domain\Contracts\RevisionAccesosRepositoryInterface;
 use App\Modules\Seguridad\Domain\Contracts\TokenServiceInterface;
 use App\Modules\Seguridad\Domain\Contracts\UserRepositoryInterface;
 use App\Modules\Seguridad\Infrastructure\Hashing\DjangoPbkdf2Hasher;
 use App\Modules\Seguridad\Infrastructure\Jwt\DjangoJwtTokenService;
 use App\Modules\Seguridad\Infrastructure\Persistence\Repositories\EloquentUserRepository;
+use App\Modules\Seguridad\Infrastructure\Persistence\Repositories\QueryRevisionAccesosRepository;
+use App\Modules\Seguridad\Presentation\Console\RevisarAccesosCommand;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -28,6 +31,7 @@ final class SeguridadServiceProvider extends ServiceProvider
     {
         $this->app->bind(PasswordHasherInterface::class, DjangoPbkdf2Hasher::class);
         $this->app->bind(UserRepositoryInterface::class, EloquentUserRepository::class);
+        $this->app->bind(RevisionAccesosRepositoryInterface::class, QueryRevisionAccesosRepository::class);
 
         $this->app->singleton(TokenServiceInterface::class, function () {
             $secret = (string) config('jwt.secret', 'django-insecure-dev-key-change-in-production');
@@ -47,6 +51,10 @@ final class SeguridadServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        if ($this->app->runningInConsole()) {
+            $this->commands([RevisarAccesosCommand::class]);
+        }
+
         // Contra el robo de contraseñas por fuerza bruta: pocos intentos por usuario e IP,
         // y un tope por IP para quien prueba muchos usuarios desde la misma máquina.
         RateLimiter::for('login', function (Request $request): array {
