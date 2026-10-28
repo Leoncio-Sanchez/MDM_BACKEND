@@ -5,6 +5,7 @@ parameters:
     paths:
         - app/Modules/Estados
         - app/Modules/ConsultaPublica
+        - app/Modules/Dashboard
     excludePaths:
         - app/Modules/*/Tests/*
     level: 8
