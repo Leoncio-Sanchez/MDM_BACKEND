@@ -38,6 +38,10 @@ return Application::configure(basePath: dirname(__DIR__))
             return response()->json(['error' => 'Aforo excedido: la capacidad supera el máximo permitido para el área del local (2 personas por m²).'], 422);
         });
 
+        $exceptions->render(function (\App\Modules\Reportes\Domain\Exceptions\InformeInvalido $e, Request $request) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        });
+
         $exceptions->render(function (\App\Modules\ITSE\Domain\Exceptions\ItseNoEncontrado $e, Request $request) {
             return response()->json(['error' => $e->getMessage()], 404);
         });

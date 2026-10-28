@@ -3,8 +3,10 @@
 declare(strict_types=1);
 
 use App\Modules\Archivos\Infrastructure\Providers\ArchivosServiceProvider;
+use App\Modules\Configuracion\Infrastructure\Providers\ConfiguracionServiceProvider;
 use App\Modules\ConsultaPublica\Infrastructure\Providers\ConsultaPublicaServiceProvider;
 use App\Modules\Dashboard\Infrastructure\Providers\DashboardServiceProvider;
+use App\Modules\Reportes\Infrastructure\Providers\ReportesServiceProvider;
 use App\Modules\Estados\Infrastructure\Providers\EstadosServiceProvider;
 use App\Modules\Expedientes\Infrastructure\Providers\ExpedienteServiceProvider;
 use App\Modules\Giros\Infrastructure\Providers\GirosServiceProvider;
@@ -44,4 +46,6 @@ return [
     UnidadesOrganicasServiceProvider::class,
     ConsultaPublicaServiceProvider::class,
     DashboardServiceProvider::class,
+    ReportesServiceProvider::class,
+    ConfiguracionServiceProvider::class,
 ];

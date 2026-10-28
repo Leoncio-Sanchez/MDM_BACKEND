@@ -45,7 +45,6 @@ function datosLicencia(array $cambios = []): array
 
 it('rechaza todas las operaciones sin autenticación', function () {
     $this->getJson(URL_LICENCIAS . '/consulta')->assertUnauthorized();
-    $this->getJson(URL_LICENCIAS . '/reporte')->assertUnauthorized();
     $this->postJson(URL_LICENCIAS, datosLicencia())->assertUnauthorized();
     $this->putJson(URL_LICENCIAS . '/1', datosLicencia())->assertUnauthorized();
     $this->deleteJson(URL_LICENCIAS . '/1')->assertUnauthorized();
