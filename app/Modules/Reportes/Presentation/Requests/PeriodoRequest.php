@@ -6,7 +6,7 @@ namespace App\Modules\Reportes\Presentation\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-final class PadronLicenciasRequest extends FormRequest
+final class PeriodoRequest extends FormRequest
 {
     public function authorize(): bool
     {
