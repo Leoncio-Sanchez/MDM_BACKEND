@@ -9,7 +9,7 @@ use Carbon\CarbonImmutable;
 
 it('obtiene un ITSE por ID', function () {
     $repo = Mockery::mock(ItseRepositoryInterface::class);
-    $itse = Itse::crear('uuid', 123, CarbonImmutable::now(), null, CarbonImmutable::now()->addYear(), 'A', 'B', 'C', 10.5, 100, 'R123', null, false, 1, 1, null, 1, 1, 1, 1, CarbonImmutable::now());
+    $itse = Itse::crear('uuid', 123, CarbonImmutable::now(), null, CarbonImmutable::now()->addYear(), 'A', 'B', 'C', 10.5, 20, 'R123', null, false, 1, 1, null, 1, 1, 1, 1, CarbonImmutable::now());
     
     $repo->shouldReceive('buscarPorId')->with(1)->once()->andReturn($itse);
     

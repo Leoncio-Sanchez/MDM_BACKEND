@@ -31,7 +31,7 @@ beforeEach(function () {
         'Dir',
         'RES-1',
         10.5,
-        50,
+        20,
         'REC-1',
         null,
         true,

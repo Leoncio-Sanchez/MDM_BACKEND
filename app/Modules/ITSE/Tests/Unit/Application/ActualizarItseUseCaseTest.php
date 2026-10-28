@@ -25,8 +25,8 @@ beforeEach(function () {
 });
 
 it('actualiza un ITSE existente', function () {
-    $dto = new ActualizarItseDTO(1, 123, CarbonImmutable::now(), null, CarbonImmutable::now()->addYear(), 'A', 'B', 'C', 10.5, 100, 'R123', null, false, 1, 1, 1, 1);
-    $itse = Itse::crear('uuid', 123, CarbonImmutable::now(), null, CarbonImmutable::now()->addYear(), 'A', 'B', 'C', 10.5, 100, 'R123', null, false, 1, 1, null, 1, 1, 1, 1, CarbonImmutable::now());
+    $dto = new ActualizarItseDTO(1, 123, CarbonImmutable::now(), null, CarbonImmutable::now()->addYear(), 'A', 'B', 'C', 10.5, 20, 'R123', null, false, 1, 1, 1, 1);
+    $itse = Itse::crear('uuid', 123, CarbonImmutable::now(), null, CarbonImmutable::now()->addYear(), 'A', 'B', 'C', 10.5, 20, 'R123', null, false, 1, 1, null, 1, 1, 1, 1, CarbonImmutable::now());
     
     $this->itses->shouldReceive('buscarPorId')->with(1)->once()->andReturn($itse);
     $this->itses->shouldReceive('existeNumero')->with(123, 1)->once()->andReturn(false);
@@ -41,7 +41,7 @@ it('actualiza un ITSE existente', function () {
 });
 
 it('lanza ItseNoEncontrado si no existe al actualizar', function () {
-    $dto = new ActualizarItseDTO(1, 123, CarbonImmutable::now(), null, CarbonImmutable::now()->addYear(), 'A', 'B', 'C', 10.5, 100, 'R123', null, false, 1, 1, 1, 1);
+    $dto = new ActualizarItseDTO(1, 123, CarbonImmutable::now(), null, CarbonImmutable::now()->addYear(), 'A', 'B', 'C', 10.5, 20, 'R123', null, false, 1, 1, 1, 1);
     
     $this->itses->shouldReceive('buscarPorId')->with(1)->once()->andReturn(null);
     
