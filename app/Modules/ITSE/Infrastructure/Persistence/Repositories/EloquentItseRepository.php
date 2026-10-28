@@ -273,23 +273,31 @@ final class EloquentItseRepository implements ItseRepositoryInterface
     }
 
     /**
-     * Lista ITSEs filtrados por fecha_solicitud_renovacion.
-     * Replica ItseSerializer de Django (23 keys).
+     * ITSE cuya fecha de caducidad está en el rango, sin inactivar y sin una renovación vigente.
+     * Incluye tanto certificados originales como renovaciones (todos vencen).
      *
      * @return array<int, Itse>
      */
-    public function listarPorRenovar(?string $fechaDesde, ?string $fechaHasta): array
+    public function listarPorRenovar(string $fechaDesde, string $fechaHasta): array
     {
-        $query = ItseModel::query()->orderBy('fecha_solicitud_renovacion');
+        $inactivo = fn ($q) => $q->select(DB::raw(1))
+            ->from('itse_estados as ie')
+            ->join('estados as est', 'est.id', '=', 'ie.estado_id')
+            ->where('est.esta_activo', false);
 
-        if ($fechaDesde !== null) {
-            $query->where('fecha_solicitud_renovacion', '>=', $fechaDesde);
-        }
-        if ($fechaHasta !== null) {
-            $query->where('fecha_solicitud_renovacion', '<=', $fechaHasta);
-        }
-
-        return $query->get()->map(fn ($m) => $this->toEntity($m))->values()->all();
+        return ItseModel::query()
+            ->whereBetween('fecha_caducidad', [$fechaDesde, $fechaHasta])
+            ->whereNotExists(fn ($q) => $inactivo($q)->whereColumn('ie.itse_id', 'itse.id'))
+            // Ya renovado: existe otro ITSE que lo tiene como principal y no está inactivo
+            ->whereNotExists(fn ($q) => $q->select(DB::raw(1))
+                ->from('itse as renovacion')
+                ->whereColumn('renovacion.itse_principal_id', 'itse.id')
+                ->whereNotExists(fn ($r) => $inactivo($r)->whereColumn('ie.itse_id', 'renovacion.id')))
+            ->orderBy('fecha_caducidad')
+            ->get()
+            ->map(fn ($m) => $this->toEntity($m))
+            ->values()
+            ->all();
     }
 
     /**

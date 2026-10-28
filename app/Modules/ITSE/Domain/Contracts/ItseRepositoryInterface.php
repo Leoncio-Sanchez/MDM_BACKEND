@@ -23,11 +23,11 @@ interface ItseRepositoryInterface
     public function buscarPorFiltro(string $filtro, string $valor): array;
 
     /**
-     * Lista ITSEs filtrados por fecha_solicitud_renovacion (6B).
+     * ITSE que caducan entre las fechas (Y-m-d), sin inactivar y aún no renovados.
      *
      * @return array<int, Itse>
      */
-    public function listarPorRenovar(?string $fechaDesde, ?string $fechaHasta): array;
+    public function listarPorRenovar(string $fechaDesde, string $fechaHasta): array;
 
     /**
      * Consulta rápida con filtro opcional por numero_itse (6B).

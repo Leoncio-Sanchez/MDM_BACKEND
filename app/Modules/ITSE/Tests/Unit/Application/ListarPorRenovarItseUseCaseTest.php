@@ -62,19 +62,36 @@ final class ListarPorRenovarItseUseCaseTest extends TestCase
         $this->assertSame(1001, $resultado[0]->numeroItse);
     }
 
-    public function test_lista_por_renovar_sin_filtros(): void
+    public function test_sin_fechas_lista_los_que_vencen_en_los_proximos_30_dias(): void
     {
+        CarbonImmutable::setTestNow('2026-10-28');
         $itses = Mockery::mock(ItseRepositoryInterface::class);
 
         $itses->shouldReceive('listarPorRenovar')
             ->once()
-            ->with(null, null)
+            ->with('2026-10-28', '2026-11-27')
             ->andReturn([]);
 
         $useCase = new ListarPorRenovarItseUseCase($itses);
-        $dto = new PorRenovarItseDTO(fechaDesde: null, fechaHasta: null);
-        $resultado = $useCase->execute($dto);
+        $resultado = $useCase->execute(new PorRenovarItseDTO(fechaDesde: null, fechaHasta: null));
 
         $this->assertSame([], $resultado);
+        CarbonImmutable::setTestNow();
+    }
+
+    public function test_dias_cambia_el_rango_desde_hoy(): void
+    {
+        CarbonImmutable::setTestNow('2026-10-28');
+        $itses = Mockery::mock(ItseRepositoryInterface::class);
+
+        $itses->shouldReceive('listarPorRenovar')
+            ->once()
+            ->with('2026-10-28', '2026-11-04')
+            ->andReturn([]);
+
+        $resultado = (new ListarPorRenovarItseUseCase($itses))->execute(new PorRenovarItseDTO(fechaDesde: null, fechaHasta: null, dias: 7));
+
+        $this->assertSame([], $resultado);
+        CarbonImmutable::setTestNow();
     }
 }
