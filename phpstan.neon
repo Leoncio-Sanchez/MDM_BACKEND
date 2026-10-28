@@ -4,6 +4,7 @@ includes:
 parameters:
     paths:
         - app/Modules/Estados
+        - app/Modules/ConsultaPublica
     excludePaths:
         - app/Modules/*/Tests/*
     level: 8

@@ -25,6 +25,10 @@ return Application::configure(basePath: dirname(__DIR__))
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
 
+        $exceptions->render(function (\App\Modules\ConsultaPublica\Domain\Exceptions\TramiteNoEncontrado $e, Request $request) {
+            return response()->json(['error' => $e->getMessage()], 404);
+        });
+
         $exceptions->render(function (\App\Modules\ITSE\Domain\Exceptions\ItseNoEncontrado $e, Request $request) {
             return response()->json(['error' => $e->getMessage()], 404);
         });
