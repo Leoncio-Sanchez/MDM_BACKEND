@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Modules\Archivos\Infrastructure\Providers\ArchivosServiceProvider;
+use App\Modules\Configuracion\Infrastructure\Providers\ConfiguracionServiceProvider;
 use App\Modules\ConsultaPublica\Infrastructure\Providers\ConsultaPublicaServiceProvider;
 use App\Modules\Dashboard\Infrastructure\Providers\DashboardServiceProvider;
 use App\Modules\Reportes\Infrastructure\Providers\ReportesServiceProvider;
@@ -46,4 +47,5 @@ return [
     ConsultaPublicaServiceProvider::class,
     DashboardServiceProvider::class,
     ReportesServiceProvider::class,
+    ConfiguracionServiceProvider::class,
 ];
