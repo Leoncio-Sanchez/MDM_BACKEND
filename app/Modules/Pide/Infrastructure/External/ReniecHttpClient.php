@@ -9,6 +9,7 @@ use App\Modules\Pide\Domain\Exceptions\ReniecError;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 use Throwable;
 
@@ -53,19 +54,31 @@ final readonly class ReniecHttpClient implements ReniecClientInterface
 
             return $json;
         } catch (ConnectionException $e) {
+            $this->registrar($e);
             if (str_contains(strtolower($e->getMessage()), 'time') || str_contains(strtolower($e->getMessage()), 'timed out')) {
                 throw ReniecError::timeout();
             }
 
             throw ReniecError::conexionFallida();
         } catch (RequestException $e) {
-            throw ReniecError::httpError($e->getMessage());
+            $this->registrar($e);
+            throw ReniecError::httpError();
         } catch (Throwable $e) {
             if ($e instanceof ReniecError || $e instanceof InvalidArgumentException) {
                 throw $e;
             }
 
-            throw ReniecError::inesperado($e->getMessage());
+            $this->registrar($e);
+            throw ReniecError::inesperado();
         }
+    }
+
+    /** El detalle técnico va al log; la URL de PIDE lleva la contraseña en la consulta: se oculta. */
+    private function registrar(Throwable $e): void
+    {
+        Log::warning('Error al consultar RENIEC (PIDE)', [
+            'tipo' => $e::class,
+            'detalle' => str_replace([$this->password, rawurlencode($this->password)], '***', $e->getMessage()),
+        ]);
     }
 }

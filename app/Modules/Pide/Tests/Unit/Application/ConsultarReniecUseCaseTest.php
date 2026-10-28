@@ -13,17 +13,21 @@ use Tests\TestCase;
 
 uses(TestCase::class);
 
-it('delega al cliente RENIEC con el DNI del DTO', function () {
+it('consulta RENIEC con el DNI del DTO y devuelve solo los datos de la persona', function () {
     $client = Mockery::mock(ReniecClientInterface::class);
     $client->shouldReceive('consultarPorDni')
         ->once()
         ->with('12345678')
-        ->andReturn(['nombre' => 'JUAN PEREZ']);
+        ->andReturn(['consultarResponse' => ['return' => ['coResultado' => '0000', 'datosPersona' => [
+            'prenombres' => 'JUAN', 'apPrimer' => 'PEREZ', 'apSegundo' => 'LOPEZ', 'foto' => 'BASE64...',
+        ]]]]);
 
     $useCase = new ConsultarReniecUseCase($client);
     $resultado = $useCase->execute(new ConsultaReniecDTO('12345678'));
 
-    expect($resultado)->toBe(['nombre' => 'JUAN PEREZ']);
+    expect($resultado->nombres)->toBe('JUAN')
+        ->and($resultado->apellidoPaterno)->toBe('PEREZ')
+        ->and($resultado->toArray())->not->toHaveKey('foto');
 });
 
 it('propaga la excepción ReniecError del cliente', function () {

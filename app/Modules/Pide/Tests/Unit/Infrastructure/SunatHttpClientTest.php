@@ -102,5 +102,5 @@ it('lanza SunatError con mensaje de error HTTP cuando upstream devuelve código 
     $client = new SunatHttpClient('https://test.local');
 
     expect(fn () => $client->consultarPorRuc('20123456789'))
-        ->toThrow(SunatError::class, 'Error HTTP del servicio SUNAT:');
+        ->toThrow(SunatError::class, 'El servicio SUNAT respondió con un error. Intente nuevamente en unos minutos.');
 });

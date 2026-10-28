@@ -9,6 +9,7 @@ use App\Modules\Pide\Domain\Exceptions\SunatError;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 use Throwable;
 
@@ -44,19 +45,28 @@ final readonly class SunatHttpClient implements SunatClientInterface
 
             return $json;
         } catch (ConnectionException $e) {
+            $this->registrar($e);
             if (str_contains(strtolower($e->getMessage()), 'time') || str_contains(strtolower($e->getMessage()), 'timed out')) {
                 throw SunatError::timeout();
             }
 
             throw SunatError::conexionFallida();
         } catch (RequestException $e) {
-            throw SunatError::httpError($e->getMessage());
+            $this->registrar($e);
+            throw SunatError::httpError();
         } catch (Throwable $e) {
             if ($e instanceof SunatError || $e instanceof InvalidArgumentException) {
                 throw $e;
             }
 
-            throw SunatError::inesperado($e->getMessage());
+            $this->registrar($e);
+            throw SunatError::inesperado();
         }
+    }
+
+    /** El detalle técnico va al log del servidor, no al usuario. */
+    private function registrar(Throwable $e): void
+    {
+        Log::warning('Error al consultar SUNAT (PIDE)', ['tipo' => $e::class, 'detalle' => $e->getMessage()]);
     }
 }

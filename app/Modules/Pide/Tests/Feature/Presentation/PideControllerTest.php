@@ -37,30 +37,52 @@ afterEach(function () {
 
 // ── RENIEC ───────────────────────────────────────────────────────────────────
 
-it('GET /reniec/consultar/ con DNI válido devuelve 200 + passthrough', function () {
-    $expectedData = [
-        'consultarResponse' => [
-            'return' => [
-                'coResultado' => '0000',
-                'datosPersona' => [
-                    'prenombres' => 'JUAN CARLOS',
-                    'apPrimer' => 'PEREZ',
-                    'apSegundo' => 'LOPEZ',
-                ],
-            ],
-        ],
-    ];
-
+it('GET /reniec/consultar/ con DNI válido devuelve solo los datos del formulario (sin foto)', function () {
     $this->reniecMock->shouldReceive('consultarPorDni')
         ->once()
         ->with('12345678')
-        ->andReturn($expectedData);
+        ->andReturn([
+            'consultarResponse' => [
+                'return' => [
+                    'coResultado' => '0000',
+                    'datosPersona' => [
+                        'prenombres' => 'JUAN CARLOS',
+                        'apPrimer' => 'PEREZ',
+                        'apSegundo' => 'LOPEZ',
+                        'direccion' => 'JR. LOS PINOS 123',
+                        'ubigeo' => 'SAN MARTIN/SAN MARTIN/MORALES',
+                        'estadoCivil' => 'SOLTERO',
+                        'foto' => 'BASE64DELAFOTO',
+                    ],
+                ],
+            ],
+        ]);
 
     $response = $this->actingAs($this->user, 'api')
         ->getJson('/api/lf-itse/reniec/consultar/?dni=12345678');
 
     $response->assertStatus(200)
-        ->assertExactJson($expectedData);
+        ->assertExactJson([
+            'dni' => '12345678',
+            'nombres' => 'JUAN CARLOS',
+            'apellido_paterno' => 'PEREZ',
+            'apellido_materno' => 'LOPEZ',
+            'direccion' => 'JR. LOS PINOS 123',
+            'departamento' => 'SAN MARTIN',
+            'provincia' => 'SAN MARTIN',
+            'distrito' => 'MORALES',
+        ]);
+});
+
+it('GET /reniec/consultar/ con DNI que no existe devuelve 404', function () {
+    $this->reniecMock->shouldReceive('consultarPorDni')
+        ->once()
+        ->andReturn(['consultarResponse' => ['return' => ['coResultado' => '0001', 'deResultado' => 'No existe']]]);
+
+    $this->actingAs($this->user, 'api')
+        ->getJson('/api/lf-itse/reniec/consultar/?dni=12345678')
+        ->assertStatus(404)
+        ->assertJsonPath('error', 'No se encontró ese DNI en RENIEC. Verifique el número o registre los datos manualmente.');
 });
 
 it('GET /reniec/consultar/ sin dni devuelve 400 con mensaje exacto', function () {
@@ -106,8 +128,9 @@ it('GET /reniec/consultar/ con error inesperado devuelve 500', function () {
     $response = $this->actingAs($this->user, 'api')
         ->getJson('/api/lf-itse/reniec/consultar/?dni=12345678');
 
+    // El detalle interno no se muestra al usuario
     $response->assertStatus(500)
-        ->assertExactJson(['error' => 'Error interno no controlado']);
+        ->assertExactJson(['error' => 'Ocurrió un error inesperado al consultar el servicio. Intente nuevamente.']);
 });
 
 it('GET /reniec/consultar/ sin autenticación devuelve 401', function () {
@@ -118,28 +141,53 @@ it('GET /reniec/consultar/ sin autenticación devuelve 401', function () {
 
 // ── SUNAT ────────────────────────────────────────────────────────────────────
 
-it('GET /sunat/consultar/ con RUC válido devuelve 200 + passthrough', function () {
-    $expectedData = [
-        'getDatosPrincipalesResponse' => [
-            'return' => [
-                'ddp_numruc' => '20123456789',
-                'ddp_nombre' => 'EMPRESA EJEMPLO S.A.C.',
-                'ddp_estado' => 'ACTIVO',
-                'ddp_condicion' => 'HABIDO',
-            ],
-        ],
-    ];
-
+it('GET /sunat/consultar/ con RUC válido devuelve los datos del contribuyente', function () {
     $this->sunatMock->shouldReceive('consultarPorRuc')
         ->once()
         ->with('20123456789')
-        ->andReturn($expectedData);
+        ->andReturn([
+            'getDatosPrincipalesResponse' => [
+                'return' => [
+                    'ddp_numruc' => '20123456789',
+                    'ddp_nombre' => 'EMPRESA EJEMPLO S.A.C.',
+                    'desc_estado' => 'ACTIVO',
+                    'desc_flag22' => 'HABIDO',
+                    'desc_tipvia' => 'JR.',
+                    'ddp_nomvia' => 'LOS ALAMOS',
+                    'ddp_numer1' => '450',
+                    'ddp_inter1' => '-',
+                    'desc_dep' => 'SAN MARTIN',
+                    'desc_prov' => 'SAN MARTIN',
+                    'desc_dist' => 'MORALES',
+                ],
+            ],
+        ]);
 
     $response = $this->actingAs($this->user, 'api')
         ->getJson('/api/lf-itse/sunat/consultar/?ruc=20123456789');
 
     $response->assertStatus(200)
-        ->assertExactJson($expectedData);
+        ->assertExactJson([
+            'ruc' => '20123456789',
+            'razon_social' => 'EMPRESA EJEMPLO S.A.C.',
+            'estado' => 'ACTIVO',
+            'condicion' => 'HABIDO',
+            'direccion' => 'JR. LOS ALAMOS NRO. 450',
+            'departamento' => 'SAN MARTIN',
+            'provincia' => 'SAN MARTIN',
+            'distrito' => 'MORALES',
+        ]);
+});
+
+it('GET /sunat/consultar/ con RUC que no existe devuelve 404', function () {
+    $this->sunatMock->shouldReceive('consultarPorRuc')
+        ->once()
+        ->andReturn(['getDatosPrincipalesResponse' => ['return' => []]]);
+
+    $this->actingAs($this->user, 'api')
+        ->getJson('/api/lf-itse/sunat/consultar/?ruc=20123456789')
+        ->assertStatus(404)
+        ->assertJsonPath('error', 'No se encontró ese RUC en SUNAT. Verifique el número o registre los datos manualmente.');
 });
 
 it('GET /sunat/consultar/ sin ruc devuelve 400 con mensaje exacto', function () {
@@ -186,7 +234,7 @@ it('GET /sunat/consultar/ con error inesperado devuelve 500', function () {
         ->getJson('/api/lf-itse/sunat/consultar/?ruc=20123456789');
 
     $response->assertStatus(500)
-        ->assertExactJson(['error' => 'Error catastrófico en SUNAT']);
+        ->assertExactJson(['error' => 'Ocurrió un error inesperado al consultar el servicio. Intente nuevamente.']);
 });
 
 it('GET /sunat/consultar/ sin autenticación devuelve 401', function () {

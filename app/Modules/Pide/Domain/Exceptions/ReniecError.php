@@ -24,13 +24,23 @@ final class ReniecError extends PideError
         return new self('No se pudo conectar con el servicio RENIEC.');
     }
 
-    public static function httpError(string $detalle): self
+    // Los mensajes no incluyen el detalle técnico: puede contener la URL con la contraseña
+    // de PIDE. El detalle se registra en el log del servidor (con la contraseña oculta).
+
+    public static function httpError(): self
     {
-        return new self("Error HTTP del servicio RENIEC: {$detalle}");
+        return new self('El servicio RENIEC respondió con un error. Intente nuevamente en unos minutos.');
     }
 
-    public static function inesperado(string $detalle): self
+    public static function inesperado(): self
     {
-        return new self("Error inesperado al consultar RENIEC: {$detalle}");
+        return new self('Ocurrió un error al consultar RENIEC. Intente nuevamente en unos minutos.');
+    }
+
+    /** PIDE respondió, pero rechazó la consulta (credenciales vencidas, servicio no habilitado…). */
+    public static function rechazada(string $codigo, string $descripcion): self
+    {
+        return new self(trim("RENIEC rechazó la consulta (código {$codigo}). {$descripcion}")
+            .' Comuníquelo al área de sistemas.');
     }
 }

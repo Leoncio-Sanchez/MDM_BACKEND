@@ -18,12 +18,13 @@ it('delega al cliente SUNAT con el RUC del DTO', function () {
     $client->shouldReceive('consultarPorRuc')
         ->once()
         ->with('20123456789')
-        ->andReturn(['razonSocial' => 'EMPRESA EJEMPLO S.A.C.']);
+        ->andReturn(['getDatosPrincipalesResponse' => ['return' => ['ddp_nombre' => 'EMPRESA EJEMPLO S.A.C.']]]);
 
     $useCase = new ConsultarSunatUseCase($client);
     $resultado = $useCase->execute(new ConsultaSunatDTO('20123456789'));
 
-    expect($resultado)->toBe(['razonSocial' => 'EMPRESA EJEMPLO S.A.C.']);
+    expect($resultado->razonSocial)->toBe('EMPRESA EJEMPLO S.A.C.')
+        ->and($resultado->ruc)->toBe('20123456789');
 });
 
 it('propaga la excepción SunatError del cliente', function () {

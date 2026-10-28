@@ -9,6 +9,7 @@ use App\Modules\Pide\Infrastructure\External\ReniecHttpClient;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 use Tests\TestCase;
 
@@ -125,8 +126,30 @@ it('lanza ReniecError con mensaje de error HTTP cuando upstream devuelve código
         '*' => Http::response('Internal Server Error', 500),
     ]);
 
-    $client = new ReniecHttpClient('https://test.local', 'u', 'r', 'p', 10);
+    $client = new ReniecHttpClient('https://test.local', 'u', 'r', 'clave-secreta', 10);
 
+    // Mensaje generico: el detalle tecnico (que puede llevar la URL con la clave) va al log
     expect(fn () => $client->consultarPorDni('12345678'))
-        ->toThrow(ReniecError::class, 'Error HTTP del servicio RENIEC:');
+        ->toThrow(ReniecError::class, 'El servicio RENIEC respondió con un error. Intente nuevamente en unos minutos.');
+});
+
+it('no muestra la contraseña de PIDE al usuario y la oculta en el log', function () {
+    Log::spy();
+    Http::fake(fn () => throw new ConnectionException(
+        'cURL error 7: Failed to connect for https://pide.local/?nuDniUsuario=u&password=clave-secreta'
+    ));
+
+    $client = new ReniecHttpClient('https://pide.local', 'u', 'r', 'clave-secreta', 10);
+
+    try {
+        $client->consultarPorDni('12345678');
+        $this->fail('Debió lanzar ReniecError');
+    } catch (ReniecError $e) {
+        expect($e->getMessage())->not->toContain('clave-secreta');
+    }
+
+    Log::shouldHaveReceived('warning')->once()->withArgs(
+        fn (string $mensaje, array $contexto) => ! str_contains($contexto['detalle'], 'clave-secreta')
+            && str_contains($contexto['detalle'], 'password=***')
+    );
 });

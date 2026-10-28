@@ -16,13 +16,15 @@ final class SunatError extends PideError
         return new self('No se pudo conectar con el servicio SUNAT.');
     }
 
-    public static function httpError(string $detalle): self
+    // Sin detalle técnico en el mensaje: se registra en el log del servidor.
+
+    public static function httpError(): self
     {
-        return new self("Error HTTP del servicio SUNAT: {$detalle}");
+        return new self('El servicio SUNAT respondió con un error. Intente nuevamente en unos minutos.');
     }
 
-    public static function inesperado(string $detalle): self
+    public static function inesperado(): self
     {
-        return new self("Error inesperado al consultar SUNAT: {$detalle}");
+        return new self('Ocurrió un error al consultar SUNAT. Intente nuevamente en unos minutos.');
     }
 }
