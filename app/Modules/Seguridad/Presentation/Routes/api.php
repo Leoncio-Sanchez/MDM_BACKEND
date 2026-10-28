@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('api')->group(function () {
     // ── Públicas (sin auth) ────────────────────────────────────────────────
     Route::post('auth/jwt/create/', [JwtAuthController::class, 'create'])
+        ->middleware('throttle:login')
         ->name('auth.jwt.create');
     Route::post('auth/jwt/refresh/', [JwtAuthController::class, 'refresh'])
         ->name('auth.jwt.refresh');
