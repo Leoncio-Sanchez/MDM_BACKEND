@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth:api', 'rol:ADMIN_MUNICIPALIDAD', 'permiso:licencias'])->prefix('api/lf-itse')->group(function () {
     Route::post('licencias-funcionamiento', [LicenciaController::class, 'store']);
     Route::get('licencias-funcionamiento/buscar', [LicenciaController::class, 'buscar']);
-    Route::get('licencias-funcionamiento/reporte', [LicenciaController::class, 'reporte']);
     Route::get('licencias-funcionamiento/consulta', [LicenciaController::class, 'consulta']);
     Route::match(['get', 'post'], 'licencias-funcionamiento/verificar-expediente', [LicenciaController::class, 'verificarExpediente']);
     Route::post('licencias-funcionamiento/inactivar', [LicenciaController::class, 'inactivar']);

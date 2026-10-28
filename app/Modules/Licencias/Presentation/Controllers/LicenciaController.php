@@ -11,7 +11,6 @@ use App\Modules\Licencias\Application\DTOs\InactivarLicenciaDTO;
 use App\Modules\Licencias\Application\DTOs\ListarEstadosDTO;
 use App\Modules\Licencias\Application\DTOs\ModificarLicenciaDTO;
 use App\Modules\Licencias\Application\DTOs\RegistrarNotificacionDTO;
-use App\Modules\Licencias\Application\DTOs\ReporteLicenciasDTO;
 use App\Modules\Licencias\Application\DTOs\VerificarExpedienteDTO;
 use App\Modules\Licencias\Application\UseCases\BuscarLicenciasUseCase;
 use App\Modules\Licencias\Application\UseCases\ConsultaLicenciasUseCase;
@@ -21,7 +20,6 @@ use App\Modules\Licencias\Application\UseCases\ListarEstadosLicenciaUseCase;
 use App\Modules\Licencias\Application\UseCases\ModificarLicenciaUseCase;
 use App\Modules\Licencias\Application\UseCases\RegistrarInactivacionUseCase;
 use App\Modules\Licencias\Application\UseCases\RegistrarNotificacionUseCase;
-use App\Modules\Licencias\Application\UseCases\ReporteLicenciasUseCase;
 use App\Modules\Licencias\Application\UseCases\VerificarNumeroExpedienteUseCase;
 use App\Modules\Licencias\Infrastructure\Persistence\Models\LicenciaModel;
 use App\Modules\Licencias\Presentation\Requests\BuscarLicenciasRequest;
@@ -31,10 +29,8 @@ use App\Modules\Licencias\Presentation\Requests\InactivarLicenciaRequest;
 use App\Modules\Licencias\Presentation\Requests\ListarEstadosRequest;
 use App\Modules\Licencias\Presentation\Requests\ModificarLicenciaRequest;
 use App\Modules\Licencias\Presentation\Requests\RegistrarNotificacionRequest;
-use App\Modules\Licencias\Presentation\Requests\ReporteLicenciasRequest;
 use App\Modules\Licencias\Presentation\Requests\VerificarExpedienteRequest;
 use App\Modules\Licencias\Presentation\Resources\LicenciaListResource;
-use App\Modules\Licencias\Presentation\Resources\LicenciaReporteResource;
 use App\Modules\Licencias\Presentation\Resources\LicenciaResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -48,7 +44,6 @@ class LicenciaController
         private readonly EliminarLicenciaUseCase $eliminar,
         private readonly BuscarLicenciasUseCase $buscar,
         private readonly ConsultaLicenciasUseCase $consulta,
-        private readonly ReporteLicenciasUseCase $reporte,
         private readonly VerificarNumeroExpedienteUseCase $verificar,
         private readonly RegistrarInactivacionUseCase $inactivar,
         private readonly RegistrarNotificacionUseCase $notificar,
@@ -80,13 +75,6 @@ class LicenciaController
         ])));
 
         return new LicenciaResource($licencia);
-    }
-
-    public function reporte(ReporteLicenciasRequest $request): AnonymousResourceCollection
-    {
-        $datos = $this->reporte->execute(ReporteLicenciasDTO::fromArray($request->validated()));
-
-        return LicenciaReporteResource::collection($datos);
     }
 
     public function verificarExpediente(VerificarExpedienteRequest $request): JsonResponse

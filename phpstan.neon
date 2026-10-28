@@ -8,6 +8,7 @@ parameters:
         - app/Modules/Dashboard
         - app/Modules/Pide
         - app/Modules/Archivos
+        - app/Modules/Reportes
     excludePaths:
         - app/Modules/*/Tests/*
     level: 8
