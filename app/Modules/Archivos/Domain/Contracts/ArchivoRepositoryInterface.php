@@ -20,4 +20,7 @@ interface ArchivoRepositoryInterface
     public function listarPorParent(int $parentId): array;
 
     public function eliminar(int $id): void;
+
+    /** ¿Existe el expediente / licencia / ITSE al que se adjunta? */
+    public function existePadre(int $parentId): bool;
 }

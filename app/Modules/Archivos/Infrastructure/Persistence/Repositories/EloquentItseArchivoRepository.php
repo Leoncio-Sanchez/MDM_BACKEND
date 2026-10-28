@@ -18,4 +18,9 @@ final class EloquentItseArchivoRepository extends AbstractEloquentArchivoReposit
     {
         return 'itse_id';
     }
+
+    protected function getParentTable(): string
+    {
+        return 'itse';
+    }
 }

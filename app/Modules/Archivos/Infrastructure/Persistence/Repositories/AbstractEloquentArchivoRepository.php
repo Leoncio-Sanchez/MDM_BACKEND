@@ -9,6 +9,7 @@ use App\Modules\Archivos\Domain\Entities\ArchivoMetadata;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 abstract class AbstractEloquentArchivoRepository implements ArchivoRepositoryInterface
 {
@@ -18,6 +19,14 @@ abstract class AbstractEloquentArchivoRepository implements ArchivoRepositoryInt
     abstract protected function getModelClass(): string;
 
     abstract protected function getParentForeignKey(): string;
+
+    /** Tabla del registro al que pertenecen los archivos (expedientes, itse, …). */
+    abstract protected function getParentTable(): string;
+
+    public function existePadre(int $parentId): bool
+    {
+        return DB::table($this->getParentTable())->where('id', $parentId)->exists();
+    }
 
     public function crear(ArchivoMetadata $metadata): ArchivoMetadata
     {

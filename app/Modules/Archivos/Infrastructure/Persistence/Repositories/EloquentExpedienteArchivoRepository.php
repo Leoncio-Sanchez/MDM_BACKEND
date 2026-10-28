@@ -18,4 +18,9 @@ final class EloquentExpedienteArchivoRepository extends AbstractEloquentArchivoR
     {
         return 'expediente_id';
     }
+
+    protected function getParentTable(): string
+    {
+        return 'expedientes';
+    }
 }

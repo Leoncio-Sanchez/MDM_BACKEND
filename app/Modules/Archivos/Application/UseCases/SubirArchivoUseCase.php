@@ -9,6 +9,7 @@ use App\Modules\Archivos\Domain\Contracts\ArchivoManagerInterface;
 use App\Modules\Archivos\Domain\Contracts\ArchivoRepositoryInterface;
 use App\Modules\Archivos\Domain\Entities\ArchivoMetadata;
 use App\Modules\Archivos\Domain\Exceptions\ErrorAlGuardarArchivo;
+use App\Modules\Archivos\Domain\Exceptions\RegistroPadreNoEncontrado;
 use DateTimeImmutable;
 use Throwable;
 
@@ -22,6 +23,10 @@ final readonly class SubirArchivoUseCase
         ArchivoRepositoryInterface $repository,
         SubirArchivoDTO $dto,
     ): ArchivoMetadata {
+        if (! $repository->existePadre($dto->parentId)) {
+            throw RegistroPadreNoEncontrado::conId($dto->parentId);
+        }
+
         $carpeta = "{$dto->carpetaBase}/{$dto->parentId}";
 
         // 1. Guardar archivo físico en disco

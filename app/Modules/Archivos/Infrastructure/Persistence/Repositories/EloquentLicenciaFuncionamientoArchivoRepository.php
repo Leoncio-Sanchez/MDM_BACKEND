@@ -18,4 +18,9 @@ final class EloquentLicenciaFuncionamientoArchivoRepository extends AbstractEloq
     {
         return 'licencia_funcionamiento_id';
     }
+
+    protected function getParentTable(): string
+    {
+        return 'licencias_funcionamiento';
+    }
 }

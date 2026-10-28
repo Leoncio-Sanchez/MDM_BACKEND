@@ -21,6 +21,7 @@ uses(TestCase::class);
 it('guarda archivo y crea registro exitosamente', function () {
     $manager = Mockery::mock(ArchivoManagerInterface::class);
     $repo = Mockery::mock(ArchivoRepositoryInterface::class);
+    $repo->shouldReceive('existePadre')->andReturn(true);
 
     $file = UploadedFile::fake()->create('documento.pdf', 100);
 
@@ -76,6 +77,7 @@ it('guarda archivo y crea registro exitosamente', function () {
 it('elimina archivo físico si falla la creación en BD (compensación atómica)', function () {
     $manager = Mockery::mock(ArchivoManagerInterface::class);
     $repo = Mockery::mock(ArchivoRepositoryInterface::class);
+    $repo->shouldReceive('existePadre')->andReturn(true);
 
     $file = UploadedFile::fake()->create('foto.png', 50);
 
@@ -114,6 +116,7 @@ it('elimina archivo físico si falla la creación en BD (compensación atómica)
 it('propaga ErrorAlGuardarArchivo si el manager falla en disco', function () {
     $manager = Mockery::mock(ArchivoManagerInterface::class);
     $repo = Mockery::mock(ArchivoRepositoryInterface::class);
+    $repo->shouldReceive('existePadre')->andReturn(true);
 
     $file = UploadedFile::fake()->create('archivo.bin', 10);
 
@@ -136,6 +139,7 @@ it('propaga ErrorAlGuardarArchivo si el manager falla en disco', function () {
 it('genera metadata correcta con parentId y usuarioId', function () {
     $manager = Mockery::mock(ArchivoManagerInterface::class);
     $repo = Mockery::mock(ArchivoRepositoryInterface::class);
+    $repo->shouldReceive('existePadre')->andReturn(true);
 
     $file = UploadedFile::fake()->create('licencia.pdf', 80);
 

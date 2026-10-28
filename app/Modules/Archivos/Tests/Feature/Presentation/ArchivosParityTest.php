@@ -31,10 +31,11 @@ beforeEach(function () {
 
 it('upload: sube archivo y devuelve metadata con 10 keys planas', function () {
     Storage::fake('media');
+    DB::table('expedientes')->insert(\Tests\Fixtures\Registros::expediente(['id' => 1]));
 
     $response = $this->actingAs($this->user, 'api')
         ->postJson('/api/lf-itse/expedientes/1/archivos/', [
-            'archivo' => UploadedFile::fake()->create('test.txt', 1),
+            'archivo' => UploadedFile::fake()->create('test.pdf', 1, 'application/pdf'),
         ]);
 
     $response->assertStatus(201)

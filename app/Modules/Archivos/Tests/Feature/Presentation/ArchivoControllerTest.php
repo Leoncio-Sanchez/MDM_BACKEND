@@ -15,6 +15,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Tests\Fixtures\Registros;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
@@ -94,6 +95,7 @@ it('expedientes: lista archivos exitosamente ordenados por fecha', function () {
 });
 
 it('expedientes: sube archivo exitosamente y devuelve 201 con metadata plana', function () {
+    DB::table('expedientes')->insert(Registros::expediente(['id' => 15]));
     $file = UploadedFile::fake()->create('solicitud.pdf', 300, 'application/pdf');
 
     $response = $this->actingAs($this->user, 'api')
@@ -256,7 +258,8 @@ it('itse: lista archivos exitosamente', function () {
 });
 
 it('itse: sube archivo exitosamente y devuelve 201', function () {
-    $file = UploadedFile::fake()->create('inspeccion.jpg', 250, 'image/jpeg');
+    DB::table('itse')->insert(Registros::itse(['id' => 3]));
+    $file = UploadedFile::fake()->image('inspeccion.jpg');
 
     $response = $this->actingAs($this->user, 'api')
         ->postJson('/api/lf-itse/itse/3/archivos/', [
@@ -370,6 +373,7 @@ it('licencias: lista archivos exitosamente', function () {
 });
 
 it('licencias: sube archivo exitosamente y devuelve 201', function () {
+    DB::table('licencias_funcionamiento')->insert(Registros::licencia(['id' => 7]));
     $file = UploadedFile::fake()->create('declaracion.pdf', 350, 'application/pdf');
 
     $response = $this->actingAs($this->user, 'api')
@@ -451,3 +455,55 @@ it('licencias: falla descargar con uuid inexistente con 404', function () {
         ->getJson('/api/lf-itse/licencias-funcionamiento/archivos/'.Str::uuid().'/descargar/')
         ->assertStatus(404);
 });
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SEGURIDAD DE LOS ADJUNTOS
+// ═══════════════════════════════════════════════════════════════════════════
+
+it('rechaza tipos de archivo que podrían ejecutar código (HTML, SVG, scripts)', function () {
+    DB::table('expedientes')->insert(Registros::expediente(['id' => 21]));
+
+    foreach (['pagina.html' => 'text/html', 'logo.svg' => 'image/svg+xml', 'script.php' => 'application/x-php'] as $nombre => $mime) {
+        $this->actingAs($this->user, 'api')
+            ->postJson('/api/lf-itse/expedientes/21/archivos/', ['archivo' => UploadedFile::fake()->create($nombre, 5, $mime)])
+            ->assertStatus(400)
+            ->assertJsonPath('archivo.0', 'Tipo de archivo no permitido. Se aceptan PDF, imágenes JPG o PNG, Word y Excel.');
+    }
+
+    $this->assertDatabaseCount('expedientes_archivos', 0);
+});
+
+it('rechaza archivos de más de 10 MB', function () {
+    DB::table('expedientes')->insert(Registros::expediente(['id' => 22]));
+
+    $this->actingAs($this->user, 'api')
+        ->postJson('/api/lf-itse/expedientes/22/archivos/', ['archivo' => UploadedFile::fake()->create('grande.pdf', 10241, 'application/pdf')])
+        ->assertStatus(400)
+        ->assertJsonPath('archivo.0', 'El archivo supera el tamaño máximo de 10 MB.');
+});
+
+it('no guarda nada si el expediente no existe', function () {
+    $this->actingAs($this->user, 'api')
+        ->postJson('/api/lf-itse/expedientes/999/archivos/', ['archivo' => UploadedFile::fake()->create('acta.pdf', 10, 'application/pdf')])
+        ->assertStatus(404);
+
+    $this->assertDatabaseCount('expedientes_archivos', 0);
+    expect(Storage::disk('media')->allFiles())->toBe([]);
+});
+
+it('descarga Word y Excel como archivo y limpia el nombre en la cabecera', function () {
+    DB::table('expedientes')->insert(Registros::expediente(['id' => 23]));
+    $subido = $this->actingAs($this->user, 'api')
+        ->postJson('/api/lf-itse/expedientes/23/archivos/', [
+            'archivo' => UploadedFile::fake()->create("Acta \"final\"\r\nX: año.docx", 5, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'),
+        ])->assertStatus(201);
+
+    $respuesta = $this->actingAs($this->user, 'api')->get('/api/lf-itse/expedientes/archivos/'.$subido->json('uuid').'/descargar/');
+
+    $respuesta->assertOk()->assertHeader('X-Content-Type-Options', 'nosniff');
+    $disposicion = $respuesta->headers->get('Content-Disposition');
+    expect($disposicion)->toStartWith('attachment; filename="Acta finalX: a_o.docx"')
+        ->and($disposicion)->toContain("filename*=UTF-8''Acta%20finalX%3A%20a%C3%B1o.docx")
+        ->and($disposicion)->not->toContain("\n");
+});
+

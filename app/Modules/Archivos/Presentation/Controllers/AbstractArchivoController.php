@@ -14,6 +14,8 @@ use App\Modules\Archivos\Domain\Entities\ArchivoMetadata;
 use App\Modules\Archivos\Domain\Exceptions\ArchivoFisicoNoEncontrado;
 use App\Modules\Archivos\Domain\Exceptions\ArchivoNoEncontrado;
 use App\Modules\Archivos\Domain\Exceptions\ErrorAlGuardarArchivo;
+use App\Modules\Archivos\Domain\Exceptions\RegistroPadreNoEncontrado;
+use App\Modules\Archivos\Domain\PoliticaArchivos;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -52,11 +54,14 @@ abstract class AbstractArchivoController
      */
     public function subir(Request $request, int $pk): JsonResponse
     {
+        // "mimes" revisa el contenido real del archivo, no solo la extensión del nombre
         $validator = Validator::make($request->all(), [
-            'archivo' => ['required', 'file'],
+            'archivo' => ['required', 'file', 'max:'.PoliticaArchivos::TAMANIO_MAXIMO_KB, 'mimes:'.implode(',', PoliticaArchivos::EXTENSIONES)],
         ], [
             'archivo.required' => 'No se ha proporcionado ningún archivo.',
             'archivo.file' => 'El archivo no es válido.',
+            'archivo.max' => 'El archivo supera el tamaño máximo de '.(PoliticaArchivos::TAMANIO_MAXIMO_KB / 1024).' MB.',
+            'archivo.mimes' => 'Tipo de archivo no permitido. Se aceptan PDF, imágenes JPG o PNG, Word y Excel.',
         ]);
 
         if ($validator->fails()) {
@@ -77,8 +82,13 @@ abstract class AbstractArchivoController
 
         try {
             $metadata = $this->subir->execute($this->getRepository(), $dto);
+        } catch (RegistroPadreNoEncontrado $e) {
+            return response()->json(['error' => $e->getMessage()], 404);
         } catch (ErrorAlGuardarArchivo $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            // El detalle (puede traer SQL o rutas internas) queda en el log, no se muestra
+            report($e);
+
+            return response()->json(['error' => 'No se pudo guardar el archivo. Intente nuevamente.'], 500);
         }
 
         return response()->json(
@@ -122,18 +132,32 @@ abstract class AbstractArchivoController
                 if (is_resource($contenido)) {
                     fclose($contenido);
                 }
-            }, 200, [
-                'Content-Type' => $mime,
-                'Content-Disposition' => 'inline; filename="'.$metadata->nombreOriginal.'"',
-                'Content-Length' => (string) $metadata->tamanioBytes,
-            ]);
+            }, 200, $this->cabecerasDescarga($metadata, $mime));
         }
 
-        return response((string) $contenido, 200, [
+        return response((string) $contenido, 200, $this->cabecerasDescarga($metadata, $mime));
+    }
+
+    /**
+     * PDF e imágenes se abren en el navegador; Word y Excel se descargan.
+     * El nombre se limpia para que no pueda romper la cabecera (comillas, saltos de línea)
+     * y "nosniff" evita que el navegador interprete el archivo como otro tipo.
+     *
+     * @return array<string, string>
+     */
+    private function cabecerasDescarga(ArchivoMetadata $metadata, string $mime): array
+    {
+        $tipo = PoliticaArchivos::seAbreEnNavegador($metadata->extension) ? 'inline' : 'attachment';
+        $nombre = trim((string) preg_replace('/[\x00-\x1F\x7F"\\\\]/u', '', $metadata->nombreOriginal)) ?: 'archivo';
+        $ascii = (string) preg_replace('/[^\x20-\x7E]/u', '_', $nombre);
+        $disposicion = "{$tipo}; filename=\"{$ascii}\"".($ascii !== $nombre ? "; filename*=UTF-8''".rawurlencode($nombre) : '');
+
+        return [
             'Content-Type' => $mime,
-            'Content-Disposition' => 'inline; filename="'.$metadata->nombreOriginal.'"',
+            'Content-Disposition' => $disposicion,
             'Content-Length' => (string) $metadata->tamanioBytes,
-        ]);
+            'X-Content-Type-Options' => 'nosniff',
+        ];
     }
 
     /**

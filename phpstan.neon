@@ -7,6 +7,7 @@ parameters:
         - app/Modules/ConsultaPublica
         - app/Modules/Dashboard
         - app/Modules/Pide
+        - app/Modules/Archivos
     excludePaths:
         - app/Modules/*/Tests/*
     level: 8
