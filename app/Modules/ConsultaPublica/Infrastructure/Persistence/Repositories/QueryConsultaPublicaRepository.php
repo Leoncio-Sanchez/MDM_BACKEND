@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\ConsultaPublica\Infrastructure\Persistence\Repositories;
 
 use App\Modules\ConsultaPublica\Domain\Contracts\ConsultaPublicaRepositoryInterface;
+use App\Modules\ConsultaPublica\Domain\ValueObjects\AvanceInspeccion;
 use App\Modules\ConsultaPublica\Domain\ValueObjects\EstadoTramite;
 use App\Modules\ConsultaPublica\Domain\ValueObjects\TipoTramite;
 use App\Modules\ConsultaPublica\Domain\ValueObjects\TramitePublico;
@@ -19,11 +20,11 @@ use Illuminate\Support\Facades\DB;
 final readonly class QueryConsultaPublicaRepository implements ConsultaPublicaRepositoryInterface
 {
     /** @return list<TramitePublico> */
-    public function expedientes(int $numero, string $documento): array
+    public function expedientes(?int $numero, string $documento): array
     {
         $filas = DB::table('expedientes as e')
             ->join('tipos_procedimiento_tupa as tpt', 'tpt.id', '=', 'e.tipo_procedimiento_tupa_id')
-            ->where('e.numero_expediente', $numero)
+            ->when($numero !== null, fn (Builder $q) => $q->where('e.numero_expediente', $numero))
             ->where(fn (Builder $q) => $q
                 ->whereIn('e.solicitante_id', $this->personasConDocumento($documento))
                 ->orWhereIn('e.representante_id', $this->personasConDocumento($documento)))
@@ -36,6 +37,11 @@ final readonly class QueryConsultaPublicaRepository implements ConsultaPublicaRe
             ->selectRaw("EXISTS (SELECT 1 FROM autorizaciones_improcedentes ai WHERE ai.expediente_id = e.id AND ai.tipo_autorizacion = 'LF') AS lf_improcedente")
             ->selectRaw("EXISTS (SELECT 1 FROM autorizaciones_improcedentes ai WHERE ai.expediente_id = e.id AND ai.tipo_autorizacion = 'ITSE') AS itse_improcedente")
             ->selectRaw('EXISTS (SELECT 1 FROM expedientes_anulaciones ea WHERE ea.expediente_id = e.id) AS anulado')
+            // Inspección ITSE: última acta vigente y asignación vigente
+            ->selectRaw('(SELECT ac.resultado FROM inspecciones_actas ac WHERE ac.expediente_id = e.id AND ac.fecha_anulacion IS NULL ORDER BY ac.visita DESC LIMIT 1) AS acta_resultado')
+            ->selectRaw('(SELECT ac.fecha_limite_subsanacion FROM inspecciones_actas ac WHERE ac.expediente_id = e.id AND ac.fecha_anulacion IS NULL ORDER BY ac.visita DESC LIMIT 1) AS acta_plazo')
+            ->selectRaw('EXISTS (SELECT 1 FROM inspecciones_asignaciones a WHERE a.expediente_id = e.id AND a.fecha_reasignacion IS NULL) AS inspeccion_asignada')
+            ->selectRaw('(SELECT a.fecha_programada FROM inspecciones_asignaciones a WHERE a.expediente_id = e.id AND a.fecha_reasignacion IS NULL LIMIT 1) AS visita_programada')
             ->orderByDesc('e.fecha_recepcion')
             ->get();
 
@@ -51,14 +57,21 @@ final readonly class QueryConsultaPublicaRepository implements ConsultaPublicaRe
             procedimiento: (string) $f->procedimiento,
             fechaEmision: CarbonImmutable::parse($f->fecha_recepcion),
             fechaVencimiento: CarbonImmutable::parse($f->fecha_vencimiento),
+            inspeccion: AvanceInspeccion::desde(
+                itsePendiente: (bool) $f->requiere_itse && ! (bool) $f->tiene_itse && ! (bool) $f->itse_improcedente && ! (bool) $f->anulado,
+                resultadoUltimaActa: $f->acta_resultado === null ? null : (string) $f->acta_resultado,
+                plazoSubsanacion: $f->acta_plazo === null ? null : CarbonImmutable::parse($f->acta_plazo),
+                asignada: (bool) $f->inspeccion_asignada,
+                visitaProgramada: $f->visita_programada === null ? null : CarbonImmutable::parse($f->visita_programada),
+            ),
         ))->all());
     }
 
     /** @return list<TramitePublico> */
-    public function licencias(int $numero, string $documento): array
+    public function licencias(?int $numero, string $documento): array
     {
         $filas = DB::table('licencias_funcionamiento as lf')
-            ->where('lf.numero_licencia', $numero)
+            ->when($numero !== null, fn (Builder $q) => $q->where('lf.numero_licencia', $numero))
             ->where(fn (Builder $q) => $q
                 ->whereIn('lf.titular_id', $this->personasConDocumento($documento))
                 ->orWhereIn('lf.conductor_id', $this->personasConDocumento($documento)))
@@ -84,10 +97,10 @@ final readonly class QueryConsultaPublicaRepository implements ConsultaPublicaRe
     }
 
     /** @return list<TramitePublico> */
-    public function itse(int $numero, string $documento): array
+    public function itse(?int $numero, string $documento): array
     {
         $filas = DB::table('itse as i')
-            ->where('i.numero_itse', $numero)
+            ->when($numero !== null, fn (Builder $q) => $q->where('i.numero_itse', $numero))
             ->where(fn (Builder $q) => $q
                 ->whereIn('i.titular_id', $this->personasConDocumento($documento))
                 ->orWhereIn('i.conductor_id', $this->personasConDocumento($documento)))
@@ -122,9 +135,9 @@ final readonly class QueryConsultaPublicaRepository implements ConsultaPublicaRe
      * Inactiva si tiene un estado cuyo catálogo no está activo (clausura, revocación…).
      * Solo recibe nombres fijos del código (literal-string), nunca datos del usuario.
      *
-     * @param literal-string $tablaEstados
-     * @param literal-string $columna
-     * @param literal-string $id
+     * @param  literal-string  $tablaEstados
+     * @param  literal-string  $columna
+     * @param  literal-string  $id
      * @return literal-string
      */
     private function inactivoSql(string $tablaEstados, string $columna, string $id): string
