@@ -65,10 +65,26 @@ final readonly class QueryAsignacionInspeccionRepository implements AsignacionIn
         return "COALESCE(NULLIF(TRIM(CONCAT_WS(' ', {$alias}.first_name, {$alias}.last_name)), ''), {$alias}.username)";
     }
 
+    /** Acompañantes vigentes de la asignación "a", como arreglo JSON (vacío si no hay asignación) */
+    private static function acompanantes(): string
+    {
+        $nombre = self::nombreUsuario('ux');
+
+        return <<<SQL
+            COALESCE((
+                SELECT json_agg(json_build_object('id', ux.id, 'nombre', {$nombre}, 'activo', ux.is_active) ORDER BY aa.id)
+                FROM inspecciones_asignaciones_acompanantes aa
+                JOIN auth_user ux ON ux.id = aa.inspector_id
+                WHERE aa.asignacion_id = a.id AND aa.fecha_retiro IS NULL
+            ), '[]') AS acompanantes
+            SQL;
+    }
+
     public function expedientesPorInspeccionar(): array
     {
         $solicitante = self::NOMBRE_SOLICITANTE;
         $inspector = self::nombreUsuario('u');
+        $acompanantes = self::acompanantes();
 
         $sql = <<<SQL
             SELECT
@@ -85,6 +101,7 @@ final readonly class QueryAsignacionInspeccionRepository implements AsignacionIn
                 a.inspector_id,
                 {$inspector} AS inspector_nombre,
                 u.is_active AS inspector_activo,
+                {$acompanantes},
                 a.nombre_comercial,
                 a.direccion,
                 a.fecha_programada,
@@ -120,7 +137,13 @@ final readonly class QueryAsignacionInspeccionRepository implements AsignacionIn
                     JOIN expedientes e ON e.id = a.expediente_id
                     JOIN tipos_procedimiento_tupa tpt ON tpt.id = e.tipo_procedimiento_tupa_id
                     WHERE a.inspector_id = u.id AND a.fecha_reasignacion IS NULL AND {$this->esperaInspeccion()}
-                ) AS pendientes
+                ) AS pendientes,
+                (SELECT COUNT(*) FROM inspecciones_asignaciones_acompanantes aa
+                    JOIN inspecciones_asignaciones a ON a.id = aa.asignacion_id AND a.fecha_reasignacion IS NULL
+                    JOIN expedientes e ON e.id = a.expediente_id
+                    JOIN tipos_procedimiento_tupa tpt ON tpt.id = e.tipo_procedimiento_tupa_id
+                    WHERE aa.inspector_id = u.id AND aa.fecha_retiro IS NULL AND {$this->esperaInspeccion()}
+                ) AS acompanando
             FROM auth_user u
             JOIN usuarios_perfiles up ON up.user_id = u.id AND up.es_inspector = TRUE
             WHERE u.is_active = TRUE
@@ -129,6 +152,7 @@ final readonly class QueryAsignacionInspeccionRepository implements AsignacionIn
 
         return array_map(function (array $fila): array {
             $fila['pendientes'] = (int) $fila['pendientes'];
+            $fila['acompanando'] = (int) $fila['acompanando'];
 
             return $fila;
         }, $this->filas(DB::select($sql)));
@@ -187,16 +211,21 @@ final readonly class QueryAsignacionInspeccionRepository implements AsignacionIn
     public function crear(int $expedienteId, DatosAsignacion $datos, int $usuarioId): int
     {
         try {
-            return (int) DB::table('inspecciones_asignaciones')->insertGetId([
-                'expediente_id' => $expedienteId,
-                'inspector_id' => $datos->inspectorId,
-                'nombre_comercial' => $datos->nombreComercial,
-                'direccion' => $datos->direccion,
-                'fecha_programada' => $datos->fechaProgramada,
-                'indicaciones' => $datos->indicaciones,
-                'fecha_asignacion' => now(),
-                'asignado_por' => $usuarioId,
-            ]);
+            return DB::transaction(function () use ($expedienteId, $datos, $usuarioId): int {
+                $id = (int) DB::table('inspecciones_asignaciones')->insertGetId([
+                    'expediente_id' => $expedienteId,
+                    'inspector_id' => $datos->inspectorId,
+                    'nombre_comercial' => $datos->nombreComercial,
+                    'direccion' => $datos->direccion,
+                    'fecha_programada' => $datos->fechaProgramada,
+                    'indicaciones' => $datos->indicaciones,
+                    'fecha_asignacion' => now(),
+                    'asignado_por' => $usuarioId,
+                ]);
+                $this->agregarAcompanantes($id, $datos->acompanantes, $usuarioId);
+
+                return $id;
+            });
         } catch (QueryException $e) {
             // Dos jefes asignando el mismo expediente a la vez: el índice único lo detiene
             if (($e->errorInfo[0] ?? null) === '23505') {
@@ -206,9 +235,9 @@ final readonly class QueryAsignacionInspeccionRepository implements AsignacionIn
         }
     }
 
-    public function reasignar(int $asignacionId, int $nuevoInspectorId, string $motivo, ?string $fechaProgramada, ?string $indicaciones, int $usuarioId): int
+    public function reasignar(int $asignacionId, int $nuevoInspectorId, array $acompanantes, string $motivo, ?string $fechaProgramada, ?string $indicaciones, int $usuarioId): int
     {
-        return DB::transaction(function () use ($asignacionId, $nuevoInspectorId, $motivo, $fechaProgramada, $indicaciones, $usuarioId): int {
+        return DB::transaction(function () use ($asignacionId, $nuevoInspectorId, $acompanantes, $motivo, $fechaProgramada, $indicaciones, $usuarioId): int {
             $actual = DB::table('inspecciones_asignaciones')
                 ->where('id', $asignacionId)
                 ->whereNull('fecha_reasignacion')
@@ -224,7 +253,8 @@ final readonly class QueryAsignacionInspeccionRepository implements AsignacionIn
                 'motivo_reasignacion' => $motivo,
             ]);
 
-            return (int) DB::table('inspecciones_asignaciones')->insertGetId([
+            // El equipo de la asignación cerrada queda como estaba: es parte de su constancia
+            $nueva = (int) DB::table('inspecciones_asignaciones')->insertGetId([
                 'expediente_id' => $actual->expediente_id,
                 'inspector_id' => $nuevoInspectorId,
                 'nombre_comercial' => $actual->nombre_comercial,
@@ -234,20 +264,61 @@ final readonly class QueryAsignacionInspeccionRepository implements AsignacionIn
                 'fecha_asignacion' => now(),
                 'asignado_por' => $usuarioId,
             ]);
+            $this->agregarAcompanantes($nueva, $acompanantes, $usuarioId);
+
+            return $nueva;
         });
     }
 
-    public function actualizar(int $asignacionId, DatosAsignacion $datos): void
+    public function actualizar(int $asignacionId, DatosAsignacion $datos, int $usuarioId): void
     {
-        DB::table('inspecciones_asignaciones')
-            ->where('id', $asignacionId)
-            ->whereNull('fecha_reasignacion')
-            ->update([
-                'nombre_comercial' => $datos->nombreComercial,
-                'direccion' => $datos->direccion,
-                'fecha_programada' => $datos->fechaProgramada,
-                'indicaciones' => $datos->indicaciones,
+        DB::transaction(function () use ($asignacionId, $datos, $usuarioId): void {
+            $vigente = DB::table('inspecciones_asignaciones')
+                ->where('id', $asignacionId)
+                ->whereNull('fecha_reasignacion')
+                ->update([
+                    'nombre_comercial' => $datos->nombreComercial,
+                    'direccion' => $datos->direccion,
+                    'fecha_programada' => $datos->fechaProgramada,
+                    'indicaciones' => $datos->indicaciones,
+                ]);
+            if ($vigente === 0) {
+                return;
+            }
+
+            // Quien sale del equipo queda con fecha y usuario; solo se agregan los nuevos
+            $actuales = $this->acompanantesVigentes($asignacionId);
+            DB::table('inspecciones_asignaciones_acompanantes')
+                ->where('asignacion_id', $asignacionId)
+                ->whereNull('fecha_retiro')
+                ->whereIn('inspector_id', array_values(array_diff($actuales, $datos->acompanantes)))
+                ->update(['fecha_retiro' => now(), 'retirado_por' => $usuarioId]);
+            $this->agregarAcompanantes($asignacionId, array_values(array_diff($datos->acompanantes, $actuales)), $usuarioId);
+        });
+    }
+
+    public function acompanantesVigentes(int $asignacionId): array
+    {
+        return DB::table('inspecciones_asignaciones_acompanantes')
+            ->where('asignacion_id', $asignacionId)
+            ->whereNull('fecha_retiro')
+            ->orderBy('id')
+            ->pluck('inspector_id')
+            ->map(static fn ($id): int => (int) $id)
+            ->all();
+    }
+
+    /** @param  array<int, int>  $inspectores */
+    private function agregarAcompanantes(int $asignacionId, array $inspectores, int $usuarioId): void
+    {
+        foreach ($inspectores as $inspectorId) {
+            DB::table('inspecciones_asignaciones_acompanantes')->insert([
+                'asignacion_id' => $asignacionId,
+                'inspector_id' => $inspectorId,
+                'fecha_agregado' => now(),
+                'agregado_por' => $usuarioId,
             ]);
+        }
     }
 
     public function historial(int $expedienteId): array
@@ -257,26 +328,37 @@ final readonly class QueryAsignacionInspeccionRepository implements AsignacionIn
 
     public function bandeja(int $inspectorId): array
     {
+        // Las que tiene a cargo y las que acompaña
         return $this->consultarAsignaciones(
-            "a.inspector_id = ? AND a.fecha_reasignacion IS NULL AND {$this->esperaInspeccion()}",
-            [$inspectorId],
+            <<<SQL
+                a.fecha_reasignacion IS NULL AND {$this->esperaInspeccion()}
+                AND (a.inspector_id = ? OR EXISTS (
+                    SELECT 1 FROM inspecciones_asignaciones_acompanantes aa
+                    WHERE aa.asignacion_id = a.id AND aa.inspector_id = ? AND aa.fecha_retiro IS NULL
+                ))
+                SQL,
+            [$inspectorId, $inspectorId, $inspectorId],
             'a.fecha_programada NULLS LAST, e.fecha_vencimiento, e.numero_expediente',
+            esResponsable: true,
         );
     }
 
     /**
-     * @param  array<int, mixed>  $parametros
+     * @param  array<int, mixed>  $parametros  con esResponsable, el primero es el inspector que consulta
      * @return array<int, array<string, mixed>>
      */
-    private function consultarAsignaciones(string $condicion, array $parametros, string $orden = 'a.id DESC'): array
+    private function consultarAsignaciones(string $condicion, array $parametros, string $orden = 'a.id DESC', bool $esResponsable = false): array
     {
         $solicitante = self::NOMBRE_SOLICITANTE;
         $inspector = self::nombreUsuario('u');
         $asignador = self::nombreUsuario('ua');
         $reasignador = self::nombreUsuario('ur');
+        $acompanantes = self::acompanantes();
+        $responsable = $esResponsable ? 'a.inspector_id = ? AS es_responsable,' : '';
 
         $sql = <<<SQL
             SELECT
+                {$responsable}
                 a.id,
                 a.expediente_id,
                 e.numero_expediente,
@@ -287,6 +369,7 @@ final readonly class QueryAsignacionInspeccionRepository implements AsignacionIn
                 p.telefono AS solicitante_telefono,
                 a.inspector_id,
                 {$inspector} AS inspector_nombre,
+                {$acompanantes},
                 a.nombre_comercial,
                 a.direccion,
                 a.fecha_programada,
@@ -335,6 +418,13 @@ final readonly class QueryAsignacionInspeccionRepository implements AsignacionIn
      */
     private function filas(array $filas): array
     {
-        return array_map(static fn ($fila): array => (array) $fila, $filas);
+        return array_map(static function ($fila): array {
+            $fila = (array) $fila;
+            if (isset($fila['acompanantes']) && is_string($fila['acompanantes'])) {
+                $fila['acompanantes'] = json_decode($fila['acompanantes'], true, flags: JSON_THROW_ON_ERROR);
+            }
+
+            return $fila;
+        }, $filas);
     }
 }

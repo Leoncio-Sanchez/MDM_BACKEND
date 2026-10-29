@@ -29,6 +29,11 @@ final readonly class AsignarInspectorUseCase
         if (! $this->asignaciones->esInspectorActivo($datos->inspectorId)) {
             throw AsignacionInvalida::inspectorNoValido();
         }
+        foreach ($datos->acompanantes as $acompanante) {
+            if (! $this->asignaciones->esInspectorActivo($acompanante)) {
+                throw AsignacionInvalida::acompananteNoValido();
+            }
+        }
 
         $id = $this->asignaciones->crear($expedienteId, $datos, $usuarioId);
 

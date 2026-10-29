@@ -55,4 +55,9 @@ final class ActaInvalida extends \DomainException
     {
         return new self("El motivo de la anulación debe tener entre {$minimo} y {$maximo} caracteres.");
     }
+
+    public static function soloResponsable(string $responsable): self
+    {
+        return new self("Usted acompaña esta inspección: el acta la registra el inspector responsable ({$responsable}).");
+    }
 }

@@ -34,9 +34,15 @@ final readonly class RegistrarActaUseCase
      */
     public function execute(int $asignacionId, int $inspectorId, DatosActa $datos, array $fotos): array
     {
-        // Solo el inspector con la asignación vigente; para cualquier otro "no existe"
+        // Solo el responsable de la asignación vigente; al acompañante se le explica, para cualquier otro "no existe"
         $asignacion = $this->asignaciones->buscar($asignacionId);
-        if ($asignacion === null || ! $asignacion['vigente'] || (int) $asignacion['inspector_id'] !== $inspectorId) {
+        if ($asignacion === null || ! $asignacion['vigente']) {
+            throw AsignacionNoEncontrada::id($asignacionId);
+        }
+        if ((int) $asignacion['inspector_id'] !== $inspectorId) {
+            if (in_array($inspectorId, array_column((array) $asignacion['acompanantes'], 'id'), true)) {
+                throw ActaInvalida::soloResponsable((string) $asignacion['inspector_nombre']);
+            }
             throw AsignacionNoEncontrada::id($asignacionId);
         }
         $expedienteId = (int) $asignacion['expediente_id'];
