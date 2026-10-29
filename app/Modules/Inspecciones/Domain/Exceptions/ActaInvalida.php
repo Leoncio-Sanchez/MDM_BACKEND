@@ -35,4 +35,24 @@ final class ActaInvalida extends \DomainException
     {
         return new self("Falta la foto de {$deQue}: es obligatoria como sustento del acta.");
     }
+
+    public static function yaAnulada(string $numeroActa): self
+    {
+        return new self("El acta N° {$numeroActa} ya está anulada.");
+    }
+
+    public static function noEsLaUltima(string $numeroActa): self
+    {
+        return new self("No se puede anular el acta N° {$numeroActa} mientras tenga una reinspección vigente: anule primero la reinspección.");
+    }
+
+    public static function expedienteResuelto(int $numeroExpediente): self
+    {
+        return new self("El expediente N° {$numeroExpediente} ya tiene certificado o denegatoria de ITSE, o está anulado: sus actas ya no se pueden anular.");
+    }
+
+    public static function motivoAnulacion(int $minimo, int $maximo): self
+    {
+        return new self("El motivo de la anulación debe tener entre {$minimo} y {$maximo} caracteres.");
+    }
 }

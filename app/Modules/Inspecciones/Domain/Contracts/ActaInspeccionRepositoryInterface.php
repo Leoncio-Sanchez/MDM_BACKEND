@@ -12,16 +12,20 @@ use Illuminate\Http\UploadedFile;
 interface ActaInspeccionRepositoryInterface
 {
     /**
-     * Actas del expediente en orden de visita, sin fotos.
+     * Actas del expediente en orden de visita (las anuladas antes que la que las reemplazó), sin fotos.
      *
      * @return array<int, array<string, mixed>>
      */
-    public function deExpediente(int $expedienteId): array;
+    public function deExpediente(int $expedienteId, bool $soloVigentes = false): array;
 
     /** @return array<string, mixed>|null el acta con sus fotos (sin contenido) */
     public function buscar(int $actaId): ?array;
 
+    /** Solo entre las actas vigentes: el número de un acta anulada se puede volver a usar */
     public function existeNumero(string $numeroActa): bool;
+
+    /** @return bool false si el acta ya estaba anulada */
+    public function anular(int $actaId, string $motivo, ?string $documento, int $usuarioId): bool;
 
     /**
      * Guarda el acta y sus fotos en una sola operación: si algo falla, no queda

@@ -42,7 +42,7 @@ final readonly class RegistrarActaUseCase
         $expedienteId = (int) $asignacion['expediente_id'];
         $numeroExpediente = (int) $asignacion['numero_expediente'];
 
-        $previas = $this->actas->deExpediente($expedienteId);
+        $previas = $this->actas->deExpediente($expedienteId, soloVigentes: true);
         $ultima = $previas === [] ? null : $previas[array_key_last($previas)];
         if ($ultima !== null && ResultadoActa::from((string) $ultima['resultado'])->esFinal()) {
             throw ActaInvalida::dictamenFinal($numeroExpediente);

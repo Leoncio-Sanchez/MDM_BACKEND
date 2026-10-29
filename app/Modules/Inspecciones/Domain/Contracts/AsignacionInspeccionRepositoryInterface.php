@@ -34,6 +34,12 @@ interface AsignacionInspeccionRepositoryInterface
 
     public function expedienteEsperaInspeccion(int $expedienteId): bool;
 
+    /**
+     * Como expedienteEsperaInspeccion, pero también si ya tiene dictamen final: la oficina
+     * aún no emite el certificado ni la denegatoria.
+     */
+    public function expedientePendienteDeResolucion(int $expedienteId): bool;
+
     public function numeroExpediente(int $expedienteId): ?int;
 
     /** @return array<string, mixed>|null */

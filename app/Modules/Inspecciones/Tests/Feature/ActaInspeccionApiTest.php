@@ -199,3 +199,73 @@ it('muestra el acta y sus fotos a la oficina y al inspector a cargo, a nadie má
     $this->actingAs($this->carlos, 'api')->getJson(URL_ACTAS."actas/{$acta['id']}/")->assertForbidden();
     $this->actingAs(($this->usuario)(['licencias' => true]), 'api')->getJson(URL_ACTAS."actas/{$acta['id']}/")->assertForbidden();
 });
+
+// ── Anulación ─────────────────────────────────────────────────────────────
+
+it('el jefe anula un acta con error: queda como constancia y el inspector vuelve a registrar la visita', function () {
+    $acta = ($this->registrar)($this->carlos, ($this->acta)())->assertCreated()->json();
+
+    $this->actingAs($this->jefe, 'api')->postJson(URL_ACTAS."actas/{$acta['id']}/anular/", ['motivo' => '   corto   '])
+        ->assertUnprocessable()->assertJsonValidationErrors('motivo');
+
+    $this->actingAs($this->jefe, 'api')->postJson(URL_ACTAS."actas/{$acta['id']}/anular/", [
+        'motivo' => 'Se registró un metraje equivocado', 'documento' => ' MEMO-015-2026 ',
+    ])->assertOk()->assertJson([
+        'anulada' => true, 'motivo_anulacion' => 'Se registró un metraje equivocado',
+        'documento_anulacion' => 'MEMO-015-2026', 'resultado' => 'APROBADO',
+    ]);
+
+    // Vuelve a la bandeja avisando la anulación; las fotos se conservan
+    expect($this->actingAs($this->carlos, 'api')->getJson(URL_ACTAS.'mi-bandeja/')->json()[0])->toMatchArray([
+        'ultima_acta_id' => null, 'acta_anulada_numero' => 'ACTA-001-2026', 'acta_anulada_motivo' => 'Se registró un metraje equivocado',
+    ]);
+    expect(Storage::disk('media')->allFiles("inspecciones/actas/{$acta['id']}"))->toHaveCount(3);
+
+    // Se registra otra vez la 1.ª visita, incluso con el mismo número del talonario
+    ($this->registrar)($this->carlos, ($this->acta)(['area_m2' => '54.5']))
+        ->assertCreated()->assertJson(['visita' => 1, 'numero_acta' => 'ACTA-001-2026', 'anulada' => false]);
+    $this->actingAs($this->carlos, 'api')->getJson(URL_ACTAS.'mi-bandeja/')->assertExactJson([]);
+
+    $actas = $this->actingAs($this->oficina, 'api')->getJson(URL_ACTAS."expedientes/{$this->expediente}/actas/")->json();
+    expect(array_column($actas, 'anulada'))->toBe([true, false]);
+    expect($actas[0]['anulado_por'])->not->toBeNull();
+
+    $this->actingAs($this->jefe, 'api')->postJson(URL_ACTAS."actas/{$acta['id']}/anular/", ['motivo' => 'Otra vez el mismo motivo'])
+        ->assertStatus(422)->assertJson(['error' => 'El acta N° ACTA-001-2026 ya está anulada.']);
+});
+
+it('anular la reinspección devuelve el expediente a observado; la 1.ª visita no se anula mientras haya reinspección', function () {
+    $primera = ($this->registrar)($this->carlos, ($this->acta)([
+        'extintores' => 'NO_CUMPLE', 'observaciones' => 'Extintor vencido', 'plazo_subsanacion_dias' => 3,
+    ]))->json();
+    $segunda = ($this->registrar)($this->carlos, ($this->acta)([
+        'numero_acta' => 'ACTA-002', 'fecha_visita' => now()->subMinute()->toIso8601String(),
+        'extintores' => 'NO_CUMPLE', 'observaciones' => 'No cambió el extintor',
+    ]))->assertJson(['resultado' => 'DESAPROBADO'])->json();
+
+    $this->actingAs($this->jefe, 'api')->postJson(URL_ACTAS."actas/{$primera['id']}/anular/", ['motivo' => 'Número de acta equivocado'])
+        ->assertStatus(422)->assertJsonPath('error', fn (string $e) => str_contains($e, 'anule primero la reinspección'));
+
+    $this->actingAs($this->jefe, 'api')->postJson(URL_ACTAS."actas/{$segunda['id']}/anular/", ['motivo' => 'Se marcó mal el checklist'])->assertOk();
+
+    expect($this->actingAs($this->carlos, 'api')->getJson(URL_ACTAS.'mi-bandeja/')->json()[0])->toMatchArray([
+        'ultima_acta_id' => $primera['id'], 'ultima_acta_resultado' => 'OBSERVADO', 'acta_anulada_numero' => 'ACTA-002',
+    ]);
+    ($this->registrar)($this->carlos, ($this->acta)(['numero_acta' => 'ACTA-003', 'fecha_visita' => now()->subMinute()->toIso8601String()]))
+        ->assertCreated()->assertJson(['visita' => 2, 'resultado' => 'APROBADO']);
+});
+
+it('no se anula un acta si el expediente ya tiene denegatoria o certificado, ni lo hace quien no es jefe', function () {
+    $acta = ($this->registrar)($this->carlos, ($this->acta)())->json();
+
+    $this->actingAs($this->oficina, 'api')->postJson(URL_ACTAS."actas/{$acta['id']}/anular/", ['motivo' => 'Se registró con error'])->assertForbidden();
+    $this->actingAs($this->carlos, 'api')->postJson(URL_ACTAS."actas/{$acta['id']}/anular/", ['motivo' => 'Se registró con error'])->assertForbidden();
+    $this->actingAs($this->jefe, 'api')->postJson(URL_ACTAS.'actas/999999/anular/', ['motivo' => 'Se registró con error'])->assertNotFound();
+
+    DB::table('autorizaciones_improcedentes')->insert(Registros::autorizacionImprocedente([
+        'tipo_autorizacion' => 'ITSE', 'expediente_id' => $this->expediente, 'usuario_id' => $this->jefe->id,
+    ]));
+    $this->actingAs($this->jefe, 'api')->postJson(URL_ACTAS."actas/{$acta['id']}/anular/", ['motivo' => 'Se registró con error'])
+        ->assertStatus(422)->assertJsonPath('error', fn (string $e) => str_contains($e, 'ya tiene certificado o denegatoria'));
+    expect(DB::table('inspecciones_actas')->whereNotNull('fecha_anulacion')->count())->toBe(0);
+});
