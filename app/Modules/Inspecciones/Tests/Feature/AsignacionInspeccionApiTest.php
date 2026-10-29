@@ -105,7 +105,7 @@ it('no asigna dos veces, ni expedientes que no esperan inspección, ni a quien n
     DB::table('expedientes_anulaciones')->insert(['expediente_id' => $this->exp702, 'motivo' => 'Desistimiento del solicitante', 'usuario_id' => $this->jefe->id]);
     ($this->asignar)($this->exp702, $this->carlos)
         ->assertStatus(422)
-        ->assertJsonFragment(['error' => 'El expediente N° 702 no espera inspección ITSE: no la requiere, ya tiene certificado o denegatoria, o está anulado.']);
+        ->assertJsonFragment(['error' => 'El expediente N° 702 no espera inspección ITSE: no la requiere, ya tiene dictamen final, certificado o denegatoria, o está anulado.']);
 
     ($this->asignar)(999999, $this->carlos)->assertNotFound();
 });

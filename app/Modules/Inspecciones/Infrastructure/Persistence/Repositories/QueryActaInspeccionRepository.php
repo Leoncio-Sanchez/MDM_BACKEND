@@ -1,0 +1,171 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\Inspecciones\Infrastructure\Persistence\Repositories;
+
+use App\Modules\Archivos\Domain\Contracts\ArchivoManagerInterface;
+use App\Modules\Inspecciones\Domain\Contracts\ActaInspeccionRepositoryInterface;
+use App\Modules\Inspecciones\Domain\Exceptions\ActaDuplicada;
+use App\Modules\Inspecciones\Domain\ValueObjects\DatosActa;
+use App\Modules\Inspecciones\Domain\ValueObjects\ResultadoActa;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
+
+final readonly class QueryActaInspeccionRepository implements ActaInspeccionRepositoryInterface
+{
+    public function __construct(private ArchivoManagerInterface $archivos) {}
+
+    public function deExpediente(int $expedienteId): array
+    {
+        return $this->consultar('ac.expediente_id = ?', [$expedienteId]);
+    }
+
+    public function buscar(int $actaId): ?array
+    {
+        $acta = $this->consultar('ac.id = ?', [$actaId])[0] ?? null;
+        if ($acta === null) {
+            return null;
+        }
+
+        $acta['fotos'] = DB::table('inspecciones_actas_fotos')
+            ->where('acta_id', $actaId)
+            ->orderBy('id')
+            ->get(['id', 'tipo', 'nombre_original', 'extension', 'tamanio_bytes'])
+            ->map(static fn ($foto): array => [
+                'id' => (int) $foto->id,
+                'tipo' => (string) $foto->tipo,
+                'nombre_original' => (string) $foto->nombre_original,
+                'extension' => (string) $foto->extension,
+                'tamanio_bytes' => (int) $foto->tamanio_bytes,
+            ])
+            ->all();
+
+        return $acta;
+    }
+
+    public function existeNumero(string $numeroActa): bool
+    {
+        return DB::table('inspecciones_actas')->whereRaw('UPPER(numero_acta) = ?', [mb_strtoupper($numeroActa)])->exists();
+    }
+
+    public function registrar(
+        int $asignacionId,
+        int $expedienteId,
+        int $inspectorId,
+        int $visita,
+        DatosActa $datos,
+        ResultadoActa $resultado,
+        ?string $fechaLimiteSubsanacion,
+        array $fotos,
+    ): int {
+        $guardados = [];
+
+        try {
+            return DB::transaction(function () use ($asignacionId, $expedienteId, $inspectorId, $visita, $datos, $resultado, $fechaLimiteSubsanacion, $fotos, &$guardados): int {
+                $actaId = (int) DB::table('inspecciones_actas')->insertGetId(array_merge([
+                    'expediente_id' => $expedienteId,
+                    'asignacion_id' => $asignacionId,
+                    'inspector_id' => $inspectorId,
+                    'numero_acta' => $datos->numeroActa,
+                    'visita' => $visita,
+                    'fecha_visita' => $datos->fechaVisita->format('Y-m-d H:i:sP'),
+                    'area_m2' => $datos->areaM2,
+                    'aforo' => $datos->aforo,
+                    'observaciones' => $datos->observaciones,
+                    'resultado' => $resultado->value,
+                    'fecha_limite_subsanacion' => $fechaLimiteSubsanacion,
+                    'fecha_registro' => now(),
+                ], array_map(static fn ($estado) => $estado->value, $datos->checklist)));
+
+                foreach ($fotos as $foto) {
+                    $meta = $this->archivos->guardar($foto['archivo'], "inspecciones/actas/{$actaId}");
+                    $guardados[] = $meta['ruta_archivo'];
+                    DB::table('inspecciones_actas_fotos')->insert([
+                        'acta_id' => $actaId,
+                        'tipo' => $foto['tipo'],
+                        'uuid' => $meta['uuid'],
+                        'nombre_original' => mb_substr($meta['nombre_original'], 0, 255),
+                        'ruta_archivo' => $meta['ruta_archivo'],
+                        'extension' => $meta['extension'],
+                        'tamanio_bytes' => $meta['tamanio_bytes'],
+                        'fecha_registro' => now(),
+                    ]);
+                }
+
+                return $actaId;
+            });
+        } catch (\Throwable $e) {
+            // La transacción ya deshizo los registros: quitar también los archivos escritos
+            foreach ($guardados as $ruta) {
+                $this->archivos->eliminar($ruta);
+            }
+            if ($e instanceof QueryException && ($e->errorInfo[0] ?? null) === '23505') {
+                // Dos envíos simultáneos: el número de acta o la visita ya se registraron
+                throw str_contains($e->getMessage(), 'numero_unico')
+                    ? ActaDuplicada::numero($datos->numeroActa)
+                    : ActaDuplicada::visita((int) DB::table('expedientes')->where('id', $expedienteId)->value('numero_expediente'));
+            }
+            throw $e;
+        }
+    }
+
+    public function leerFoto(int $actaId, int $fotoId): ?array
+    {
+        $foto = DB::table('inspecciones_actas_fotos')->where('acta_id', $actaId)->where('id', $fotoId)->first();
+        if ($foto === null || ! $this->archivos->existe((string) $foto->ruta_archivo)) {
+            return null;
+        }
+
+        return [
+            'foto' => ['nombre_original' => (string) $foto->nombre_original, 'extension' => (string) $foto->extension],
+            'contenido' => $this->archivos->leer((string) $foto->ruta_archivo),
+        ];
+    }
+
+    public function inspectorPuedeVer(int $actaId, int $inspectorId): bool
+    {
+        return DB::table('inspecciones_actas as ac')
+            ->where('ac.id', $actaId)
+            ->where(function ($q) use ($inspectorId): void {
+                $q->where('ac.inspector_id', $inspectorId)
+                    ->orWhereExists(function ($sub) use ($inspectorId): void {
+                        $sub->selectRaw('1')->from('inspecciones_asignaciones as a')
+                            ->whereColumn('a.expediente_id', 'ac.expediente_id')
+                            ->where('a.inspector_id', $inspectorId)
+                            ->whereNull('a.fecha_reasignacion');
+                    });
+            })
+            ->exists();
+    }
+
+    /**
+     * @param  array<int, mixed>  $parametros
+     * @return array<int, array<string, mixed>>
+     */
+    private function consultar(string $condicion, array $parametros): array
+    {
+        $filas = DB::select(<<<SQL
+            SELECT
+                ac.id, ac.expediente_id, e.numero_expediente, ac.asignacion_id, ac.inspector_id,
+                COALESCE(NULLIF(TRIM(CONCAT_WS(' ', u.first_name, u.last_name)), ''), u.username) AS inspector_nombre,
+                ac.numero_acta, ac.visita, ac.fecha_visita, ac.area_m2, ac.aforo,
+                ac.extintores, ac.senalizacion, ac.luces_emergencia, ac.tableros_electricos,
+                ac.observaciones, ac.resultado, ac.fecha_limite_subsanacion, ac.fecha_registro
+            FROM inspecciones_actas ac
+            JOIN expedientes e ON e.id = ac.expediente_id
+            JOIN auth_user u ON u.id = ac.inspector_id
+            WHERE {$condicion}
+            ORDER BY ac.visita
+            SQL, $parametros);
+
+        return array_map(static function ($fila): array {
+            $acta = (array) $fila;
+            $acta['area_m2'] = (float) $acta['area_m2'];
+            $acta['aforo'] = (int) $acta['aforo'];
+            $acta['visita'] = (int) $acta['visita'];
+
+            return $acta;
+        }, $filas);
+    }
+}

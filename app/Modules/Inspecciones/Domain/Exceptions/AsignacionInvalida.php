@@ -13,7 +13,7 @@ final class AsignacionInvalida extends \DomainException
 
     public static function expedienteSinInspeccionPendiente(int $numero): self
     {
-        return new self("El expediente N° {$numero} no espera inspección ITSE: no la requiere, ya tiene certificado o denegatoria, o está anulado.");
+        return new self("El expediente N° {$numero} no espera inspección ITSE: no la requiere, ya tiene dictamen final, certificado o denegatoria, o está anulado.");
     }
 
     public static function mismoInspector(): self

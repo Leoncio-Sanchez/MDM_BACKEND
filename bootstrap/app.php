@@ -131,4 +131,16 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (\App\Modules\Inspecciones\Domain\Exceptions\ExpedienteYaAsignado $e, Request $request) {
             return response()->json(['error' => $e->getMessage()], 409);
         });
+
+        $exceptions->render(function (\App\Modules\Inspecciones\Domain\Exceptions\ActaInvalida $e, Request $request) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        });
+
+        $exceptions->render(function (\App\Modules\Inspecciones\Domain\Exceptions\ActaDuplicada $e, Request $request) {
+            return response()->json(['error' => $e->getMessage()], 409);
+        });
+
+        $exceptions->render(function (\App\Modules\Inspecciones\Domain\Exceptions\ActaNoEncontrada $e, Request $request) {
+            return response()->json(['error' => $e->getMessage()], 404);
+        });
     })->create();
