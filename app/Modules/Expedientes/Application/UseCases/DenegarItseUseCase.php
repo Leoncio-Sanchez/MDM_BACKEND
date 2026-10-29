@@ -25,6 +25,7 @@ final readonly class DenegarItseUseCase
         if ($expediente === null) {
             throw ExpedienteNoEncontrado::porId($dto->expedienteId);
         }
+        $expediente->asegurarQueNoEstaAnulado();
 
         if ($this->expedientes->tieneItse($dto->expedienteId)) {
             throw ItseYaEmitidaError::paraExpediente($dto->expedienteId);

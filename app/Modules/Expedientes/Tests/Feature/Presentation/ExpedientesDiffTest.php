@@ -93,7 +93,7 @@ it('pendientes endpoint response structure matches exact 11 keys from Django', f
         ->and($item['dias_habiles_restantes'])->toBeInt();
 });
 
-it('buscar endpoint response structure matches exact 27 keys from Django', function () {
+it('buscar endpoint response structure matches the 27 keys from Django plus the annulment ones', function () {
     $this->repo->shouldReceive('buscarPorFiltro')
         ->once()
         ->with('NUMERO', '888888')
@@ -165,6 +165,8 @@ it('buscar endpoint response structure matches exact 27 keys from Django', funct
         'licencia_pendiente',
         'itse_pendiente',
         'mostrar_alerta',
+        'anulado',
+        'motivo_anulacion',
         'dias_habiles_restantes',
     ];
 
@@ -198,7 +200,7 @@ it('buscar endpoint response structure matches exact 27 keys from Django', funct
         ->and($item['dias_habiles_restantes'])->toBeInt();
 });
 
-it('consulta endpoint response structure matches exact 19 keys from Django', function () {
+it('consulta endpoint response structure matches the 19 keys from Django plus the annulment ones', function () {
     $expedienteEntity = new Expediente(
         id: 25,
         uuid: '8cbce9a5-3509-42bd-9cab-659f0239ac9d',
@@ -255,6 +257,9 @@ it('consulta endpoint response structure matches exact 19 keys from Django', fun
         'representante',
         'usuario_ampliacion',
         'usuario',
+        // Agregadas con la anulación de expedientes (no existían en Django)
+        'anulado',
+        'anulacion',
     ];
 
     expect(array_keys($item))->toBe($expectedKeys)

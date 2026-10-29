@@ -43,6 +43,10 @@ final readonly class CrearItseUseCase
                 throw ExpedienteNoValidoItse::noExiste($dto->expedienteId);
             }
 
+            if ($this->expedientes->estaAnulado($dto->expedienteId)) {
+                throw ExpedienteNoValidoItse::anulado($dto->expedienteId);
+            }
+
             if (!$this->personas->existe($dto->titularId)) {
                 throw ItseInvalido::titularNoExiste($dto->titularId);
             }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Expedientes\Domain\Contracts;
 
 use App\Modules\Expedientes\Domain\Entities\Expediente;
+use App\Modules\Expedientes\Domain\ValueObjects\AnulacionExpediente;
 
 interface ExpedienteRepositoryInterface
 {
@@ -24,7 +25,8 @@ interface ExpedienteRepositoryInterface
 
     public function actualizar(Expediente $expediente): Expediente;
 
-    public function eliminar(int $id): void;
+    /** Registra la anulación (los expedientes no se eliminan: LPAG, Ley 27444) */
+    public function anular(int $id, AnulacionExpediente $anulacion): void;
 
     public function existeNumeroEnAnio(int $numero, int $anio, ?int $exceptoId = null): bool;
 

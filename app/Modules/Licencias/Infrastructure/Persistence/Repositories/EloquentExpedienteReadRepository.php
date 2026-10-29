@@ -11,6 +11,11 @@ final readonly class EloquentExpedienteReadRepository implements ExpedienteReadR
         return \Illuminate\Support\Facades\DB::table("autorizaciones_improcedentes")->where("expediente_id", $expedienteId)->where("tipo_autorizacion", $tipo)->exists();
     }
 
+    public function estaAnulado(int $expedienteId): bool
+    {
+        return \Illuminate\Support\Facades\DB::table('expedientes_anulaciones')->where('expediente_id', $expedienteId)->exists();
+    }
+
     public function buscarPorNumeroYAnio(int $numero, int $anio): ?object {
         return ExpedienteReadModel::query()->where('numero', $numero)->whereYear('fecha_ingreso', $anio)->first();
     }

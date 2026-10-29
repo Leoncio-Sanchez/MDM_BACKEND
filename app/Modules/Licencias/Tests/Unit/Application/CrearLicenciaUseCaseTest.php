@@ -37,6 +37,7 @@ function payloadLicencia(array $cambios = []): array
 it('crea la licencia con todos los datos del formulario', function () {
     $expedienteRepo = Mockery::mock(ExpedienteReadRepositoryInterface::class);
     $expedienteRepo->shouldReceive('buscarPorId')->with(1)->once()->andReturn((object) ['id' => 1]);
+    $expedienteRepo->shouldReceive('estaAnulado')->with(1)->andReturn(false);
 
     $licenciaRepo = Mockery::mock(LicenciaRepositoryInterface::class);
     $licenciaRepo->shouldReceive('existeNumeroLicencia')->with(1001)->once()->andReturn(false);
@@ -83,6 +84,7 @@ it('usa al titular como conductor si no se indica', function () {
 it('lanza LicenciaDuplicadaError si el número ya existe y no intenta insertar', function () {
     $expedienteRepo = Mockery::mock(ExpedienteReadRepositoryInterface::class);
     $expedienteRepo->shouldReceive('buscarPorId')->andReturn((object) ['id' => 1]);
+    $expedienteRepo->shouldReceive('estaAnulado')->andReturn(false);
 
     $licenciaRepo = Mockery::mock(LicenciaRepositoryInterface::class);
     $licenciaRepo->shouldReceive('existeNumeroLicencia')->with(1001)->once()->andReturn(true);

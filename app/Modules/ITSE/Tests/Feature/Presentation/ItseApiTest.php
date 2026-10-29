@@ -54,6 +54,7 @@ it('crea un ITSE correctamente', function () {
     });
     $this->mock(ExpedienteReadRepositoryInterface::class, function ($mock) {
         $mock->shouldReceive('existe')->andReturn(true);
+        $mock->shouldReceive('estaAnulado')->andReturn(false);
     });
     $this->mock(PersonaReadRepositoryInterface::class, function ($mock) {
         $mock->shouldReceive('existe')->andReturn(true);
@@ -88,6 +89,27 @@ it('crea un ITSE correctamente', function () {
 
     $response = $this->actingAs($this->user, 'api')->postJson('/api/lf-itse/itse/', $data);
     $response->assertStatus(201);
+});
+
+it('no emite ITSE sobre un expediente anulado', function () {
+    $this->mock(ItseRepositoryInterface::class, function ($mock) {
+        $mock->shouldReceive('existeNumero')->andReturn(false);
+        $mock->shouldReceive('existeRecibo')->andReturn(false);
+        $mock->shouldNotReceive('crear');
+    });
+    $this->mock(ExpedienteReadRepositoryInterface::class, function ($mock) {
+        $mock->shouldReceive('existe')->andReturn(true);
+        $mock->shouldReceive('estaAnulado')->with(1)->andReturn(true);
+    });
+
+    $this->actingAs($this->user, 'api')->postJson('/api/lf-itse/itse/', [
+        'numero_itse' => 12345, 'fecha_expedicion' => '2026-01-01', 'fecha_caducidad' => '2027-01-01',
+        'nombre_comercial' => 'Test', 'direccion' => 'Dir', 'resolucion_numero' => 'RES-1', 'area' => 10.5,
+        'capacidad_aforo' => 10, 'se_puede_publicar' => false, 'numero_recibo_pago' => 'REC-1', 'tipo_itse_id' => 1,
+        'expediente_id' => 1, 'nivel_riesgo_id' => 1, 'conductor_id' => 1, 'titular_id' => 1,
+    ])
+        ->assertUnprocessable()
+        ->assertJson(['error' => 'El expediente con ID 1 está anulado: no se puede emitir un certificado ITSE sobre él.']);
 });
 
 it('falla crear ITSE si no esta autenticado', function () {

@@ -27,6 +27,7 @@ final readonly class AmpliarPlazoExpedienteUseCase
         if ($expediente === null) {
             throw ExpedienteNoEncontrado::porId($dto->expedienteId);
         }
+        $expediente->asegurarQueNoEstaAnulado();
 
         $tipo = $this->tiposTupa->buscarPorId($expediente->tipoProcedimientoTupaId);
         if ($tipo === null) {

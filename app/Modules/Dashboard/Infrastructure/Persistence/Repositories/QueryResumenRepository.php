@@ -85,6 +85,8 @@ final readonly class QueryResumenRepository implements ResumenRepositoryInterfac
 
         return DB::table('expedientes as e')
             ->join('tipos_procedimiento_tupa as tpt', 'tpt.id', '=', 'e.tipo_procedimiento_tupa_id')
+            // Un expediente anulado ya no está en trámite
+            ->whereNotExists(fn (Builder $s) => $s->selectRaw('1')->from('expedientes_anulaciones as ea')->whereColumn('ea.expediente_id', 'e.id'))
             ->where(fn (Builder $q) => $q
                 ->where($pendiente('requiere_lf', 'licencias_funcionamiento', 'LF'))
                 ->orWhere($pendiente('requiere_itse', 'itse', 'ITSE')))

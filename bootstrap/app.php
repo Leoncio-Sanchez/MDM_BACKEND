@@ -58,8 +58,13 @@ return Application::configure(basePath: dirname(__DIR__))
             return response()->json(['error' => $e->getMessage()], 409);
         });
 
-        $exceptions->render(function (\App\Modules\Expedientes\Domain\Exceptions\ExpedienteConItseError $e, Request $request) {
+        $exceptions->render(function (\App\Modules\Expedientes\Domain\Exceptions\ExpedienteConItseError|\App\Modules\Expedientes\Domain\Exceptions\ExpedienteAnulado $e, Request $request) {
             return response()->json(['error' => $e->getMessage()], 409);
+        });
+
+        // Antes respondían 500: son datos inválidos del pedido
+        $exceptions->render(function (\App\Modules\Expedientes\Domain\Exceptions\ExpedienteInvalido|\App\Modules\Expedientes\Domain\Exceptions\SolicitanteNoValido|\App\Modules\Expedientes\Domain\Exceptions\TipoProcedimientoNoValido $e, Request $request) {
+            return response()->json(['error' => $e->getMessage()], 422);
         });
 
         $exceptions->render(function (\App\Modules\ITSE\Domain\Exceptions\ItseInvalido|\App\Modules\ITSE\Domain\Exceptions\ItseFechaInvalida|\App\Modules\ITSE\Domain\Exceptions\ExpedienteNoValidoItse $e, Request $request) {

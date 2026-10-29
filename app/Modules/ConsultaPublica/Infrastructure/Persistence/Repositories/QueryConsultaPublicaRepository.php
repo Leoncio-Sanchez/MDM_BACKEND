@@ -35,6 +35,7 @@ final readonly class QueryConsultaPublicaRepository implements ConsultaPublicaRe
             ->selectRaw('EXISTS (SELECT 1 FROM itse i WHERE i.expediente_id = e.id) AS tiene_itse')
             ->selectRaw("EXISTS (SELECT 1 FROM autorizaciones_improcedentes ai WHERE ai.expediente_id = e.id AND ai.tipo_autorizacion = 'LF') AS lf_improcedente")
             ->selectRaw("EXISTS (SELECT 1 FROM autorizaciones_improcedentes ai WHERE ai.expediente_id = e.id AND ai.tipo_autorizacion = 'ITSE') AS itse_improcedente")
+            ->selectRaw('EXISTS (SELECT 1 FROM expedientes_anulaciones ea WHERE ea.expediente_id = e.id) AS anulado')
             ->orderByDesc('e.fecha_recepcion')
             ->get();
 
@@ -45,6 +46,7 @@ final readonly class QueryConsultaPublicaRepository implements ConsultaPublicaRe
                 (bool) $f->requiere_lf, (bool) $f->requiere_itse,
                 (bool) $f->tiene_lf, (bool) $f->tiene_itse,
                 (bool) $f->lf_improcedente, (bool) $f->itse_improcedente,
+                (bool) $f->anulado,
             ),
             procedimiento: (string) $f->procedimiento,
             fechaEmision: CarbonImmutable::parse($f->fecha_recepcion),

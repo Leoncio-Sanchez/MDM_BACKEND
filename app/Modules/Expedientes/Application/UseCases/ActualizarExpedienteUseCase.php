@@ -32,6 +32,7 @@ final readonly class ActualizarExpedienteUseCase
             if (! $existente) {
                 throw ExpedienteNoEncontrado::porId($dto->expedienteId);
             }
+            $existente->asegurarQueNoEstaAnulado();
 
             $tipo = $this->tipos->buscarPorId($dto->tipoProcedimientoTupaId);
             if (! $tipo) {

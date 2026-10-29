@@ -32,6 +32,7 @@ it('crea un ITSE correctamente', function () {
     $this->itses->shouldReceive('existeNumero')->with(123)->once()->andReturn(false);
     $this->itses->shouldReceive('existeRecibo')->with('R123')->once()->andReturn(false);
     $this->expedientes->shouldReceive('existe')->with(1)->once()->andReturn(true);
+    $this->expedientes->shouldReceive('estaAnulado')->with(1)->once()->andReturn(false);
     $this->personas->shouldReceive('existe')->with(1)->twice()->andReturn(true);
     $this->niveles->shouldReceive('existe')->with(1)->once()->andReturn(true);
     

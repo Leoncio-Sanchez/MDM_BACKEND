@@ -15,13 +15,13 @@ use App\Modules\Expedientes\Application\DTOs\DenegarItseDTO;
 use App\Modules\Expedientes\Application\DTOs\DenegarLicenciaDTO;
 use App\Modules\Expedientes\Application\UseCases\ActualizarExpedienteUseCase;
 use App\Modules\Expedientes\Application\UseCases\AmpliarPlazoExpedienteUseCase;
+use App\Modules\Expedientes\Application\UseCases\AnularExpedienteUseCase;
 use App\Modules\Expedientes\Application\UseCases\BuscarAutorizacionImprocedenteUseCase;
 use App\Modules\Expedientes\Application\UseCases\BuscarExpedientesUseCase;
 use App\Modules\Expedientes\Application\UseCases\ConsultaExpedientesUseCase;
 use App\Modules\Expedientes\Application\UseCases\CrearExpedienteUseCase;
 use App\Modules\Expedientes\Application\UseCases\DenegarItseUseCase;
 use App\Modules\Expedientes\Application\UseCases\DenegarLicenciaUseCase;
-use App\Modules\Expedientes\Application\UseCases\EliminarExpedienteUseCase;
 use App\Modules\Expedientes\Application\UseCases\ListarExpedientesPendientesUseCase;
 use App\Modules\Expedientes\Application\UseCases\ListarExpedientesUseCase;
 use App\Modules\Expedientes\Application\UseCases\ObtenerExpedienteUseCase;
@@ -30,6 +30,7 @@ use App\Modules\Expedientes\Domain\Exceptions\ItseYaEmitidaError;
 use App\Modules\Expedientes\Domain\Exceptions\LicenciaYaEmitidaError;
 use App\Modules\Expedientes\Domain\Exceptions\TipoAutorizacionInvalidoError;
 use App\Modules\Expedientes\Presentation\Requests\ActualizarExpedienteRequest;
+use App\Modules\Expedientes\Presentation\Requests\AnularExpedienteRequest;
 use App\Modules\Expedientes\Presentation\Requests\CrearExpedienteRequest;
 use App\Modules\Expedientes\Presentation\Resources\AutorizacionImprocedenteResource;
 use App\Modules\Expedientes\Presentation\Resources\ExpedienteBusquedaResource;
@@ -47,7 +48,7 @@ final class ExpedienteController extends Controller
         private readonly CrearExpedienteUseCase $crear,
         private readonly ActualizarExpedienteUseCase $actualizar,
         private readonly ObtenerExpedienteUseCase $obtener,
-        private readonly EliminarExpedienteUseCase $eliminar,
+        private readonly AnularExpedienteUseCase $anularExpediente,
         private readonly ListarExpedientesUseCase $listar,
         private readonly ListarExpedientesPendientesUseCase $listarPendientes,
         private readonly BuscarExpedientesUseCase $buscar,
@@ -91,11 +92,19 @@ final class ExpedienteController extends Controller
         return new ExpedienteResource($this->actualizar->execute($dto));
     }
 
-    public function destroy(int $pk): JsonResponse
+    /** Reemplaza al antiguo DELETE: el expediente queda como constancia, marcado como anulado */
+    public function anular(AnularExpedienteRequest $request, int $pk): ExpedienteResource
     {
-        $this->eliminar->execute($pk);
+        /** @var object{id: int} $user */
+        $user = $request->user('api');
+        $documento = $request->validated('documento');
 
-        return new JsonResponse(null, 204);
+        return new ExpedienteResource($this->anularExpediente->execute(
+            $pk,
+            (string) $request->validated('motivo'),
+            is_string($documento) ? $documento : null,
+            (int) $user->id,
+        ));
     }
 
     public function pendientes(): JsonResponse

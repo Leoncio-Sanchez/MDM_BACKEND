@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Modules\Expedientes\Domain\Entities\Expediente;
+use App\Modules\Expedientes\Domain\ValueObjects\AnulacionExpediente;
 use App\Modules\Expedientes\Infrastructure\Persistence\Repositories\EloquentExpedienteRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -74,7 +75,8 @@ it('actualiza un expediente existente', function () {
         ->and($actualizado->observaciones)->toBe('Obs modificada');
 });
 
-it('elimina un expediente por ID', function () {
+it('anula un expediente sin borrarlo y lo devuelve con su constancia', function () {
+    DB::table('auth_user')->insert(\Tests\Fixtures\UsuarioAuth::datos(['id' => 7, 'username' => 'mesa_partes', 'first_name' => 'ROSA', 'last_name' => 'DIAZ']));
     $exp = Expediente::crear(
         uuid: Uuid::uuid4()->toString(),
         numeroExpediente: 300,
@@ -87,9 +89,21 @@ it('elimina un expediente por ID', function () {
     );
     $creado = $this->repo->crear($exp);
 
-    $this->repo->eliminar((int) $creado->id);
+    expect($creado->estaAnulado())->toBeFalse();
 
-    expect($this->repo->buscarPorId((int) $creado->id))->toBeNull();
+    $this->repo->anular((int) $creado->id, new AnulacionExpediente(
+        motivo: 'Expediente duplicado por error',
+        documento: null,
+        fechaAnulacion: new DateTimeImmutable('2025-05-03 15:30:00', new DateTimeZone('America/Lima')),
+        usuarioId: 7,
+    ));
+
+    $anulado = $this->repo->buscarPorId((int) $creado->id);
+    expect($anulado)->not->toBeNull()
+        ->and($anulado->estaAnulado())->toBeTrue()
+        ->and($anulado->anulacion?->motivo)->toBe('Expediente duplicado por error')
+        ->and($anulado->anulacion?->usuarioNombre)->toBe('ROSA DIAZ')
+        ->and($anulado->anulacion?->fechaAnulacion->setTimezone(new DateTimeZone('America/Lima'))->format('Y-m-d H:i'))->toBe('2025-05-03 15:30');
 });
 
 it('lista y pagina expedientes', function () {

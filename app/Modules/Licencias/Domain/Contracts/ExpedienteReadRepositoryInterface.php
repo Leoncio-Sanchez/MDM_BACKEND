@@ -7,4 +7,5 @@ interface ExpedienteReadRepositoryInterface
     public function buscarPorId(int $id): ?object;
     public function buscarPorNumeroYAnio(int $numero, int $anio): ?object;
     public function tieneAutorizacionImprocedente(int $expedienteId, string $tipo): bool;
+    public function estaAnulado(int $expedienteId): bool;
 }

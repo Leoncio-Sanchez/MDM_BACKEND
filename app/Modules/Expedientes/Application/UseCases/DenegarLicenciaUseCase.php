@@ -25,6 +25,7 @@ final readonly class DenegarLicenciaUseCase
         if ($expediente === null) {
             throw ExpedienteNoEncontrado::porId($dto->expedienteId);
         }
+        $expediente->asegurarQueNoEstaAnulado();
 
         if ($this->expedientes->tieneLicencia($dto->expedienteId)) {
             throw LicenciaYaEmitidaError::paraExpediente($dto->expedienteId);

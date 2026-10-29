@@ -7,8 +7,10 @@ namespace App\Modules\Expedientes\Infrastructure\Persistence\Repositories;
 use App\Modules\Expedientes\Domain\Contracts\ExpedienteRepositoryInterface;
 use App\Modules\Expedientes\Domain\Entities\AutorizacionImprocedente;
 use App\Modules\Expedientes\Domain\Entities\Expediente;
+use App\Modules\Expedientes\Domain\ValueObjects\AnulacionExpediente;
 use App\Modules\Expedientes\Domain\ValueObjects\TipoAutorizacion;
 use App\Modules\Expedientes\Infrastructure\Persistence\Models\AutorizacionImprocedenteModel;
+use App\Modules\Expedientes\Infrastructure\Persistence\Models\ExpedienteAnulacionModel;
 use App\Modules\Expedientes\Infrastructure\Persistence\Models\ExpedienteModel;
 use DateTimeImmutable;
 use Illuminate\Database\Eloquent\Collection;
@@ -22,7 +24,7 @@ final readonly class EloquentExpedienteRepository implements ExpedienteRepositor
     public function listar(): array
     {
         /** @var Collection<int, ExpedienteModel> $models */
-        $models = ExpedienteModel::query()->orderBy('id', 'desc')->get();
+        $models = ExpedienteModel::with('anulacion.usuario')->orderBy('id', 'desc')->get();
 
         return $models->map(fn (ExpedienteModel $m): Expediente => $this->toEntity($m))->all();
     }
@@ -32,7 +34,7 @@ final readonly class EloquentExpedienteRepository implements ExpedienteRepositor
      */
     public function paginar(int $pagina = 1, int $porPagina = 15): array
     {
-        $query = ExpedienteModel::query()->orderBy('id', 'desc');
+        $query = ExpedienteModel::with('anulacion.usuario')->orderBy('id', 'desc');
         $total = $query->count();
         /** @var Collection<int, ExpedienteModel> $models */
         $models = $query->skip(($pagina - 1) * $porPagina)->take($porPagina)->get();
@@ -47,7 +49,7 @@ final readonly class EloquentExpedienteRepository implements ExpedienteRepositor
     public function buscarPorId(int $id): ?Expediente
     {
         /** @var ExpedienteModel|null $model */
-        $model = ExpedienteModel::with('autorizacionesImprocedentes')->find($id);
+        $model = ExpedienteModel::with(['autorizacionesImprocedentes', 'anulacion.usuario'])->find($id);
 
         return $model ? $this->toEntity($model) : null;
     }
@@ -98,9 +100,15 @@ final readonly class EloquentExpedienteRepository implements ExpedienteRepositor
         return $this->toEntity($model);
     }
 
-    public function eliminar(int $id): void
+    public function anular(int $id, AnulacionExpediente $anulacion): void
     {
-        ExpedienteModel::destroy($id);
+        ExpedienteAnulacionModel::query()->create([
+            'expediente_id' => $id,
+            'motivo' => trim($anulacion->motivo),
+            'documento' => $anulacion->documento,
+            'fecha_anulacion' => $this->toUtc($anulacion->fechaAnulacion),
+            'usuario_id' => $anulacion->usuarioId,
+        ]);
     }
 
     public function existeNumeroEnAnio(int $numero, int $anio, ?int $exceptoId = null): bool
@@ -189,8 +197,12 @@ final readonly class EloquentExpedienteRepository implements ExpedienteRepositor
             COALESCE(tsolicitante.apellido_materno, '') || ' ' ||
             COALESCE(tsolicitante.nombres, '')
         )                             AS solicitante_nombre,
-        tsolicitante_ruc.numero_documento AS solicitante_ruc
+        tsolicitante_ruc.numero_documento AS solicitante_ruc,
+        ea.id IS NOT NULL             AS anulado,
+        ea.motivo                     AS motivo_anulacion
     FROM expedientes
+    LEFT JOIN expedientes_anulaciones ea
+        ON ea.expediente_id = expedientes.id
     LEFT JOIN tipos_procedimiento_tupa tpt
         ON expedientes.tipo_procedimiento_tupa_id = tpt.id
     LEFT JOIN personas AS tsolicitante
@@ -210,18 +222,20 @@ SQL;
 SELECT
     t.*,
     CASE
+        WHEN t.anulado THEN FALSE
         WHEN t.requiere_lf = FALSE THEN FALSE
         WHEN t.requiere_lf = TRUE AND lf.id   IS NOT NULL THEN FALSE
         WHEN t.requiere_lf = TRUE AND tlf.id  IS NOT NULL THEN FALSE
         ELSE TRUE
     END AS licencia_pendiente,
     CASE
+        WHEN t.anulado THEN FALSE
         WHEN t.requiere_itse = FALSE THEN FALSE
         WHEN t.requiere_itse = TRUE AND i.id    IS NOT NULL THEN FALSE
         WHEN t.requiere_itse = TRUE AND titse.id IS NOT NULL THEN FALSE
         ELSE TRUE
     END AS itse_pendiente,
-    t.fecha_alerta <= CURRENT_DATE AS mostrar_alerta
+    (NOT t.anulado AND t.fecha_alerta <= CURRENT_DATE) AS mostrar_alerta
 FROM ({$sqlInterna}) AS t
 LEFT JOIN licencias_funcionamiento lf
     ON t.id = lf.expediente_id
@@ -308,8 +322,10 @@ LEFT JOIN tipos_procedimiento_tupa tpt
     ON e.tipo_procedimiento_tupa_id = tpt.id
 LEFT JOIN personas tsolicitante
     ON e.solicitante_id = tsolicitante.id
-WHERE texpedientes.licencia_pendiente = TRUE
-   OR texpedientes.itse_pendiente = TRUE
+WHERE (texpedientes.licencia_pendiente = TRUE
+   OR texpedientes.itse_pendiente = TRUE)
+  -- Un expediente anulado ya no está en trámite
+  AND NOT EXISTS (SELECT 1 FROM expedientes_anulaciones ea WHERE ea.expediente_id = e.id)
 ORDER BY e.fecha_alerta DESC
 SQL;
 
@@ -324,7 +340,7 @@ SQL;
      */
     public function consultar(?int $numeroExpediente): array
     {
-        $query = ExpedienteModel::with('autorizacionesImprocedentes')->orderBy('id', 'desc');
+        $query = ExpedienteModel::with(['autorizacionesImprocedentes', 'anulacion.usuario'])->orderBy('id', 'desc');
 
         if ($numeroExpediente !== null) {
             $query->where('numero_expediente', $numeroExpediente);
@@ -386,6 +402,22 @@ SQL;
             }
         }
 
+        $anulacion = null;
+        if ($model->relationLoaded('anulacion') && $model->anulacion !== null) {
+            /** @var ExpedienteAnulacionModel $a */
+            $a = $model->anulacion;
+            $usuario = $a->usuario;
+            $anulacion = new AnulacionExpediente(
+                motivo: (string) $a->motivo,
+                documento: $a->documento !== null ? (string) $a->documento : null,
+                fechaAnulacion: $this->toDateTimeImmutable($a->fecha_anulacion),
+                usuarioId: (int) $a->usuario_id,
+                usuarioNombre: $usuario !== null
+                    ? (trim($usuario->first_name.' '.$usuario->last_name) ?: (string) $usuario->username)
+                    : null,
+            );
+        }
+
         return new Expediente(
             id: (int) $model->id,
             uuid: (string) $model->uuid,
@@ -405,6 +437,7 @@ SQL;
             usuarioId: (int) $model->usuario_id,
             fechaDigitacion: $this->toDateTimeImmutable($model->fecha_digitacion),
             autorizacionesImprocedentes: $autorizaciones,
+            anulacion: $anulacion,
         );
     }
 }
