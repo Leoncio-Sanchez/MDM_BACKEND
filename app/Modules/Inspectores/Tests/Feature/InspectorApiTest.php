@@ -146,6 +146,25 @@ final class InspectorApiTest extends TestCase
         $this->assertSame('Luis Alberto Ramirez', $response->json('nombre_completo'));
     }
 
+    /** El jefe restablece la contraseña del inspector; vacía = se conserva la actual */
+    public function test_actualizar_inspector_cambia_la_contrasena_cifrada(): void
+    {
+        $insp = $this->inspector(\Tests\Fixtures\UsuarioAuth::datos([
+            'username' => 'inspector_clave',
+            'password' => 'hash-anterior',
+            'is_active' => true,
+        ]));
+        $url = '/api/lf-itse/inspectores/'.$insp->id.'/';
+
+        $this->withHeader('Authorization', 'Bearer '.$this->token)->putJson($url, ['password' => ''])->assertStatus(200);
+        $this->assertSame('hash-anterior', UsuarioModel::find($insp->id)?->password);
+
+        $this->withHeader('Authorization', 'Bearer '.$this->token)->putJson($url, ['password' => 'NuevaClave2026'])->assertStatus(200);
+        $guardada = (string) UsuarioModel::find($insp->id)?->password;
+        $this->assertNotSame('NuevaClave2026', $guardada);
+        $this->assertTrue(app(\App\Modules\Seguridad\Domain\Contracts\PasswordHasherInterface::class)->verify('NuevaClave2026', $guardada));
+    }
+
     /** Ya no borra la cuenta: la desactiva (los usuarios no se eliminan) */
     public function test_eliminar_inspector_lo_desactiva(): void
     {
