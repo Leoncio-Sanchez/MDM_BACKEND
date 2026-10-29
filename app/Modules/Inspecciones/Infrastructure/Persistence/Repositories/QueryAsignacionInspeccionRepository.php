@@ -21,6 +21,28 @@ final readonly class QueryAsignacionInspeccionRepository implements AsignacionIn
         AND NOT EXISTS (SELECT 1 FROM expedientes_anulaciones ea WHERE ea.expediente_id = e.id)
         SQL;
 
+    /** Sin acta Aprobada ni Desaprobada: todavía hay que visitar el local */
+    private const SIN_DICTAMEN_FINAL = <<<'SQL'
+        NOT EXISTS (SELECT 1 FROM inspecciones_actas acf WHERE acf.expediente_id = e.id AND acf.resultado IN ('APROBADO', 'DESAPROBADO'))
+        SQL;
+
+    /** Última acta del expediente "e" (alias "uact") */
+    private const ULTIMA_ACTA = <<<'SQL'
+        LEFT JOIN LATERAL (
+            SELECT id, numero_acta, visita, resultado, fecha_limite_subsanacion, observaciones
+            FROM inspecciones_actas WHERE expediente_id = e.id ORDER BY visita DESC LIMIT 1
+        ) uact ON TRUE
+        SQL;
+
+    private const CAMPOS_ULTIMA_ACTA = <<<'SQL'
+        uact.id AS ultima_acta_id,
+        uact.numero_acta AS ultima_acta_numero,
+        uact.visita AS ultima_acta_visita,
+        uact.resultado AS ultima_acta_resultado,
+        uact.fecha_limite_subsanacion,
+        uact.observaciones AS ultima_acta_observaciones
+        SQL;
+
     private const NOMBRE_SOLICITANTE = "TRIM(CONCAT_WS(' ', p.apellido_paterno, p.apellido_materno, p.nombres))";
 
     private static function nombreUsuario(string $alias): string
@@ -52,7 +74,8 @@ final readonly class QueryAsignacionInspeccionRepository implements AsignacionIn
                 a.direccion,
                 a.fecha_programada,
                 a.indicaciones,
-                a.fecha_asignacion
+                a.fecha_asignacion,
+                {$this->camposUltimaActa()}
             FROM expedientes e
             JOIN tipos_procedimiento_tupa tpt ON tpt.id = e.tipo_procedimiento_tupa_id
             JOIN personas p ON p.id = e.solicitante_id
@@ -62,7 +85,9 @@ final readonly class QueryAsignacionInspeccionRepository implements AsignacionIn
             ) lf ON TRUE
             LEFT JOIN inspecciones_asignaciones a ON a.expediente_id = e.id AND a.fecha_reasignacion IS NULL
             LEFT JOIN auth_user u ON u.id = a.inspector_id
-            WHERE {$this->esperaInspeccion()}
+            {$this->ultimaActa()}
+            -- Incluye los que ya tienen dictamen final: la oficina aún debe emitir el certificado o denegarlo
+            WHERE {$this->esperaInspeccion(sinDictamenFinal: false)}
             -- Primero los que faltan asignar; dentro de cada grupo, el que vence antes
             ORDER BY (a.id IS NULL) DESC, e.fecha_vencimiento, e.numero_expediente
             SQL;
@@ -247,7 +272,8 @@ final readonly class QueryAsignacionInspeccionRepository implements AsignacionIn
                 a.fecha_reasignacion IS NULL AS vigente,
                 a.fecha_reasignacion,
                 {$reasignador} AS reasignado_por,
-                a.motivo_reasignacion
+                a.motivo_reasignacion,
+                {$this->camposUltimaActa()}
             FROM inspecciones_asignaciones a
             JOIN expedientes e ON e.id = a.expediente_id
             JOIN tipos_procedimiento_tupa tpt ON tpt.id = e.tipo_procedimiento_tupa_id
@@ -255,6 +281,7 @@ final readonly class QueryAsignacionInspeccionRepository implements AsignacionIn
             JOIN auth_user u ON u.id = a.inspector_id
             JOIN auth_user ua ON ua.id = a.asignado_por
             LEFT JOIN auth_user ur ON ur.id = a.reasignado_por
+            {$this->ultimaActa()}
             WHERE {$condicion}
             ORDER BY {$orden}
             SQL;
@@ -262,9 +289,20 @@ final readonly class QueryAsignacionInspeccionRepository implements AsignacionIn
         return $this->filas(DB::select($sql, $parametros));
     }
 
-    private function esperaInspeccion(): string
+    /** Por defecto también exige que falte el dictamen final (todavía hay que ir al local) */
+    private function esperaInspeccion(bool $sinDictamenFinal = true): string
     {
-        return '('.self::ESPERA_INSPECCION.')';
+        return '('.self::ESPERA_INSPECCION.($sinDictamenFinal ? ' AND '.self::SIN_DICTAMEN_FINAL : '').')';
+    }
+
+    private function ultimaActa(): string
+    {
+        return self::ULTIMA_ACTA;
+    }
+
+    private function camposUltimaActa(): string
+    {
+        return self::CAMPOS_ULTIMA_ACTA;
     }
 
     /**
