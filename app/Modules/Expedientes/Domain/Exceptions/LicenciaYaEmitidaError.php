@@ -8,8 +8,8 @@ use RuntimeException;
 
 final class LicenciaYaEmitidaError extends RuntimeException
 {
-    public static function paraExpediente(int $expedienteId): self
+    public static function paraExpediente(int $numeroExpediente): self
     {
-        return new self("El expediente {$expedienteId} ya tiene una licencia de funcionamiento emitida. Para denegarla primero debe eliminar la licencia.");
+        return new self("El expediente N° {$numeroExpediente} ya tiene su licencia de funcionamiento emitida: no se puede denegar.");
     }
 }

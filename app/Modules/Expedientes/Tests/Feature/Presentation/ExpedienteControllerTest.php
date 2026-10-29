@@ -12,6 +12,7 @@ use App\Modules\Expedientes\Domain\Entities\Expediente;
 use App\Modules\Expedientes\Domain\ValueObjects\TipoAutorizacion;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Tests\Fixtures\UsuarioAuth;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
@@ -55,7 +56,7 @@ function crearAutorizacionFeatureFixture(int $id = 1, int $expedienteId = 10, Ti
 }
 
 beforeEach(function () {
-    DB::table('auth_user')->insert(\Tests\Fixtures\UsuarioAuth::datos([
+    DB::table('auth_user')->insert(UsuarioAuth::datos([
         'is_staff' => true,
         'is_superuser' => true, // todos los accesos del perfil
         'id' => 1,
@@ -419,13 +420,15 @@ it('POST /expedientes/{pk}/denegar-licencia/ si ya tiene licencia devuelve 400 c
         ]);
 
     $response->assertStatus(400)
-        ->assertJson(['error' => 'El expediente 10 ya tiene una licencia de funcionamiento emitida. Para denegarla primero debe eliminar la licencia.']);
+        ->assertJson(['error' => 'El expediente N° 110 ya tiene su licencia de funcionamiento emitida: no se puede denegar.']);
 });
 
 it('POST /expedientes/{pk}/denegar-licencia/ con datos validos devuelve 201 con autorizacion creada', function () {
     $exp = crearExpedienteFeatureFixture(10);
     $this->repo->shouldReceive('buscarPorId')->with(10)->once()->andReturn($exp);
     $this->repo->shouldReceive('tieneLicencia')->with(10)->once()->andReturnFalse();
+    $this->repo->shouldReceive('requiereAutorizacion')->once()->andReturnTrue();
+    $this->autorizacionesRepo->shouldReceive('existe')->once()->andReturnFalse();
     $auto = crearAutorizacionFeatureFixture(1, 10, TipoAutorizacion::LF);
     $this->autorizacionesRepo->shouldReceive('crear')->once()->andReturn($auto);
 
@@ -484,13 +487,15 @@ it('POST /expedientes/{pk}/denegar-itse/ si ya tiene ITSE devuelve 400 con mensa
         ]);
 
     $response->assertStatus(400)
-        ->assertJson(['error' => 'El expediente 10 ya tiene una ITSE emitida. Para declararla desfavorable primero debe eliminar la ITSE.']);
+        ->assertJson(['error' => 'El expediente N° 110 ya tiene su certificado ITSE emitido: no se puede denegar.']);
 });
 
 it('POST /expedientes/{pk}/denegar-itse/ con datos validos devuelve 201 con autorizacion creada', function () {
     $exp = crearExpedienteFeatureFixture(10);
     $this->repo->shouldReceive('buscarPorId')->with(10)->once()->andReturn($exp);
     $this->repo->shouldReceive('tieneItse')->with(10)->once()->andReturnFalse();
+    $this->repo->shouldReceive('requiereAutorizacion')->once()->andReturnTrue();
+    $this->autorizacionesRepo->shouldReceive('existe')->once()->andReturnFalse();
     $auto = crearAutorizacionFeatureFixture(2, 10, TipoAutorizacion::ITSE);
     $this->autorizacionesRepo->shouldReceive('crear')->once()->andReturn($auto);
 

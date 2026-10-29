@@ -142,6 +142,8 @@ it('denegar-licencia and denegar-itse responses match exact 8 keys validated aga
 
     $this->repo->shouldReceive('buscarPorId')->with(27)->andReturn($expOriginal);
     $this->repo->shouldReceive('tieneLicencia')->with(27)->andReturnFalse();
+    $this->repo->shouldReceive('requiereAutorizacion')->andReturnTrue();
+    $this->autorizacionesRepo->shouldReceive('existe')->andReturnFalse();
 
     $auto = new AutorizacionImprocedente(
         id: 4,

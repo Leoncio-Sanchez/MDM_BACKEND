@@ -227,7 +227,7 @@ final class ExpedienteController extends Controller
     {
         try {
             $data = $request->validate([
-                'fecha_rechazo' => ['required', 'date'],
+                'fecha_rechazo' => ['required', 'date', 'before_or_equal:today'],
                 'documento' => ['required', 'string', 'max:100'],
                 'observaciones' => ['required', 'string', 'max:1000'],
             ]);
@@ -259,7 +259,7 @@ final class ExpedienteController extends Controller
     {
         try {
             $data = $request->validate([
-                'fecha_rechazo' => ['required', 'date'],
+                'fecha_rechazo' => ['required', 'date', 'before_or_equal:today'],
                 'documento' => ['required', 'string', 'max:100'],
                 'observaciones' => ['required', 'string', 'max:1000'],
             ]);
