@@ -84,12 +84,14 @@ it('POST /api/lf-itse/expedientes/ crea un expediente correctamente y retorna 20
         'fecha_digitacion_ampliacion', 'fecha_digitacion',
         'tipo_procedimiento_tupa', 'solicitante', 'representante',
         'usuario_ampliacion', 'usuario',
+        // Agregadas con la anulación de expedientes (no existían en Django)
+        'anulado', 'anulacion',
     ];
 
     foreach ($expectedKeys as $key) {
         expect(array_key_exists($key, $json))->toBeTrue("Falta key: {$key}");
     }
-    expect(count(array_keys($json)))->toBe(19);
+    expect(count(array_keys($json)))->toBe(21);
 
     expect($json['numero_expediente'])->toBe(1)
         ->and($json['tipo_procedimiento_tupa'])->toBe(1)
@@ -175,12 +177,13 @@ it('GET /api/lf-itse/expedientes/ lista expedientes retornando 200 con 8 keys (T
     $expectedKeys = [
         'id', 'uuid', 'numero_expediente', 'fecha_recepcion',
         'fecha_vencimiento', 'fecha_alerta', 'tipo_procedimiento_tupa', 'solicitante',
+        'anulado', 'anulacion',
     ];
 
     foreach ($expectedKeys as $key) {
         expect(array_key_exists($key, $first))->toBeTrue("Falta key de list: {$key}");
     }
-    expect(count($first))->toBe(8);
+    expect(count($first))->toBe(10);
 });
 
 it('GET /api/lf-itse/expedientes/ falla sin autenticacion retornando 401', function () {
@@ -210,12 +213,14 @@ it('GET /api/lf-itse/expedientes/{pk}/ obtiene expediente existente retornando 2
         'fecha_digitacion_ampliacion', 'fecha_digitacion',
         'tipo_procedimiento_tupa', 'solicitante', 'representante',
         'usuario_ampliacion', 'usuario',
+        // Agregadas con la anulación de expedientes (no existían en Django)
+        'anulado', 'anulacion',
     ];
 
     foreach ($expectedKeys as $key) {
         expect(array_key_exists($key, $json))->toBeTrue("Falta key: {$key}");
     }
-    expect(count($json))->toBe(19);
+    expect(count($json))->toBe(21);
 });
 
 it('GET /api/lf-itse/expedientes/{pk}/ retorna 404 cuando no existe', function () {
@@ -256,7 +261,7 @@ it('PUT /api/lf-itse/expedientes/{pk}/ actualiza expediente y retorna 200 con 19
     expect($json['numero_expediente'])->toBe(10)
         ->and($json['observaciones'])->toBe('Observacion modificada')
         ->and($json['representante'])->toBe(2)
-        ->and(count($json))->toBe(19);
+        ->and(count($json))->toBe(21);
 });
 
 it('PUT /api/lf-itse/expedientes/{pk}/ falla sin autenticacion retornando 401', function () {
@@ -282,7 +287,7 @@ it('PUT /api/lf-itse/expedientes/{pk}/ retorna 404 cuando no existe', function (
     $response->assertStatus(404);
 });
 
-it('DELETE /api/lf-itse/expedientes/{pk}/ elimina expediente correctamente y retorna 204', function () {
+it('POST /api/lf-itse/expedientes/{pk}/anular/ anula con constancia y el expediente no se borra', function () {
     $createRes = $this->actingAs($this->user, 'api')->postJson('/api/lf-itse/expedientes/', [
         'fecha_recepcion' => '2026-03-10T10:00:00',
         'tipo_procedimiento_tupa_id' => 1,
@@ -291,29 +296,81 @@ it('DELETE /api/lf-itse/expedientes/{pk}/ elimina expediente correctamente y ret
     $id = $createRes->json('id');
 
     $response = $this->actingAs($this->user, 'api')
-        ->deleteJson("/api/lf-itse/expedientes/{$id}/");
+        ->postJson("/api/lf-itse/expedientes/{$id}/anular/", [
+            'motivo' => '  Desistimiento presentado por el solicitante  ',
+            'documento' => 'Carta s/n del 12/03/2026',
+        ]);
 
-    $response->assertStatus(204);
+    $response->assertOk()
+        ->assertJsonPath('anulado', true)
+        ->assertJsonPath('anulacion.motivo', 'Desistimiento presentado por el solicitante')
+        ->assertJsonPath('anulacion.documento', 'Carta s/n del 12/03/2026')
+        ->assertJsonPath('anulacion.usuario', 1)
+        ->assertJsonPath('anulacion.usuario_nombre', 'admin');
 
-    // Verificar que fue eliminado
-    $checkRes = $this->actingAs($this->user, 'api')
-        ->getJson("/api/lf-itse/expedientes/{$id}/");
-    $checkRes->assertStatus(404);
+    // Sigue existiendo (LPAG): solo queda marcado como anulado
+    $this->actingAs($this->user, 'api')->getJson("/api/lf-itse/expedientes/{$id}/")
+        ->assertOk()
+        ->assertJsonPath('anulado', true);
+    expect(DB::table('expedientes')->where('id', $id)->exists())->toBeTrue();
 });
 
-it('DELETE /api/lf-itse/expedientes/{pk}/ falla sin autenticacion retornando 401', function () {
-    $response = $this->deleteJson('/api/lf-itse/expedientes/1/');
-    $response->assertStatus(401);
+it('DELETE /api/lf-itse/expedientes/{pk}/ ya no existe: los expedientes no se borran', function () {
+    $createRes = $this->actingAs($this->user, 'api')->postJson('/api/lf-itse/expedientes/', [
+        'fecha_recepcion' => '2026-03-10T10:00:00',
+        'tipo_procedimiento_tupa_id' => 1,
+        'solicitante_id' => 1,
+    ]);
+    $id = $createRes->json('id');
+
+    $this->actingAs($this->user, 'api')->deleteJson("/api/lf-itse/expedientes/{$id}/")->assertStatus(405);
+    expect(DB::table('expedientes')->where('id', $id)->exists())->toBeTrue();
 });
 
-it('DELETE /api/lf-itse/expedientes/{pk}/ retorna 404 cuando no existe', function () {
-    $response = $this->actingAs($this->user, 'api')
-        ->deleteJson('/api/lf-itse/expedientes/99999/');
-
-    $response->assertStatus(404);
+it('POST /api/lf-itse/expedientes/{pk}/anular/ falla sin autenticacion retornando 401', function () {
+    $this->postJson('/api/lf-itse/expedientes/1/anular/', ['motivo' => 'Motivo suficiente'])->assertStatus(401);
 });
 
-it('DELETE /api/lf-itse/expedientes/{pk}/ retorna 409 cuando tiene licencia asociada', function () {
+it('POST /api/lf-itse/expedientes/{pk}/anular/ retorna 404 cuando no existe', function () {
+    $this->actingAs($this->user, 'api')
+        ->postJson('/api/lf-itse/expedientes/99999/anular/', ['motivo' => 'Motivo suficiente'])
+        ->assertStatus(404);
+});
+
+it('POST /api/lf-itse/expedientes/{pk}/anular/ exige un motivo real', function () {
+    $createRes = $this->actingAs($this->user, 'api')->postJson('/api/lf-itse/expedientes/', [
+        'fecha_recepcion' => '2026-03-10T10:00:00',
+        'tipo_procedimiento_tupa_id' => 1,
+        'solicitante_id' => 1,
+    ]);
+    $id = $createRes->json('id');
+
+    foreach ([[], ['motivo' => 'corto'], ['motivo' => str_repeat(' ', 20)], ['motivo' => str_repeat('a', 501)]] as $datos) {
+        $this->actingAs($this->user, 'api')
+            ->postJson("/api/lf-itse/expedientes/{$id}/anular/", $datos)
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['motivo']);
+    }
+    expect(DB::table('expedientes_anulaciones')->count())->toBe(0);
+});
+
+it('POST /api/lf-itse/expedientes/{pk}/anular/ retorna 409 si ya estaba anulado', function () {
+    $createRes = $this->actingAs($this->user, 'api')->postJson('/api/lf-itse/expedientes/', [
+        'fecha_recepcion' => '2026-03-10T10:00:00',
+        'tipo_procedimiento_tupa_id' => 1,
+        'solicitante_id' => 1,
+    ]);
+    $id = $createRes->json('id');
+    $numero = $createRes->json('numero_expediente');
+    $anular = fn () => $this->actingAs($this->user, 'api')
+        ->postJson("/api/lf-itse/expedientes/{$id}/anular/", ['motivo' => 'Registrado por error']);
+
+    $anular()->assertOk();
+    $anular()->assertStatus(409)->assertJson(['error' => "El expediente N° {$numero} ya está anulado."]);
+    expect(DB::table('expedientes_anulaciones')->count())->toBe(1);
+});
+
+it('POST /api/lf-itse/expedientes/{pk}/anular/ retorna 409 cuando tiene licencia asociada', function () {
     $createRes = $this->actingAs($this->user, 'api')->postJson('/api/lf-itse/expedientes/', [
         'fecha_recepcion' => '2026-03-10T10:00:00',
         'tipo_procedimiento_tupa_id' => 1,
@@ -344,12 +401,13 @@ it('DELETE /api/lf-itse/expedientes/{pk}/ retorna 409 cuando tiene licencia asoc
     ]));
 
     $response = $this->actingAs($this->user, 'api')
-        ->deleteJson("/api/lf-itse/expedientes/{$id}/");
+        ->postJson("/api/lf-itse/expedientes/{$id}/anular/", ['motivo' => 'Registrado por error']);
 
     $response->assertStatus(409);
+    expect(DB::table('expedientes_anulaciones')->count())->toBe(0);
 });
 
-it('DELETE /api/lf-itse/expedientes/{pk}/ retorna 409 cuando tiene ITSE asociado', function () {
+it('POST /api/lf-itse/expedientes/{pk}/anular/ retorna 409 cuando tiene ITSE asociado', function () {
     $createRes = $this->actingAs($this->user, 'api')->postJson('/api/lf-itse/expedientes/', [
         'fecha_recepcion' => '2026-03-10T10:00:00',
         'tipo_procedimiento_tupa_id' => 1,
@@ -378,7 +436,8 @@ it('DELETE /api/lf-itse/expedientes/{pk}/ retorna 409 cuando tiene ITSE asociado
     ]));
 
     $response = $this->actingAs($this->user, 'api')
-        ->deleteJson("/api/lf-itse/expedientes/{$id}/");
+        ->postJson("/api/lf-itse/expedientes/{$id}/anular/", ['motivo' => 'Registrado por error']);
 
     $response->assertStatus(409);
+    expect(DB::table('expedientes_anulaciones')->count())->toBe(0);
 });

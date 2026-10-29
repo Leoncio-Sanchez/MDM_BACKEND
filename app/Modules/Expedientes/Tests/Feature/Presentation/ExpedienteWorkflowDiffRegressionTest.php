@@ -45,7 +45,7 @@ afterEach(function () {
     Mockery::close();
 });
 
-it('ampliacion-plazo response matches exact 19 keys validated against Django', function () {
+it('ampliacion-plazo response matches the 19 keys validated against Django plus the annulment ones', function () {
     $expOriginal = new Expediente(
         id: 27,
         uuid: 'c19fe3b5-05a6-401f-9e34-86c03effb0d4',
@@ -104,6 +104,9 @@ it('ampliacion-plazo response matches exact 19 keys validated against Django', f
         'representante',
         'usuario_ampliacion',
         'usuario',
+        // Agregadas con la anulación de expedientes (no existían en Django)
+        'anulado',
+        'anulacion',
     ];
 
     expect(array_keys($data))->toBe($expectedKeys)

@@ -16,9 +16,12 @@ final class EstadoTramite
     public const VENCIDO = 'VENCIDO';
     public const INACTIVO = 'INACTIVO';
 
+    public const ANULADO = 'ANULADO';
+
     /**
      * Misma regla que "expedientes pendientes": cada autorización que el procedimiento
      * requiere (LF / ITSE) queda resuelta al emitirse o al declararse improcedente.
+     * Un expediente anulado deja de estar en trámite, sea cual sea su avance.
      */
     public static function deExpediente(
         bool $requiereLf,
@@ -27,7 +30,12 @@ final class EstadoTramite
         bool $tieneItse,
         bool $lfImprocedente,
         bool $itseImprocedente,
+        bool $anulado = false,
     ): string {
+        if ($anulado) {
+            return self::ANULADO;
+        }
+
         $lfPendiente = $requiereLf && ! $tieneLf && ! $lfImprocedente;
         $itsePendiente = $requiereItse && ! $tieneItse && ! $itseImprocedente;
 

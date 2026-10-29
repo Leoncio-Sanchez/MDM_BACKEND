@@ -34,6 +34,12 @@ Route::middleware(['auth:api', 'rol:ADMIN_MUNICIPALIDAD', 'permiso:expedientes|l
         [ExpedienteController::class, 'denegarLicencia'],
     )->whereNumber('pk')->name('expedientes.denegar-licencia');
 
+    // Los expedientes no se eliminan (LPAG, Ley 27444): se anulan con motivo, fecha y usuario
+    Route::post(
+        'expedientes/{pk}/anular/',
+        [ExpedienteController::class, 'anular'],
+    )->whereNumber('pk')->name('expedientes.anular');
+
     Route::post(
         'expedientes/{pk}/denegar-itse/',
         [ExpedienteController::class, 'denegarItse'],
@@ -42,5 +48,4 @@ Route::middleware(['auth:api', 'rol:ADMIN_MUNICIPALIDAD', 'permiso:expedientes|l
     // ── 7A Dinámicas ──────────────────────────────────────────────────────────
     Route::get('expedientes/{pk}/', [ExpedienteController::class, 'show'])->whereNumber('pk');
     Route::put('expedientes/{pk}/', [ExpedienteController::class, 'update'])->whereNumber('pk');
-    Route::delete('expedientes/{pk}/', [ExpedienteController::class, 'destroy'])->whereNumber('pk');
 });

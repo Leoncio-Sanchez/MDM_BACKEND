@@ -13,6 +13,11 @@ final class EloquentExpedienteReadRepository implements ExpedienteReadRepository
         return ExpedienteReadModel::where('id', $id)->exists();
     }
 
+    public function estaAnulado(int $id): bool
+    {
+        return \Illuminate\Support\Facades\DB::table('expedientes_anulaciones')->where('expediente_id', $id)->exists();
+    }
+
     public function buscarPorNumeroYAnio(int $numero, int $anio): ?\stdClass
     {
         $model = ExpedienteReadModel::where('numero_expediente', $numero)

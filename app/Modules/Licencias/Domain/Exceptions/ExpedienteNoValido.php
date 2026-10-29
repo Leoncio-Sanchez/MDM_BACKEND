@@ -9,4 +9,9 @@ final class ExpedienteNoValido extends \DomainException
     {
         return new self("Expediente con ID {$id} no es válido");
     }
+
+    public static function anulado(int $id): self
+    {
+        return new self("El expediente con ID {$id} está anulado: no se puede emitir una licencia sobre él.");
+    }
 }

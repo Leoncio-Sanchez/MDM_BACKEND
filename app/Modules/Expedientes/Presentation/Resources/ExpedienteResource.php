@@ -51,6 +51,8 @@ final class ExpedienteResource extends JsonResource
             'representante' => $this->representanteId,
             'usuario_ampliacion' => $this->usuarioAmpliacionId,
             'usuario' => $this->usuarioId,
+            'anulado' => $this->estaAnulado(),
+            'anulacion' => AnulacionExpedienteResource::oNulo($this->anulacion),
         ];
     }
 }

@@ -8,8 +8,8 @@ use DomainException;
 
 final class ExpedienteConItseError extends DomainException
 {
-    public static function porId(int $id): self
+    public static function porNumero(int $numero): self
     {
-        return new self("No se puede eliminar el expediente {$id}: tiene una ITSE emitida.");
+        return new self("No se puede anular el expediente N° {$numero}: tiene un certificado ITSE emitido.");
     }
 }

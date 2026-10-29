@@ -56,6 +56,10 @@ final class ExpedienteBusquedaResource extends JsonResource
             'licencia_pendiente' => (bool) data_get($data, 'licencia_pendiente'),
             'itse_pendiente' => (bool) data_get($data, 'itse_pendiente'),
             'mostrar_alerta' => (bool) data_get($data, 'mostrar_alerta'),
+            'anulado' => (bool) data_get($data, 'anulado'),
+            'motivo_anulacion' => data_get($data, 'motivo_anulacion') !== null
+                ? (string) data_get($data, 'motivo_anulacion')
+                : null,
             'dias_habiles_restantes' => data_get($data, 'dias_habiles_restantes') !== null
                 ? (int) data_get($data, 'dias_habiles_restantes')
                 : null,

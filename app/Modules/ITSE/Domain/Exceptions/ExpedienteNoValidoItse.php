@@ -11,4 +11,9 @@ final class ExpedienteNoValidoItse extends DomainException
     {
         return new self("El expediente con ID {$id} no existe.");
     }
+
+    public static function anulado(int $id): self
+    {
+        return new self("El expediente con ID {$id} está anulado: no se puede emitir un certificado ITSE sobre él.");
+    }
 }

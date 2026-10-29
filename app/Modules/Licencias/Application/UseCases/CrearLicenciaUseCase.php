@@ -20,6 +20,9 @@ final readonly class CrearLicenciaUseCase {
             if ($expediente === null) {
                 throw ExpedienteNoValido::porId($dto->expedienteId);
             }
+            if ($this->expedientes->estaAnulado($dto->expedienteId)) {
+                throw ExpedienteNoValido::anulado($dto->expedienteId);
+            }
         }
 
         // Validar antes de insertar: si no, la BD rechaza con un 500 (restricción UNIQUE)

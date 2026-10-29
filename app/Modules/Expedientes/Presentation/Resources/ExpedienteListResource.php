@@ -30,6 +30,8 @@ final class ExpedienteListResource extends JsonResource
             'fecha_alerta' => $this->fechaAlerta->format('Y-m-d'),
             'tipo_procedimiento_tupa' => $this->tipoProcedimientoTupaId,
             'solicitante' => $this->solicitanteId,
+            'anulado' => $this->estaAnulado(),
+            'anulacion' => AnulacionExpedienteResource::oNulo($this->anulacion),
         ];
     }
 }

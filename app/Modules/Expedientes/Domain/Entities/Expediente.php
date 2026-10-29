@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Expedientes\Domain\Entities;
 
+use App\Modules\Expedientes\Domain\Exceptions\ExpedienteAnulado;
+use App\Modules\Expedientes\Domain\ValueObjects\AnulacionExpediente;
 use DateTimeImmutable;
 
 final readonly class Expediente
@@ -30,6 +32,8 @@ final readonly class Expediente
         public int $usuarioId,
         public DateTimeImmutable $fechaDigitacion,
         public array $autorizacionesImprocedentes = [],
+        /** null = vigente; con valor = anulado (ya no admite trámites) */
+        public ?AnulacionExpediente $anulacion = null,
     ) {}
 
     public static function crear(
@@ -97,6 +101,7 @@ final readonly class Expediente
             usuarioId: $this->usuarioId,
             fechaDigitacion: $this->fechaDigitacion,
             autorizacionesImprocedentes: $this->autorizacionesImprocedentes,
+            anulacion: $this->anulacion,
         );
     }
 
@@ -128,6 +133,7 @@ final readonly class Expediente
             usuarioId: $this->usuarioId,
             fechaDigitacion: $this->fechaDigitacion,
             autorizacionesImprocedentes: $this->autorizacionesImprocedentes,
+            anulacion: $this->anulacion,
         );
     }
 
@@ -155,6 +161,20 @@ final readonly class Expediente
             usuarioId: $this->usuarioId,
             fechaDigitacion: $this->fechaDigitacion,
             autorizacionesImprocedentes: $autorizaciones,
+            anulacion: $this->anulacion,
         );
+    }
+
+    public function estaAnulado(): bool
+    {
+        return $this->anulacion !== null;
+    }
+
+    /** @throws ExpedienteAnulado si el expediente está anulado */
+    public function asegurarQueNoEstaAnulado(): void
+    {
+        if ($this->estaAnulado()) {
+            throw ExpedienteAnulado::noAdmiteCambios($this->numeroExpediente);
+        }
     }
 }

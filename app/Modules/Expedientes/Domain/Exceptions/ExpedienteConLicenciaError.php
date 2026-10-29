@@ -8,8 +8,8 @@ use DomainException;
 
 final class ExpedienteConLicenciaError extends DomainException
 {
-    public static function porId(int $id): self
+    public static function porNumero(int $numero): self
     {
-        return new self("No se puede eliminar el expediente {$id}: tiene una licencia de funcionamiento emitida.");
+        return new self("No se puede anular el expediente N° {$numero}: tiene una licencia de funcionamiento emitida.");
     }
 }

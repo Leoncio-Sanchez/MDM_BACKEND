@@ -18,13 +18,8 @@ final class ExpedienteInvalido extends DomainException
         return new self("Ya existe un expediente con el número {$numero} en el año {$anio}.");
     }
 
-    public static function conLicenciaEmitida(int $id): self
+    public static function motivoAnulacion(int $minimo, int $maximo): self
     {
-        return new self("No se puede eliminar el expediente {$id} porque tiene una Licencia de Funcionamiento asociada.");
-    }
-
-    public static function conItseEmitido(int $id): self
-    {
-        return new self("No se puede eliminar el expediente {$id} porque tiene un ITSE asociado.");
+        return new self("El motivo de la anulación debe tener entre {$minimo} y {$maximo} caracteres.");
     }
 }

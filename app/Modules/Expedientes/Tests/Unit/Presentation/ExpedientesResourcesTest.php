@@ -41,7 +41,7 @@ it('ExpedientePendienteResource expone exactamente 11 keys', function () {
         ]);
 });
 
-it('ExpedienteBusquedaResource expone exactamente 27 keys', function () {
+it('ExpedienteBusquedaResource expone las 27 keys de Django más las de anulación', function () {
     $data = [
         'id' => 10,
         'tipo_procedimiento_tupa_id' => 2,
@@ -76,7 +76,7 @@ it('ExpedienteBusquedaResource expone exactamente 27 keys', function () {
     $result = $resource->toArray(Request::create('/test'));
 
     expect($result)->toBeArray()
-        ->and(count($result))->toBe(27)
+        ->and(count($result))->toBe(29)
         ->and(array_keys($result))->toBe([
             'id',
             'tipo_procedimiento_tupa_id',
@@ -104,6 +104,8 @@ it('ExpedienteBusquedaResource expone exactamente 27 keys', function () {
             'licencia_pendiente',
             'itse_pendiente',
             'mostrar_alerta',
+            'anulado',
+            'motivo_anulacion',
             'dias_habiles_restantes',
         ]);
 });

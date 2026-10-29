@@ -6,6 +6,7 @@ namespace App\Modules\Expedientes\Infrastructure\Persistence\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * @property int $id
@@ -73,6 +74,14 @@ class ExpedienteModel extends Model
     public function autorizacionesImprocedentes(): HasMany
     {
         return $this->hasMany(AutorizacionImprocedenteModel::class, 'expediente_id');
+    }
+
+    /**
+     * @return HasOne<ExpedienteAnulacionModel, $this>
+     */
+    public function anulacion(): HasOne
+    {
+        return $this->hasOne(ExpedienteAnulacionModel::class, 'expediente_id');
     }
 
     public function getDateFormat(): string
