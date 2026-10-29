@@ -38,6 +38,8 @@ use App\Modules\ITSE\Presentation\Requests\{
     PorRenovarItseRequest,
     VerificarExpedienteRequest
 };
+use App\Modules\ITSE\Domain\Contracts\InspeccionReadRepositoryInterface;
+use App\Modules\ITSE\Domain\Exceptions\ExpedienteNoValidoItse;
 use App\Modules\ITSE\Presentation\Resources\ItseResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -57,7 +59,18 @@ final class ItseController extends Controller
         private readonly ListarInspectoresItseUseCase $listarInspectores,
         private readonly ListarPorRenovarItseUseCase $listarPorRenovar,
         private readonly ConsultaItseUseCase $consulta,
+        private readonly InspeccionReadRepositoryInterface $inspecciones,
     ) {}
+
+    public function inspeccion(int $expedienteId): JsonResponse
+    {
+        $situacion = $this->inspecciones->situacion($expedienteId);
+        if ($situacion === null) {
+            return response()->json(['error' => ExpedienteNoValidoItse::noExiste($expedienteId)->getMessage()], 404);
+        }
+
+        return response()->json($situacion->toArray());
+    }
 
     // ── 6A ────────────────────────────────────────────────────────────────────
 

@@ -5,13 +5,16 @@ use App\Modules\ITSE\Application\DTOs\VerificarExpedienteItseDTO;
 use App\Modules\ITSE\Application\UseCases\VerificarExpedienteItseUseCase;
 use App\Modules\ITSE\Domain\Contracts\AutorizacionImprocedenteReadRepositoryInterface;
 use App\Modules\ITSE\Domain\Contracts\ExpedienteReadRepositoryInterface;
+use App\Modules\ITSE\Domain\Contracts\InspeccionReadRepositoryInterface;
 use App\Modules\ITSE\Domain\Contracts\ItseRepositoryInterface;
 
 beforeEach(function () {
     $this->expedientes = Mockery::mock(ExpedienteReadRepositoryInterface::class);
     $this->improcedentes = Mockery::mock(AutorizacionImprocedenteReadRepositoryInterface::class);
     $this->itses = Mockery::mock(ItseRepositoryInterface::class);
-    $this->useCase = new VerificarExpedienteItseUseCase($this->expedientes, $this->improcedentes, $this->itses);
+    $this->inspecciones = Mockery::mock(InspeccionReadRepositoryInterface::class);
+    $this->inspecciones->shouldReceive('situacion')->andReturn(null);
+    $this->useCase = new VerificarExpedienteItseUseCase($this->expedientes, $this->improcedentes, $this->itses, $this->inspecciones);
 });
 
 it('verifica expediente existente', function () {
