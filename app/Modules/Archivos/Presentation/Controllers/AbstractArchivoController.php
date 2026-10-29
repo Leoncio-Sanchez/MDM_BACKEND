@@ -6,13 +6,15 @@ namespace App\Modules\Archivos\Presentation\Controllers;
 
 use App\Modules\Archivos\Application\DTOs\SubirArchivoDTO;
 use App\Modules\Archivos\Application\UseCases\DescargarArchivoUseCase;
-use App\Modules\Archivos\Application\UseCases\EliminarArchivoUseCase;
+use App\Modules\Archivos\Application\UseCases\InactivarArchivoUseCase;
 use App\Modules\Archivos\Application\UseCases\ListarArchivosUseCase;
 use App\Modules\Archivos\Application\UseCases\SubirArchivoUseCase;
 use App\Modules\Archivos\Domain\Contracts\ArchivoRepositoryInterface;
 use App\Modules\Archivos\Domain\Entities\ArchivoMetadata;
+use App\Modules\Archivos\Domain\Entities\InactivacionArchivo;
 use App\Modules\Archivos\Domain\Exceptions\ArchivoFisicoNoEncontrado;
 use App\Modules\Archivos\Domain\Exceptions\ArchivoNoEncontrado;
+use App\Modules\Archivos\Domain\Exceptions\ArchivoYaInactivo;
 use App\Modules\Archivos\Domain\Exceptions\ErrorAlGuardarArchivo;
 use App\Modules\Archivos\Domain\Exceptions\RegistroPadreNoEncontrado;
 use App\Modules\Archivos\Domain\PoliticaArchivos;
@@ -27,7 +29,7 @@ abstract class AbstractArchivoController
     public function __construct(
         protected ListarArchivosUseCase $listar,
         protected SubirArchivoUseCase $subir,
-        protected EliminarArchivoUseCase $eliminar,
+        protected InactivarArchivoUseCase $inactivar,
         protected DescargarArchivoUseCase $descargar,
     ) {}
 
@@ -98,17 +100,39 @@ abstract class AbstractArchivoController
     }
 
     /**
-     * DELETE /{modulo}/archivos/{pk}/ — Eliminar
+     * POST /{modulo}/archivos/{pk}/inactivar/ — Dar de baja (reemplaza al antiguo DELETE):
+     * el registro y el archivo en disco se conservan para auditoría.
      */
-    public function eliminar(int $pk): SymfonyResponse
+    public function inactivar(Request $request, int $pk): JsonResponse
     {
-        try {
-            $this->eliminar->execute($this->getRepository(), $pk);
-        } catch (ArchivoNoEncontrado $e) {
-            return response()->json(['error' => $e->getMessage()], 404);
+        // Sin el trim, "          " pasaría el mínimo de caracteres
+        $motivo = is_string($request->input('motivo')) ? trim($request->input('motivo')) : $request->input('motivo');
+        $validator = Validator::make(['motivo' => $motivo], [
+            'motivo' => ['required', 'string', 'min:'.InactivacionArchivo::MOTIVO_MINIMO, 'max:'.InactivacionArchivo::MOTIVO_MAXIMO],
+        ], [
+            'motivo.required' => 'Indique el motivo por el que se da de baja el archivo.',
+            'motivo.min' => 'El motivo debe tener al menos :min caracteres.',
+            'motivo.max' => 'El motivo no puede pasar de :max caracteres.',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()->first(), 'errors' => $validator->errors()], 422);
         }
 
-        return response()->noContent();
+        $usuario = $request->user();
+        try {
+            $archivo = $this->inactivar->execute(
+                $this->getRepository(),
+                $pk,
+                (string) $motivo,
+                $usuario !== null ? (int) $usuario->getAuthIdentifier() : 1,
+            );
+        } catch (ArchivoNoEncontrado $e) {
+            return response()->json(['error' => $e->getMessage()], 404);
+        } catch (ArchivoYaInactivo $e) {
+            return response()->json(['error' => $e->getMessage()], 409);
+        }
+
+        return response()->json($this->serializeMetadata($archivo));
     }
 
     /**
@@ -176,6 +200,14 @@ abstract class AbstractArchivoController
             'fecha_digitacion' => $m->fechaDigitacion->format('Y-m-d\TH:i:sP'),
             $this->getParentFieldName() => $m->parentId,
             'usuario' => $m->usuarioId,
+            // Agregados con la inactivación (no existían en Django)
+            'activo' => $m->estaActivo(),
+            'inactivacion' => $m->inactivacion === null ? null : [
+                'motivo' => $m->inactivacion->motivo,
+                'fecha' => $m->inactivacion->fechaInactivacion->setTimezone(new \DateTimeZone('America/Lima'))->format('Y-m-d\TH:i:sP'),
+                'usuario' => $m->inactivacion->usuarioId,
+                'usuario_nombre' => $m->inactivacion->usuarioNombre,
+            ],
         ];
     }
 

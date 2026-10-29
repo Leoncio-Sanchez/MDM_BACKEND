@@ -45,7 +45,7 @@ beforeEach(function () {
 it('rechaza acceso sin autenticacion a las rutas de archivos', function () {
     $this->getJson('/api/lf-itse/expedientes/1/archivos/')->assertStatus(401);
     $this->postJson('/api/lf-itse/expedientes/1/archivos/')->assertStatus(401);
-    $this->deleteJson('/api/lf-itse/expedientes/archivos/1/')->assertStatus(401);
+    $this->postJson('/api/lf-itse/expedientes/archivos/1/inactivar/', ['motivo' => 'Motivo suficiente'])->assertStatus(401);
     $this->getJson('/api/lf-itse/expedientes/archivos/'.Str::uuid().'/descargar/')->assertStatus(401);
 });
 
@@ -133,7 +133,7 @@ it('expedientes: falla subir archivo sin archivo y devuelve 400', function () {
         ->assertJsonStructure(['archivo']);
 });
 
-it('expedientes: elimina archivo exitosamente con 204', function () {
+it('expedientes: inactiva el archivo sin borrarlo del disco ni de la base', function () {
     $uuid = (string) Str::uuid();
     $ruta = "expedientes/15/{$uuid}.pdf";
     Storage::disk('media')->put($ruta, 'test content');
@@ -152,16 +152,54 @@ it('expedientes: elimina archivo exitosamente con 204', function () {
     ));
 
     $response = $this->actingAs($this->user, 'api')
-        ->deleteJson("/api/lf-itse/expedientes/archivos/{$creado->id}/");
+        ->postJson("/api/lf-itse/expedientes/archivos/{$creado->id}/inactivar/", ['motivo' => '  Foto borrosa, se subió otra  ']);
 
-    $response->assertStatus(204);
-    Storage::disk('media')->assertMissing($ruta);
-    expect($this->expRepo->obtenerPorId((int) $creado->id))->toBeNull();
+    $response->assertOk()
+        ->assertJsonPath('activo', false)
+        ->assertJsonPath('inactivacion.motivo', 'Foto borrosa, se subió otra')
+        ->assertJsonPath('inactivacion.usuario', 1)
+        ->assertJsonPath('inactivacion.usuario_nombre', 'admin');
+    Storage::disk('media')->assertExists($ruta);
+    expect($this->expRepo->obtenerPorId((int) $creado->id)?->estaActivo())->toBeFalse();
+
+    // Sigue en el listado (marcado) y se puede descargar: el OCI puede auditarlo
+    $this->actingAs($this->user, 'api')->getJson('/api/lf-itse/expedientes/15/archivos/')
+        ->assertOk()
+        ->assertJsonPath('0.activo', false);
+    $this->actingAs($this->user, 'api')->get("/api/lf-itse/expedientes/archivos/{$uuid}/descargar/")->assertOk();
+
+    // La ruta de borrado ya no existe: nada se elimina
+    $this->actingAs($this->user, 'api')->deleteJson("/api/lf-itse/expedientes/archivos/{$creado->id}/")->assertNotFound();
+    Storage::disk('media')->assertExists($ruta);
+    expect(DB::table('expedientes_archivos')->where('id', $creado->id)->exists())->toBeTrue();
+
+    // No se inactiva dos veces
+    $this->actingAs($this->user, 'api')
+        ->postJson("/api/lf-itse/expedientes/archivos/{$creado->id}/inactivar/", ['motivo' => 'Otra vez por error'])
+        ->assertStatus(409)
+        ->assertJson(['error' => 'El archivo «a_borrar.pdf» ya está inactivo.']);
 });
 
-it('expedientes: falla eliminar con id inexistente y devuelve 404', function () {
+it('expedientes: exige un motivo real para inactivar', function () {
+    $uuid = (string) Str::uuid();
+    $creado = $this->expRepo->crear(new ArchivoMetadata(
+        id: null, uuid: $uuid, nombreOriginal: 'acta.pdf', nombreArchivo: "{$uuid}.pdf",
+        rutaArchivo: "expedientes/15/{$uuid}.pdf", extension: 'pdf', tamanioBytes: 100,
+        fechaDigitacion: new DateTimeImmutable, parentId: 15, usuarioId: 1,
+    ));
+
+    foreach ([[], ['motivo' => 'corto'], ['motivo' => str_repeat(' ', 20)], ['motivo' => str_repeat('a', 501)]] as $datos) {
+        $this->actingAs($this->user, 'api')
+            ->postJson("/api/lf-itse/expedientes/archivos/{$creado->id}/inactivar/", $datos)
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['motivo']);
+    }
+    expect(DB::table('expedientes_archivos_inactivaciones')->count())->toBe(0);
+});
+
+it('expedientes: falla inactivar con id inexistente y devuelve 404', function () {
     $response = $this->actingAs($this->user, 'api')
-        ->deleteJson('/api/lf-itse/expedientes/archivos/999999/');
+        ->postJson('/api/lf-itse/expedientes/archivos/999999/inactivar/', ['motivo' => 'Motivo suficiente']);
 
     $response->assertStatus(404)
         ->assertJsonStructure(['error']);
@@ -281,7 +319,7 @@ it('itse: falla subir archivo sin archivo con 400', function () {
     $response->assertStatus(400);
 });
 
-it('itse: elimina archivo exitosamente con 204', function () {
+it('itse: inactiva archivo y lo conserva en disco', function () {
     $uuid = (string) Str::uuid();
     $ruta = "itse/3/{$uuid}.pdf";
     Storage::disk('media')->put($ruta, 'itse test');
@@ -299,15 +337,17 @@ it('itse: elimina archivo exitosamente con 204', function () {
         usuarioId: 1,
     ));
 
-    $response = $this->actingAs($this->user, 'api')
-        ->deleteJson("/api/lf-itse/itse/archivos/{$creado->id}/");
-
-    $response->assertStatus(204);
+    $this->actingAs($this->user, 'api')
+        ->postJson("/api/lf-itse/itse/archivos/{$creado->id}/inactivar/", ['motivo' => 'Documento equivocado'])
+        ->assertOk()
+        ->assertJsonPath('activo', false);
+    Storage::disk('media')->assertExists($ruta);
+    expect(DB::table('itse_archivos_inactivaciones')->where('archivo_id', $creado->id)->exists())->toBeTrue();
 });
 
-it('itse: falla eliminar con id inexistente con 404', function () {
+it('itse: falla inactivar con id inexistente con 404', function () {
     $this->actingAs($this->user, 'api')
-        ->deleteJson('/api/lf-itse/itse/archivos/999999/')
+        ->postJson('/api/lf-itse/itse/archivos/999999/inactivar/', ['motivo' => 'Motivo suficiente'])
         ->assertStatus(404);
 });
 
@@ -395,7 +435,7 @@ it('licencias: falla subir archivo sin archivo con 400', function () {
         ->assertStatus(400);
 });
 
-it('licencias: elimina archivo exitosamente con 204', function () {
+it('licencias: inactiva archivo y lo conserva en disco', function () {
     $uuid = (string) Str::uuid();
     $ruta = "licencias_funcionamiento/7/{$uuid}.pdf";
     Storage::disk('media')->put($ruta, 'lic test');
@@ -414,13 +454,16 @@ it('licencias: elimina archivo exitosamente con 204', function () {
     ));
 
     $this->actingAs($this->user, 'api')
-        ->deleteJson("/api/lf-itse/licencias-funcionamiento/archivos/{$creado->id}/")
-        ->assertStatus(204);
+        ->postJson("/api/lf-itse/licencias-funcionamiento/archivos/{$creado->id}/inactivar/", ['motivo' => 'Documento equivocado'])
+        ->assertOk()
+        ->assertJsonPath('activo', false);
+    Storage::disk('media')->assertExists($ruta);
+    expect(DB::table('licencias_funcionamiento_archivos_inactivaciones')->where('archivo_id', $creado->id)->exists())->toBeTrue();
 });
 
-it('licencias: falla eliminar con id inexistente con 404', function () {
+it('licencias: falla inactivar con id inexistente con 404', function () {
     $this->actingAs($this->user, 'api')
-        ->deleteJson('/api/lf-itse/licencias-funcionamiento/archivos/999999/')
+        ->postJson('/api/lf-itse/licencias-funcionamiento/archivos/999999/inactivar/', ['motivo' => 'Motivo suficiente'])
         ->assertStatus(404);
 });
 

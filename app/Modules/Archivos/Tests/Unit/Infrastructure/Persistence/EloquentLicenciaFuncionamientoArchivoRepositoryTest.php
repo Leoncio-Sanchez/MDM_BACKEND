@@ -104,7 +104,8 @@ it('lista archivos de licencia ordenados por fecha digitacion asc', function () 
         ->and($lista[1]->nombreOriginal)->toBe('segundo_lic.pdf');
 });
 
-it('elimina registro de archivo de licencia', function () {
+it('inactiva el archivo de licencia sin borrarlo y lo lee con su constancia', function () {
+    \Illuminate\Support\Facades\DB::table('auth_user')->insert(\Tests\Fixtures\UsuarioAuth::datos(['id' => 9, 'username' => 'mesa_partes', 'first_name' => 'ROSA', 'last_name' => 'DIAZ']));
     $uuid = (string) Str::uuid();
     $creado = $this->repo->crear(new ArchivoMetadata(
         id: null,
@@ -119,7 +120,18 @@ it('elimina registro de archivo de licencia', function () {
         usuarioId: 1,
     ));
 
-    $this->repo->eliminar((int) $creado->id);
+    expect($creado->estaActivo())->toBeTrue();
 
-    expect($this->repo->obtenerPorId((int) $creado->id))->toBeNull();
+    $this->repo->inactivar((int) $creado->id, new \App\Modules\Archivos\Domain\Entities\InactivacionArchivo(
+        motivo: 'Se subió el documento equivocado',
+        fechaInactivacion: new DateTimeImmutable('2026-09-25 10:00:00-05:00'),
+        usuarioId: 9,
+    ));
+
+    $leido = $this->repo->obtenerPorId((int) $creado->id);
+    expect($leido)->not->toBeNull()
+        ->and($leido?->estaActivo())->toBeFalse()
+        ->and($leido?->inactivacion?->motivo)->toBe('Se subió el documento equivocado')
+        ->and($leido?->inactivacion?->usuarioNombre)->toBe('ROSA DIAZ')
+        ->and($this->repo->listarPorParent($creado->parentId)[0]->estaActivo())->toBeFalse();
 });

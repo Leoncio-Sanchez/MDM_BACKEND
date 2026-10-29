@@ -25,5 +25,12 @@ final readonly class ArchivoMetadata
         public DateTimeImmutable $fechaDigitacion,
         public int $parentId,
         public int $usuarioId,
+        /** null = activo; con valor = dado de baja (se conserva para auditoría) */
+        public ?InactivacionArchivo $inactivacion = null,
     ) {}
+
+    public function estaActivo(): bool
+    {
+        return $this->inactivacion === null;
+    }
 }

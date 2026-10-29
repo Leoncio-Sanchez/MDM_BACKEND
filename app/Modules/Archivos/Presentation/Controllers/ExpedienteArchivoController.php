@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Archivos\Presentation\Controllers;
 
 use App\Modules\Archivos\Application\UseCases\DescargarArchivoUseCase;
-use App\Modules\Archivos\Application\UseCases\EliminarArchivoUseCase;
+use App\Modules\Archivos\Application\UseCases\InactivarArchivoUseCase;
 use App\Modules\Archivos\Application\UseCases\ListarArchivosUseCase;
 use App\Modules\Archivos\Application\UseCases\SubirArchivoUseCase;
 use App\Modules\Archivos\Domain\Contracts\ArchivoRepositoryInterface;
@@ -16,11 +16,11 @@ final class ExpedienteArchivoController extends AbstractArchivoController
     public function __construct(
         ListarArchivosUseCase $listar,
         SubirArchivoUseCase $subir,
-        EliminarArchivoUseCase $eliminar,
+        InactivarArchivoUseCase $inactivar,
         DescargarArchivoUseCase $descargar,
         private readonly ExpedienteArchivoRepositoryInterface $repository,
     ) {
-        parent::__construct($listar, $subir, $eliminar, $descargar);
+        parent::__construct($listar, $subir, $inactivar, $descargar);
     }
 
     protected function getRepository(): ArchivoRepositoryInterface

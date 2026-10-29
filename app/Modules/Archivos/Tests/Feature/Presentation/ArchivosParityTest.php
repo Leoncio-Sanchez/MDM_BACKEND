@@ -29,7 +29,7 @@ beforeEach(function () {
     $this->user = User::find(1);
 });
 
-it('upload: sube archivo y devuelve metadata con 10 keys planas', function () {
+it('upload: sube archivo y devuelve las 10 keys planas de Django más las de inactivación', function () {
     Storage::fake('media');
     DB::table('expedientes')->insert(\Tests\Fixtures\Registros::expediente(['id' => 1]));
 
@@ -39,7 +39,7 @@ it('upload: sube archivo y devuelve metadata con 10 keys planas', function () {
         ]);
 
     $response->assertStatus(201)
-        ->assertJsonCount(10)
+        ->assertJsonCount(12)
         ->assertJsonStructure([
             'id',
             'uuid',
@@ -51,7 +51,12 @@ it('upload: sube archivo y devuelve metadata con 10 keys planas', function () {
             'fecha_digitacion',
             'expediente',
             'usuario',
-        ]);
+            // Agregadas con la inactivación (no existían en Django)
+            'activo',
+            'inactivacion',
+        ])
+        ->assertJsonPath('activo', true)
+        ->assertJsonPath('inactivacion', null);
 });
 
 it('download: Content-Disposition es inline', function () {
@@ -99,9 +104,9 @@ it('download con uuid inexistente devuelve 404', function () {
     $response->assertStatus(404);
 });
 
-it('delete con id inexistente devuelve 404', function () {
+it('inactivar con id inexistente devuelve 404', function () {
     $response = $this->actingAs($this->user, 'api')
-        ->deleteJson('/api/lf-itse/expedientes/archivos/999999/');
+        ->postJson('/api/lf-itse/expedientes/archivos/999999/inactivar/', ['motivo' => 'Motivo suficiente']);
 
     $response->assertStatus(404);
 });
