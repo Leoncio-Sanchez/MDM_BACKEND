@@ -6,6 +6,7 @@ namespace App\Modules\ITSE\Application\UseCases;
 use App\Modules\ITSE\Application\DTOs\VerificarExpedienteItseDTO;
 use App\Modules\ITSE\Domain\Contracts\AutorizacionImprocedenteReadRepositoryInterface;
 use App\Modules\ITSE\Domain\Contracts\ExpedienteReadRepositoryInterface;
+use App\Modules\ITSE\Domain\Contracts\InspeccionReadRepositoryInterface;
 use App\Modules\ITSE\Domain\Contracts\ItseRepositoryInterface;
 
 final readonly class VerificarExpedienteItseUseCase
@@ -14,6 +15,7 @@ final readonly class VerificarExpedienteItseUseCase
         private ExpedienteReadRepositoryInterface $expedientes,
         private AutorizacionImprocedenteReadRepositoryInterface $improcedentes,
         private ItseRepositoryInterface $itses,
+        private InspeccionReadRepositoryInterface $inspecciones,
     ) {}
 
     /** @return array<string, mixed> */
@@ -47,6 +49,15 @@ final readonly class VerificarExpedienteItseUseCase
                 'se_puede_emitir_itse' => false,
                 'expediente_id' => $expediente->id,
                 'mensaje' => 'El expediente ya registra el ITSE número ' . $itseData['numero_itse'] . '.',
+            ];
+        }
+
+        $sinActa = $this->inspecciones->situacion((int) $expediente->id)?->motivoParaNoEmitir();
+        if ($sinActa !== null) {
+            return [
+                'se_puede_emitir_itse' => false,
+                'expediente_id' => $expediente->id,
+                'mensaje' => $sinActa,
             ];
         }
 

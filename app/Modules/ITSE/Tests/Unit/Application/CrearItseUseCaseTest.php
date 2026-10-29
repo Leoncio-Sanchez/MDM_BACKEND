@@ -4,6 +4,7 @@ declare(strict_types=1);
 use App\Modules\ITSE\Application\DTOs\CrearItseDTO;
 use App\Modules\ITSE\Application\UseCases\CrearItseUseCase;
 use App\Modules\ITSE\Domain\Contracts\ExpedienteReadRepositoryInterface;
+use App\Modules\ITSE\Domain\Contracts\InspeccionReadRepositoryInterface;
 use App\Modules\ITSE\Domain\Contracts\ItseRepositoryInterface;
 use App\Modules\ITSE\Domain\Contracts\NivelRiesgoReadRepositoryInterface;
 use App\Modules\ITSE\Domain\Contracts\PersonaReadRepositoryInterface;
@@ -19,7 +20,10 @@ beforeEach(function () {
     $this->expedientes = Mockery::mock(ExpedienteReadRepositoryInterface::class);
     $this->personas = Mockery::mock(PersonaReadRepositoryInterface::class);
     $this->niveles = Mockery::mock(NivelRiesgoReadRepositoryInterface::class);
-    $this->useCase = new CrearItseUseCase($this->itses, $this->expedientes, $this->personas, $this->niveles);
+    // Sin acta exigible: estos casos prueban las demás validaciones
+    $this->inspecciones = Mockery::mock(InspeccionReadRepositoryInterface::class);
+    $this->inspecciones->shouldReceive('situacion')->andReturn(null);
+    $this->useCase = new CrearItseUseCase($this->itses, $this->expedientes, $this->personas, $this->niveles, $this->inspecciones);
     
     DB::shouldReceive('transaction')->andReturnUsing(function ($callback) {
         return $callback();

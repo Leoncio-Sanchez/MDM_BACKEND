@@ -18,6 +18,8 @@ Route::middleware(['auth:api', 'rol:ADMIN_MUNICIPALIDAD', 'permiso:itse'])->pref
     Route::get('itse/verificar-expediente/', [ItseController::class, 'verificarExpediente']);
     Route::post('itse/verificar-expediente/', [ItseController::class, 'verificarExpediente']);
     Route::post('itse/inactivar/', [ItseController::class, 'inactivar']);
+    // Acta de inspección que sustenta el certificado (o por qué aún no se puede emitir)
+    Route::get('itse/expedientes/{expedienteId}/inspeccion/', [ItseController::class, 'inspeccion'])->whereNumber('expedienteId');
 
     // ── 6A dinámicas ─────────────────────────────────────────────────────────
     Route::post('itse/', [ItseController::class, 'store']);

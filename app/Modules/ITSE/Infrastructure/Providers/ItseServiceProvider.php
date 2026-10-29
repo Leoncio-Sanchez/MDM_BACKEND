@@ -29,6 +29,9 @@ use App\Modules\ITSE\Infrastructure\Persistence\Repositories\EloquentZonificacio
 use App\Modules\ITSE\Domain\Contracts\AutorizacionImprocedenteReadRepositoryInterface;
 use App\Modules\ITSE\Infrastructure\Persistence\Repositories\EloquentAutorizacionImprocedenteReadRepository;
 
+use App\Modules\ITSE\Domain\Contracts\InspeccionReadRepositoryInterface;
+use App\Modules\ITSE\Infrastructure\Persistence\Repositories\QueryInspeccionReadRepository;
+
 
 final class ItseServiceProvider extends ServiceProvider
 {
@@ -42,6 +45,7 @@ final class ItseServiceProvider extends ServiceProvider
         $this->app->bind(NivelRiesgoReadRepositoryInterface::class, EloquentNivelRiesgoReadRepository::class);
         $this->app->bind(ZonificacionReadRepositoryInterface::class, EloquentZonificacionReadRepository::class);
         $this->app->bind(AutorizacionImprocedenteReadRepositoryInterface::class, EloquentAutorizacionImprocedenteReadRepository::class);
+        $this->app->bind(InspeccionReadRepositoryInterface::class, QueryInspeccionReadRepository::class);
     }
 
     public function boot(): void
