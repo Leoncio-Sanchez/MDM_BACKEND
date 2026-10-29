@@ -5,7 +5,8 @@ declare(strict_types=1);
 use App\Modules\Personas\Presentation\Controllers\PersonaController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth:api', 'rol:ADMIN_MUNICIPALIDAD'])->prefix('api/lf-itse')->group(function () {
+// Datos personales de los administrados: solo las oficinas que tramitan (y TI), no "reportes"
+Route::middleware(['auth:api', 'rol:ADMIN_MUNICIPALIDAD', 'permiso:expedientes|licencias|itse|admin'])->prefix('api/lf-itse')->group(function () {
     Route::get('personas/', [PersonaController::class, 'index']);
     Route::post('personas/', [PersonaController::class, 'store']);
 
