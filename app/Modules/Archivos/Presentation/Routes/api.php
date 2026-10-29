@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:api', 'rol:ADMIN_MUNICIPALIDAD'])->prefix('api/lf-itse')->group(function () {
     // ═══════════════════════════════════════════════════════════════════════════
-    // EXPEDIENTES (3 rutas, 4 operaciones)
+    // EXPEDIENTES (listar, subir, inactivar, descargar)
     // ═══════════════════════════════════════════════════════════════════════════
     Route::get('expedientes/{pk}/archivos/', [ExpedienteArchivoController::class, 'listar'])
         ->whereNumber('pk')
@@ -21,9 +21,10 @@ Route::middleware(['auth:api', 'rol:ADMIN_MUNICIPALIDAD'])->prefix('api/lf-itse'
         ->name('archivos.expedientes.subir')
         ->middleware('permiso:expedientes|licencias|itse,expedientes');
 
-    Route::delete('expedientes/archivos/{pk}/', [ExpedienteArchivoController::class, 'eliminar'])
+    // Los adjuntos no se borran: se dan de baja con motivo (auditoría del OCI)
+    Route::post('expedientes/archivos/{pk}/inactivar/', [ExpedienteArchivoController::class, 'inactivar'])
         ->whereNumber('pk')
-        ->name('archivos.expedientes.eliminar')
+        ->name('archivos.expedientes.inactivar')
         ->middleware('permiso:expedientes|licencias|itse,expedientes');
 
     Route::get('expedientes/archivos/{uuid}/descargar/', [ExpedienteArchivoController::class, 'descargar'])
@@ -31,7 +32,7 @@ Route::middleware(['auth:api', 'rol:ADMIN_MUNICIPALIDAD'])->prefix('api/lf-itse'
         ->middleware('permiso:expedientes|licencias|itse,expedientes');
 
     // ═══════════════════════════════════════════════════════════════════════════
-    // ITSE (3 rutas, 4 operaciones)
+    // ITSE (listar, subir, inactivar, descargar)
     // ═══════════════════════════════════════════════════════════════════════════
     Route::get('itse/{pk}/archivos/', [ItseArchivoController::class, 'listar'])
         ->whereNumber('pk')
@@ -43,9 +44,10 @@ Route::middleware(['auth:api', 'rol:ADMIN_MUNICIPALIDAD'])->prefix('api/lf-itse'
         ->name('archivos.itse.subir')
         ->middleware('permiso:itse');
 
-    Route::delete('itse/archivos/{pk}/', [ItseArchivoController::class, 'eliminar'])
+    // Los adjuntos no se borran: se dan de baja con motivo (auditoría del OCI)
+    Route::post('itse/archivos/{pk}/inactivar/', [ItseArchivoController::class, 'inactivar'])
         ->whereNumber('pk')
-        ->name('archivos.itse.eliminar')
+        ->name('archivos.itse.inactivar')
         ->middleware('permiso:itse');
 
     Route::get('itse/archivos/{uuid}/descargar/', [ItseArchivoController::class, 'descargar'])
@@ -53,7 +55,7 @@ Route::middleware(['auth:api', 'rol:ADMIN_MUNICIPALIDAD'])->prefix('api/lf-itse'
         ->middleware('permiso:itse');
 
     // ═══════════════════════════════════════════════════════════════════════════
-    // LICENCIAS FUNCIONAMIENTO (3 rutas, 4 operaciones)
+    // LICENCIAS FUNCIONAMIENTO (listar, subir, inactivar, descargar)
     // ═══════════════════════════════════════════════════════════════════════════
     Route::get('licencias-funcionamiento/{pk}/archivos/', [LicenciaFuncionamientoArchivoController::class, 'listar'])
         ->whereNumber('pk')
@@ -65,9 +67,10 @@ Route::middleware(['auth:api', 'rol:ADMIN_MUNICIPALIDAD'])->prefix('api/lf-itse'
         ->name('archivos.licencias.subir')
         ->middleware('permiso:licencias');
 
-    Route::delete('licencias-funcionamiento/archivos/{pk}/', [LicenciaFuncionamientoArchivoController::class, 'eliminar'])
+    // Los adjuntos no se borran: se dan de baja con motivo (auditoría del OCI)
+    Route::post('licencias-funcionamiento/archivos/{pk}/inactivar/', [LicenciaFuncionamientoArchivoController::class, 'inactivar'])
         ->whereNumber('pk')
-        ->name('archivos.licencias.eliminar')
+        ->name('archivos.licencias.inactivar')
         ->middleware('permiso:licencias');
 
     Route::get('licencias-funcionamiento/archivos/{uuid}/descargar/', [LicenciaFuncionamientoArchivoController::class, 'descargar'])

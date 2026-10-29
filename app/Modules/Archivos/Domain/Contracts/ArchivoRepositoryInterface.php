@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Archivos\Domain\Contracts;
 
 use App\Modules\Archivos\Domain\Entities\ArchivoMetadata;
+use App\Modules\Archivos\Domain\Entities\InactivacionArchivo;
 
 interface ArchivoRepositoryInterface
 {
@@ -19,7 +20,8 @@ interface ArchivoRepositoryInterface
      */
     public function listarPorParent(int $parentId): array;
 
-    public function eliminar(int $id): void;
+    /** Da de baja el archivo sin borrarlo (ni el registro ni el archivo en disco) */
+    public function inactivar(int $id, InactivacionArchivo $inactivacion): void;
 
     /** ¿Existe el expediente / licencia / ITSE al que se adjunta? */
     public function existePadre(int $parentId): bool;
