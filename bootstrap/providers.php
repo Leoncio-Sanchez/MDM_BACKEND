@@ -19,6 +19,7 @@ use App\Modules\Seguridad\Infrastructure\Providers\SeguridadServiceProvider;
 use App\Modules\TipoDocumentoIdentidad\Infrastructure\Providers\TipoDocumentoIdentidadServiceProvider;
 use App\Modules\TipoLicencia\Infrastructure\Providers\TipoLicenciaServiceProvider;
 use App\Modules\TipoProcedimientoTupa\Infrastructure\Providers\TipoProcedimientoTupaServiceProvider;
+use App\Modules\Inspecciones\Infrastructure\Providers\InspeccionesServiceProvider;
 use App\Modules\Inspectores\Infrastructure\Providers\InspectoresServiceProvider;
 use App\Modules\UnidadesOrganicas\Infrastructure\Providers\UnidadesOrganicasServiceProvider;
 use App\Modules\Usuarios\Infrastructure\Providers\UsuariosServiceProvider;
@@ -48,4 +49,5 @@ return [
     DashboardServiceProvider::class,
     ReportesServiceProvider::class,
     ConfiguracionServiceProvider::class,
+    InspeccionesServiceProvider::class,
 ];

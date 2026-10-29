@@ -72,6 +72,7 @@ final class InspectorController extends Controller
     public function update(Request $request, int $pk): JsonResponse
     {
         $datos = $request->only([
+            'password',
             'first_name',
             'last_name',
             'email',

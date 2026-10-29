@@ -18,7 +18,7 @@ interface TokenServiceInterface
      * - jti: string random hex
      * - user_id: STRING (no int)
      * - username: string
-     * - role: "ADMIN_MUNICIPALIDAD" | "CIUDADANO"
+     * - role: "ADMIN_MUNICIPALIDAD" | "INSPECTOR" | "CIUDADANO"
      * - ruc: string|null
      */
     public function issue(AuthenticatedUser $user): TokenPair;

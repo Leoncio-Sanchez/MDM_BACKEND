@@ -10,7 +10,7 @@ final readonly class AuthenticatedUser
         public int $id,
         public string $username,
         public string $email,
-        public string $role,           // 'ADMIN_MUNICIPALIDAD' | 'CIUDADANO'
+        public string $role,           // 'ADMIN_MUNICIPALIDAD' | 'INSPECTOR' | 'CIUDADANO'
         public ?string $ruc,
         public string $passwordHash,   // hash de auth_user.password (para validar)
         public Permisos $permisos = new Permisos(),

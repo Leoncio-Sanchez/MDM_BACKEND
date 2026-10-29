@@ -9,17 +9,22 @@ namespace App\Modules\Seguridad\Domain\ValueObjects;
  *
  * Regla (Django, FASE_9): staff/superuser → ADMIN_MUNICIPALIDAD; resto → CIUDADANO.
  *
- * No existe un rol INSPECTOR: en el esquema real los inspectores son registros de la
- * tabla `inspectores` (no usuarios con login) y `usuarios_perfiles` no tiene ninguna
- * columna que marque a un usuario como inspector.
+ * INSPECTOR: usuario que no es staff y tiene la casilla es_inspector. Es un rol aparte
+ * para que el inspector de campo solo llegue a su bandeja y no a las rutas generales
+ * del personal (Personas, Archivos, consultas PIDE).
  */
 enum Rol: string
 {
     case AdminMunicipalidad = 'ADMIN_MUNICIPALIDAD';
     case Ciudadano = 'CIUDADANO';
+    case Inspector = 'INSPECTOR';
 
-    public static function resolver(bool $esAdmin): self
+    public static function resolver(bool $esAdmin, bool $esInspector = false): self
     {
-        return $esAdmin ? self::AdminMunicipalidad : self::Ciudadano;
+        return match (true) {
+            $esAdmin => self::AdminMunicipalidad,
+            $esInspector => self::Inspector,
+            default => self::Ciudadano,
+        };
     }
 }

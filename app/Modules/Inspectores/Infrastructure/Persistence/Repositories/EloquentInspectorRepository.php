@@ -106,6 +106,10 @@ final class EloquentInspectorRepository implements InspectorRepositoryInterface
         if (array_key_exists('is_active', $datos)) {
             $user->is_active = (bool) $datos['is_active'];
         }
+        // Ya viene cifrada desde el caso de uso
+        if (array_key_exists('password', $datos)) {
+            $user->password = (string) $datos['password'];
+        }
         $user->save();
 
         return $user;

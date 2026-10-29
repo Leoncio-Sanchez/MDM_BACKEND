@@ -119,4 +119,16 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (\App\Modules\Usuarios\Domain\Exceptions\PerfilInvalido $e, Request $request) {
             return response()->json(['error' => $e->getMessage()], 422);
         });
+
+        $exceptions->render(function (\App\Modules\Inspecciones\Domain\Exceptions\AsignacionInvalida $e, Request $request) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        });
+
+        $exceptions->render(function (\App\Modules\Inspecciones\Domain\Exceptions\AsignacionNoEncontrada $e, Request $request) {
+            return response()->json(['error' => $e->getMessage()], 404);
+        });
+
+        $exceptions->render(function (\App\Modules\Inspecciones\Domain\Exceptions\ExpedienteYaAsignado $e, Request $request) {
+            return response()->json(['error' => $e->getMessage()], 409);
+        });
     })->create();

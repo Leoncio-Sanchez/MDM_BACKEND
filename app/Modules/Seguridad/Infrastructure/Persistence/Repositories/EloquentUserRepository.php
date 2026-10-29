@@ -33,14 +33,16 @@ final readonly class EloquentUserRepository implements UserRepositoryInterface
 
     private function toValueObject(UserAuthModel $user): AuthenticatedUser
     {
+        $permisos = $this->cargarPermisos($user);
+
         return new AuthenticatedUser(
             id: (int) $user->id,
             username: (string) $user->username,
             email: (string) $user->email,
-            role: $this->computeRole($user),
+            role: $this->computeRole($user, $permisos),
             ruc: null,
             passwordHash: (string) $user->password,
-            permisos: $this->cargarPermisos($user),
+            permisos: $permisos,
         );
     }
 
@@ -66,8 +68,8 @@ final readonly class EloquentUserRepository implements UserRepositoryInterface
         );
     }
 
-    private function computeRole(UserAuthModel $user): string
+    private function computeRole(UserAuthModel $user, Permisos $permisos): string
     {
-        return Rol::resolver((bool) ($user->is_superuser || $user->is_staff))->value;
+        return Rol::resolver((bool) ($user->is_superuser || $user->is_staff), $permisos->inspector)->value;
     }
 }
