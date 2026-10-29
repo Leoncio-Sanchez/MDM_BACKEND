@@ -25,5 +25,7 @@ final readonly class TramitePublico
         public ?DateTimeImmutable $fechaEmision = null,
         public ?DateTimeImmutable $fechaVencimiento = null,
         public bool $vigenciaIndeterminada = false,
+        /** Solo expedientes cuya ITSE sigue pendiente */
+        public ?AvanceInspeccion $inspeccion = null,
     ) {}
 }

@@ -7,8 +7,9 @@ namespace App\Modules\ConsultaPublica\Domain\Contracts;
 use App\Modules\ConsultaPublica\Domain\ValueObjects\TramitePublico;
 
 /**
- * Busca trámites por su número y el documento (DNI/RUC/CE) de una de sus partes.
- * Si el documento no corresponde al trámite, no devuelve nada.
+ * Busca trámites por el documento (DNI/RUC/CE) de una de sus partes y, si se indica, su número.
+ * Si el documento no corresponde al trámite, no devuelve nada. Sin número: todos los del
+ * documento ("Mis trámites" del ciudadano con cuenta).
  */
 interface ConsultaPublicaRepositoryInterface
 {
@@ -17,19 +18,19 @@ interface ConsultaPublicaRepositoryInterface
      *
      * @return list<TramitePublico>
      */
-    public function expedientes(int $numero, string $documento): array;
+    public function expedientes(?int $numero, string $documento): array;
 
     /**
      * Partes: titular o conductor.
      *
      * @return list<TramitePublico>
      */
-    public function licencias(int $numero, string $documento): array;
+    public function licencias(?int $numero, string $documento): array;
 
     /**
      * Partes: titular o conductor.
      *
      * @return list<TramitePublico>
      */
-    public function itse(int $numero, string $documento): array;
+    public function itse(?int $numero, string $documento): array;
 }

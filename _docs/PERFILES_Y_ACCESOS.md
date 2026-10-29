@@ -78,10 +78,23 @@ Todos entran a `/admin` (dashboard). Cada tarjeta del dashboard aparece solo si 
 | `/inspector` | Mis inspecciones: las que tiene a cargo y las que acompaña | Inspector |
 | `/inspector/acta/<asignación>` | Registrar acta con fotos (solo el inspector responsable) | Inspector |
 
-### Otras cuentas
+### Ciudadanos (administrados)
 | Ruta | Pantalla |
 |---|---|
-| `/ciudadano` | Aviso de que la cuenta no tiene acceso interno y enlace a la consulta del trámite |
+| `/ciudadano/ingresar` | Ingresar con DNI/RUC y contraseña, crear la cuenta u «Olvidé mi contraseña» |
+| `/ciudadano` | **Mis trámites**: sus expedientes, licencias y certificados ITSE, con el avance de la inspección |
+
+- **Crear la cuenta**: el ciudadano lo hace solo, con su DNI/RUC y el número de uno de sus expedientes (está en su
+  cargo de recepción) como prueba de que el documento es suyo. No necesita correo ni que la municipalidad haga nada.
+- **Olvidó su contraseña**: la restablece igual, con su DNI/RUC y el número de uno de sus expedientes.
+- **Qué ve**: todo lo que está a nombre de su documento (como solicitante, representante, titular o conductor). Nunca
+  datos de otras personas, ni el nombre del inspector, ni el detalle o las fotos del acta.
+- **Avance de la inspección**: pendiente de programar, programada para tal fecha, observada (con el plazo para
+  subsanar), aprobada o desaprobada. También aparece en la consulta pública sin cuenta.
+- Los intentos están limitados (5 por minuto por documento) para que nadie pruebe expedientes o contraseñas en masa.
+- Su usuario interno es `ciu_<documento>`; no es personal ni tiene accesos del panel.
+
+Sin cuenta, cualquiera puede consultar un trámite en `/consulta` con el número y el DNI/RUC del titular.
 
 El servidor aplica las mismas reglas en cada pedido: aunque alguien escriba una ruta a mano, sin el acceso recibe
 "No tiene permisos".

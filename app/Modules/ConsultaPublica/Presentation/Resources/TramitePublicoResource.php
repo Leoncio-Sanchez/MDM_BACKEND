@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\ConsultaPublica\Presentation\Resources;
 
+use App\Modules\ConsultaPublica\Domain\ValueObjects\TipoTramite;
 use App\Modules\ConsultaPublica\Domain\ValueObjects\TramitePublico;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -21,7 +22,7 @@ final class TramitePublicoResource extends JsonResource
     {
         $t = $this->resource;
 
-        return [
+        $datos = [
             'tipo' => $t->tipo->value,
             'numero' => $t->numero,
             'estado' => $t->estado,
@@ -32,5 +33,15 @@ final class TramitePublicoResource extends JsonResource
             'fecha_vencimiento' => $t->fechaVencimiento?->format('Y-m-d'),
             'vigencia_indeterminada' => $t->vigenciaIndeterminada,
         ];
+
+        // Expedientes: en qué va la inspección ITSE (null si no aplica o ya se resolvió)
+        if ($t->tipo === TipoTramite::Expediente) {
+            $datos['inspeccion'] = $t->inspeccion === null ? null : [
+                'estado' => $t->inspeccion->estado,
+                'fecha' => $t->inspeccion->fecha?->format('Y-m-d'),
+            ];
+        }
+
+        return $datos;
     }
 }
