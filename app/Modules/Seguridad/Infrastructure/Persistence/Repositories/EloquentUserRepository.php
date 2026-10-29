@@ -60,6 +60,9 @@ final readonly class EloquentUserRepository implements UserRepositoryInterface
             licencias: (bool) $perfil->licencias,
             itse: (bool) $perfil->itse,
             admin: (bool) $perfil->admin,
+            inspector: (bool) $perfil->es_inspector,
+            jefeItse: (bool) $perfil->es_jefe_itse,
+            reportes: (bool) $perfil->reportes_completos,
         );
     }
 

@@ -115,4 +115,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (\App\Modules\Personas\Domain\Exceptions\DocumentoInvalido|\App\Modules\Personas\Domain\Exceptions\TipoDocumentoNoValido $e, Request $request) {
             return response()->json(['error' => $e->getMessage()], 422);
         });
+
+        $exceptions->render(function (\App\Modules\Usuarios\Domain\Exceptions\PerfilInvalido $e, Request $request) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        });
     })->create();

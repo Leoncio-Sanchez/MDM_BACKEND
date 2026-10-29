@@ -7,7 +7,7 @@ namespace App\Modules\Inspectores\Presentation\Controllers;
 use App\Http\Controllers\Controller;
 use App\Modules\Inspectores\Application\UseCases\ActualizarInspectorUseCase;
 use App\Modules\Inspectores\Application\UseCases\CrearInspectorUseCase;
-use App\Modules\Inspectores\Application\UseCases\EliminarInspectorUseCase;
+use App\Modules\Inspectores\Application\UseCases\DesactivarInspectorUseCase;
 use App\Modules\Inspectores\Application\UseCases\ListarInspectoresUseCase;
 use App\Modules\Inspectores\Application\UseCases\ObtenerInspectorUseCase;
 use App\Modules\Usuarios\Presentation\Resources\UsuarioResource;
@@ -21,7 +21,7 @@ final class InspectorController extends Controller
         private readonly ObtenerInspectorUseCase $obtenerInspector,
         private readonly CrearInspectorUseCase $crearInspector,
         private readonly ActualizarInspectorUseCase $actualizarInspector,
-        private readonly EliminarInspectorUseCase $eliminarInspector,
+        private readonly DesactivarInspectorUseCase $desactivarInspector,
     ) {}
 
     public function index(Request $request): JsonResponse
@@ -54,7 +54,7 @@ final class InspectorController extends Controller
             return response()->json(['error' => 'El username es requerido.'], 400);
         }
 
-        $inspector = $this->crearInspector->execute($datos);
+        $inspector = $this->crearInspector->execute($datos, (int) $request->user()?->getAuthIdentifier());
 
         return response()->json((new UsuarioResource($inspector))->resolve(), 201);
     }
@@ -88,7 +88,8 @@ final class InspectorController extends Controller
 
     public function destroy(int $pk): JsonResponse
     {
-        $exito = $this->eliminarInspector->execute($pk);
+        // DELETE se mantiene por compatibilidad, pero ya no borra: desactiva la cuenta
+        $exito = $this->desactivarInspector->execute($pk);
         if (! $exito) {
             return response()->json(['detail' => 'No encontrado.'], 404);
         }

@@ -14,6 +14,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property bool $licencias
  * @property bool $itse
  * @property bool $admin
+ * @property bool $es_inspector
+ * @property bool $es_jefe_itse
+ * @property bool $reportes_completos
  * @property int $user_id_digitador
  * @property string $fecha_digitacion
  */
@@ -29,6 +32,9 @@ final class UsuarioPerfilModel extends Model
         'licencias',
         'itse',
         'admin',
+        'es_inspector',
+        'es_jefe_itse',
+        'reportes_completos',
         'user_id_digitador',
         'fecha_digitacion',
     ];
@@ -42,6 +48,9 @@ final class UsuarioPerfilModel extends Model
             'licencias' => 'boolean',
             'itse' => 'boolean',
             'admin' => 'boolean',
+            'es_inspector' => 'boolean',
+            'es_jefe_itse' => 'boolean',
+            'reportes_completos' => 'boolean',
             'user_id_digitador' => 'integer',
         ];
     }

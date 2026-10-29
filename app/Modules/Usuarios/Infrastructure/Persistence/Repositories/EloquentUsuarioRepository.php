@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Usuarios\Infrastructure\Persistence\Repositories;
 
 use App\Modules\Usuarios\Domain\Contracts\UsuarioRepositoryInterface;
+use App\Modules\Usuarios\Domain\Entities\UsuarioPerfil;
 use App\Modules\Usuarios\Infrastructure\Persistence\Models\UsuarioModel;
 use App\Modules\Usuarios\Infrastructure\Persistence\Models\UsuarioPerfilModel;
 use Carbon\Carbon;
@@ -65,13 +66,12 @@ final class EloquentUsuarioRepository implements UsuarioRepositoryInterface
             if ($perfilDatos !== null) {
                 $perfil = new UsuarioPerfilModel;
                 $perfil->user_id = $user->id;
-                $perfil->expedientes = (bool) ($perfilDatos['expedientes'] ?? false);
-                $perfil->licencias = (bool) ($perfilDatos['licencias'] ?? false);
-                $perfil->itse = (bool) ($perfilDatos['itse'] ?? false);
-                $perfil->admin = (bool) ($perfilDatos['admin'] ?? false);
+                foreach (UsuarioPerfil::CASILLAS as $casilla) {
+                    $perfil->setAttribute($casilla, (bool) ($perfilDatos[$casilla] ?? false));
+                }
                 $perfil->user_id_digitador = $digitadorId ?? $user->id;
                 $perfil->fecha_digitacion = Carbon::now('UTC')->toDateTimeString();
-                $perfil->save();
+                $this->guardarPerfil($perfil);
             }
 
             $user->load('perfil');
@@ -118,23 +118,28 @@ final class EloquentUsuarioRepository implements UsuarioRepositoryInterface
                     $perfil->fecha_digitacion = Carbon::now('UTC')->toDateTimeString();
                 }
 
-                if (array_key_exists('expedientes', $perfilDatos)) {
-                    $perfil->expedientes = (bool) $perfilDatos['expedientes'];
+                // Solo cambian las casillas enviadas
+                foreach (UsuarioPerfil::CASILLAS as $casilla) {
+                    if (array_key_exists($casilla, $perfilDatos)) {
+                        $perfil->setAttribute($casilla, (bool) $perfilDatos[$casilla]);
+                    }
                 }
-                if (array_key_exists('licencias', $perfilDatos)) {
-                    $perfil->licencias = (bool) $perfilDatos['licencias'];
-                }
-                if (array_key_exists('itse', $perfilDatos)) {
-                    $perfil->itse = (bool) $perfilDatos['itse'];
-                }
-                if (array_key_exists('admin', $perfilDatos)) {
-                    $perfil->admin = (bool) $perfilDatos['admin'];
-                }
-                $perfil->save();
+                $this->guardarPerfil($perfil);
             }
 
             return $user->fresh(['perfil']);
         });
+    }
+
+    /** Valida el perfil completo (con las casillas que no cambiaron) antes de guardarlo */
+    private function guardarPerfil(UsuarioPerfilModel $perfil): void
+    {
+        UsuarioPerfil::fromArray(array_map(
+            fn (string $casilla) => (bool) $perfil->getAttribute($casilla),
+            array_combine(UsuarioPerfil::CASILLAS, UsuarioPerfil::CASILLAS),
+        ))->asegurarConsistencia();
+
+        $perfil->save();
     }
 
     public function desactivar(int $id): bool

@@ -6,7 +6,8 @@ namespace App\Modules\Inspectores\Application\UseCases;
 
 use App\Modules\Inspectores\Domain\Contracts\InspectorRepositoryInterface;
 
-final readonly class EliminarInspectorUseCase
+/** Reemplaza al antiguo borrado: la cuenta del inspector queda inactiva y su historial se conserva. */
+final readonly class DesactivarInspectorUseCase
 {
     public function __construct(
         private InspectorRepositoryInterface $repository,
@@ -14,6 +15,6 @@ final readonly class EliminarInspectorUseCase
 
     public function execute(int $id): bool
     {
-        return $this->repository->eliminar($id);
+        return $this->repository->desactivar($id);
     }
 }

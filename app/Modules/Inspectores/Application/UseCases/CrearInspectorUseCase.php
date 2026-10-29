@@ -18,12 +18,12 @@ final readonly class CrearInspectorUseCase
     /**
      * @param  array<string, mixed>  $datos
      */
-    public function execute(array $datos): UsuarioModel
+    public function execute(array $datos, int $digitadorId): UsuarioModel
     {
         if (! empty($datos['password'])) {
             $datos['password'] = $this->hasher->hash((string) $datos['password']);
         }
 
-        return $this->repository->crear($datos);
+        return $this->repository->crear($datos, $digitadorId);
     }
 }
