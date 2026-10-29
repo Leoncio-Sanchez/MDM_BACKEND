@@ -12,6 +12,8 @@ use App\Modules\Seguridad\Infrastructure\Hashing\DjangoPbkdf2Hasher;
 use App\Modules\Seguridad\Infrastructure\Jwt\DjangoJwtTokenService;
 use App\Modules\Seguridad\Infrastructure\Persistence\Repositories\EloquentUserRepository;
 use App\Modules\Seguridad\Infrastructure\Persistence\Repositories\QueryRevisionAccesosRepository;
+use App\Modules\Seguridad\Presentation\Console\CrearAdministradorCommand;
+use App\Modules\Seguridad\Presentation\Console\CrearUsuariosPruebaCommand;
 use App\Modules\Seguridad\Presentation\Console\RevisarAccesosCommand;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\JsonResponse;
@@ -52,7 +54,7 @@ final class SeguridadServiceProvider extends ServiceProvider
     public function boot(): void
     {
         if ($this->app->runningInConsole()) {
-            $this->commands([RevisarAccesosCommand::class]);
+            $this->commands([RevisarAccesosCommand::class, CrearUsuariosPruebaCommand::class, CrearAdministradorCommand::class]);
         }
 
         // Contra el robo de contraseñas por fuerza bruta: pocos intentos por usuario e IP,
