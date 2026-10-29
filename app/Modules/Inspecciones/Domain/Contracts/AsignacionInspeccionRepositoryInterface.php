@@ -50,10 +50,18 @@ interface AsignacionInspeccionRepositoryInterface
     /** @throws ExpedienteYaAsignado */
     public function crear(int $expedienteId, DatosAsignacion $datos, int $usuarioId): int;
 
-    /** Cierra la asignación vigente y abre otra para el nuevo inspector con el mismo local. */
-    public function reasignar(int $asignacionId, int $nuevoInspectorId, string $motivo, ?string $fechaProgramada, ?string $indicaciones, int $usuarioId): int;
+    /**
+     * Cierra la asignación vigente y abre otra para el nuevo responsable y sus acompañantes, con el mismo local.
+     *
+     * @param  array<int, int>  $acompanantes
+     */
+    public function reasignar(int $asignacionId, int $nuevoInspectorId, array $acompanantes, string $motivo, ?string $fechaProgramada, ?string $indicaciones, int $usuarioId): int;
 
-    public function actualizar(int $asignacionId, DatosAsignacion $datos): void;
+    /** Cambia local, programación y acompañantes; el responsable no cambia (eso es reasignar). */
+    public function actualizar(int $asignacionId, DatosAsignacion $datos, int $usuarioId): void;
+
+    /** @return list<int> ids de los acompañantes vigentes */
+    public function acompanantesVigentes(int $asignacionId): array;
 
     /**
      * Todas las asignaciones del expediente, de la más reciente a la más antigua.
@@ -63,7 +71,7 @@ interface AsignacionInspeccionRepositoryInterface
     public function historial(int $expedienteId): array;
 
     /**
-     * Inspecciones pendientes del inspector.
+     * Inspecciones pendientes del inspector: las que tiene a cargo y las que acompaña ("es_responsable").
      *
      * @return array<int, array<string, mixed>>
      */

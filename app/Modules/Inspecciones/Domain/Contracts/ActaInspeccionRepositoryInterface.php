@@ -28,8 +28,8 @@ interface ActaInspeccionRepositoryInterface
     public function anular(int $actaId, string $motivo, ?string $documento, int $usuarioId): bool;
 
     /**
-     * Guarda el acta y sus fotos en una sola operación: si algo falla, no queda
-     * ni el registro ni los archivos.
+     * Guarda el acta, sus fotos y los acompañantes vigentes de la asignación en una sola
+     * operación: si algo falla, no queda ni el registro ni los archivos.
      *
      * @param  array<int, array{tipo: string, archivo: UploadedFile}>  $fotos
      *
@@ -49,6 +49,6 @@ interface ActaInspeccionRepositoryInterface
     /** @return array{foto: array<string, mixed>, contenido: resource|string}|null */
     public function leerFoto(int $actaId, int $fotoId): ?array;
 
-    /** El inspector ve las actas que registró y las del expediente que tiene asignado */
+    /** El inspector ve las actas que registró o acompañó, y las del expediente cuya inspección tiene a cargo o acompaña */
     public function inspectorPuedeVer(int $actaId, int $inspectorId): bool;
 }

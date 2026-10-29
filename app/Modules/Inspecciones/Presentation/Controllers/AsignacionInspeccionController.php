@@ -41,6 +41,7 @@ final readonly class AsignacionInspeccionController
                 direccion: (string) $request->validated('direccion'),
                 fechaProgramada: $this->texto($request->validated('fecha_programada')),
                 indicaciones: $this->texto($request->validated('indicaciones')),
+                acompanantes: $this->acompanantes($request) ?? [],
             ),
             $this->usuarioId($request),
         );
@@ -56,6 +57,8 @@ final readonly class AsignacionInspeccionController
             (string) $request->validated('direccion'),
             $this->texto($request->validated('fecha_programada')),
             $this->texto($request->validated('indicaciones')),
+            $this->acompanantes($request),
+            $this->usuarioId($request),
         ));
     }
 
@@ -64,6 +67,7 @@ final readonly class AsignacionInspeccionController
         return new JsonResponse($useCase->execute(
             $pk,
             (int) $request->validated('inspector_id'),
+            $this->acompanantes($request),
             (string) $request->validated('motivo'),
             $this->texto($request->validated('fecha_programada')),
             $this->texto($request->validated('indicaciones')),
@@ -86,6 +90,16 @@ final readonly class AsignacionInspeccionController
     private function usuarioId(Request $request): int
     {
         return (int) $request->user()?->getAuthIdentifier();
+    }
+
+    /** @return array<int, int>|null null si el pedido no trae el campo (se conserva el equipo) */
+    private function acompanantes(Request $request): ?array
+    {
+        if (! $request->has('acompanantes')) {
+            return null;
+        }
+
+        return array_map('intval', (array) $request->validated('acompanantes'));
     }
 
     private function texto(mixed $valor): ?string

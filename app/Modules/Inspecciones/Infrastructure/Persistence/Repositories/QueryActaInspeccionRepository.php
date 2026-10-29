@@ -95,6 +95,13 @@ final readonly class QueryActaInspeccionRepository implements ActaInspeccionRepo
                     'fecha_registro' => now(),
                 ], array_map(static fn ($estado) => $estado->value, $datos->checklist)));
 
+                // Quiénes acompañaron la visita, aunque después cambie el equipo de la asignación
+                DB::insert(<<<'SQL'
+                    INSERT INTO inspecciones_actas_acompanantes (acta_id, inspector_id)
+                    SELECT ?, inspector_id FROM inspecciones_asignaciones_acompanantes
+                    WHERE asignacion_id = ? AND fecha_retiro IS NULL
+                    SQL, [$actaId, $asignacionId]);
+
                 foreach ($fotos as $foto) {
                     $meta = $this->archivos->guardar($foto['archivo'], "inspecciones/actas/{$actaId}");
                     $guardados[] = $meta['ruta_archivo'];
@@ -147,10 +154,24 @@ final readonly class QueryActaInspeccionRepository implements ActaInspeccionRepo
             ->where(function ($q) use ($inspectorId): void {
                 $q->where('ac.inspector_id', $inspectorId)
                     ->orWhereExists(function ($sub) use ($inspectorId): void {
+                        $sub->selectRaw('1')->from('inspecciones_actas_acompanantes as aca')
+                            ->whereColumn('aca.acta_id', 'ac.id')
+                            ->where('aca.inspector_id', $inspectorId);
+                    })
+                    ->orWhereExists(function ($sub) use ($inspectorId): void {
+                        // Responsable o acompañante de la inspección vigente del expediente
                         $sub->selectRaw('1')->from('inspecciones_asignaciones as a')
                             ->whereColumn('a.expediente_id', 'ac.expediente_id')
-                            ->where('a.inspector_id', $inspectorId)
-                            ->whereNull('a.fecha_reasignacion');
+                            ->whereNull('a.fecha_reasignacion')
+                            ->where(function ($equipo) use ($inspectorId): void {
+                                $equipo->where('a.inspector_id', $inspectorId)
+                                    ->orWhereExists(function ($acomp) use ($inspectorId): void {
+                                        $acomp->selectRaw('1')->from('inspecciones_asignaciones_acompanantes as aa')
+                                            ->whereColumn('aa.asignacion_id', 'a.id')
+                                            ->where('aa.inspector_id', $inspectorId)
+                                            ->whereNull('aa.fecha_retiro');
+                                    });
+                            });
                     });
             })
             ->exists();
@@ -171,7 +192,15 @@ final readonly class QueryActaInspeccionRepository implements ActaInspeccionRepo
                 ac.observaciones, ac.resultado, ac.fecha_limite_subsanacion, ac.fecha_registro,
                 ac.fecha_anulacion IS NOT NULL AS anulada,
                 ac.fecha_anulacion, ac.motivo_anulacion, ac.documento_anulacion,
-                COALESCE(NULLIF(TRIM(CONCAT_WS(' ', un.first_name, un.last_name)), ''), un.username) AS anulado_por
+                COALESCE(NULLIF(TRIM(CONCAT_WS(' ', un.first_name, un.last_name)), ''), un.username) AS anulado_por,
+                COALESCE((
+                    SELECT json_agg(json_build_object(
+                        'id', ux.id,
+                        'nombre', COALESCE(NULLIF(TRIM(CONCAT_WS(' ', ux.first_name, ux.last_name)), ''), ux.username)
+                    ) ORDER BY ux.id)
+                    FROM inspecciones_actas_acompanantes aca JOIN auth_user ux ON ux.id = aca.inspector_id
+                    WHERE aca.acta_id = ac.id
+                ), '[]') AS acompanantes
             FROM inspecciones_actas ac
             JOIN expedientes e ON e.id = ac.expediente_id
             JOIN auth_user u ON u.id = ac.inspector_id
@@ -186,6 +215,7 @@ final readonly class QueryActaInspeccionRepository implements ActaInspeccionRepo
             $acta['aforo'] = (int) $acta['aforo'];
             $acta['visita'] = (int) $acta['visita'];
             $acta['anulada'] = (bool) $acta['anulada'];
+            $acta['acompanantes'] = json_decode((string) $acta['acompanantes'], true, flags: JSON_THROW_ON_ERROR);
 
             return $acta;
         }, $filas);
