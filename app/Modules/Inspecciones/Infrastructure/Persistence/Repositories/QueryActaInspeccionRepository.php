@@ -16,9 +16,9 @@ final readonly class QueryActaInspeccionRepository implements ActaInspeccionRepo
 {
     public function __construct(private ArchivoManagerInterface $archivos) {}
 
-    public function deExpediente(int $expedienteId): array
+    public function deExpediente(int $expedienteId, bool $soloVigentes = false): array
     {
-        return $this->consultar('ac.expediente_id = ?', [$expedienteId]);
+        return $this->consultar('ac.expediente_id = ?'.($soloVigentes ? ' AND ac.fecha_anulacion IS NULL' : ''), [$expedienteId]);
     }
 
     public function buscar(int $actaId): ?array
@@ -46,7 +46,24 @@ final readonly class QueryActaInspeccionRepository implements ActaInspeccionRepo
 
     public function existeNumero(string $numeroActa): bool
     {
-        return DB::table('inspecciones_actas')->whereRaw('UPPER(numero_acta) = ?', [mb_strtoupper($numeroActa)])->exists();
+        return DB::table('inspecciones_actas')
+            ->whereNull('fecha_anulacion')
+            ->whereRaw('UPPER(numero_acta) = ?', [mb_strtoupper($numeroActa)])
+            ->exists();
+    }
+
+    public function anular(int $actaId, string $motivo, ?string $documento, int $usuarioId): bool
+    {
+        // La condición evita que dos anulaciones simultáneas se pisen la constancia
+        return DB::table('inspecciones_actas')
+            ->where('id', $actaId)
+            ->whereNull('fecha_anulacion')
+            ->update([
+                'fecha_anulacion' => now(),
+                'motivo_anulacion' => $motivo,
+                'documento_anulacion' => $documento,
+                'anulado_por' => $usuarioId,
+            ]) === 1;
     }
 
     public function registrar(
@@ -151,12 +168,16 @@ final readonly class QueryActaInspeccionRepository implements ActaInspeccionRepo
                 COALESCE(NULLIF(TRIM(CONCAT_WS(' ', u.first_name, u.last_name)), ''), u.username) AS inspector_nombre,
                 ac.numero_acta, ac.visita, ac.fecha_visita, ac.area_m2, ac.aforo,
                 ac.extintores, ac.senalizacion, ac.luces_emergencia, ac.tableros_electricos,
-                ac.observaciones, ac.resultado, ac.fecha_limite_subsanacion, ac.fecha_registro
+                ac.observaciones, ac.resultado, ac.fecha_limite_subsanacion, ac.fecha_registro,
+                ac.fecha_anulacion IS NOT NULL AS anulada,
+                ac.fecha_anulacion, ac.motivo_anulacion, ac.documento_anulacion,
+                COALESCE(NULLIF(TRIM(CONCAT_WS(' ', un.first_name, un.last_name)), ''), un.username) AS anulado_por
             FROM inspecciones_actas ac
             JOIN expedientes e ON e.id = ac.expediente_id
             JOIN auth_user u ON u.id = ac.inspector_id
+            LEFT JOIN auth_user un ON un.id = ac.anulado_por
             WHERE {$condicion}
-            ORDER BY ac.visita
+            ORDER BY ac.visita, ac.fecha_registro
             SQL, $parametros);
 
         return array_map(static function ($fila): array {
@@ -164,6 +185,7 @@ final readonly class QueryActaInspeccionRepository implements ActaInspeccionRepo
             $acta['area_m2'] = (float) $acta['area_m2'];
             $acta['aforo'] = (int) $acta['aforo'];
             $acta['visita'] = (int) $acta['visita'];
+            $acta['anulada'] = (bool) $acta['anulada'];
 
             return $acta;
         }, $filas);

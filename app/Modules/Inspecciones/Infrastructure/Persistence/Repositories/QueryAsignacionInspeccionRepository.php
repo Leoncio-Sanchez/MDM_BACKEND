@@ -21,17 +21,29 @@ final readonly class QueryAsignacionInspeccionRepository implements AsignacionIn
         AND NOT EXISTS (SELECT 1 FROM expedientes_anulaciones ea WHERE ea.expediente_id = e.id)
         SQL;
 
-    /** Sin acta Aprobada ni Desaprobada: todavía hay que visitar el local */
+    /** Sin acta vigente Aprobada ni Desaprobada: todavía hay que visitar el local */
     private const SIN_DICTAMEN_FINAL = <<<'SQL'
-        NOT EXISTS (SELECT 1 FROM inspecciones_actas acf WHERE acf.expediente_id = e.id AND acf.resultado IN ('APROBADO', 'DESAPROBADO'))
+        NOT EXISTS (
+            SELECT 1 FROM inspecciones_actas acf
+            WHERE acf.expediente_id = e.id AND acf.fecha_anulacion IS NULL AND acf.resultado IN ('APROBADO', 'DESAPROBADO')
+        )
         SQL;
 
-    /** Última acta del expediente "e" (alias "uact") */
+    /**
+     * Última acta vigente del expediente "e" (alias "uact") y, si después se anuló la que
+     * seguía, esa acta anulada (alias "anu"): el inspector debe volver a registrar esa visita.
+     */
     private const ULTIMA_ACTA = <<<'SQL'
         LEFT JOIN LATERAL (
             SELECT id, numero_acta, visita, resultado, fecha_limite_subsanacion, observaciones
-            FROM inspecciones_actas WHERE expediente_id = e.id ORDER BY visita DESC LIMIT 1
+            FROM inspecciones_actas WHERE expediente_id = e.id AND fecha_anulacion IS NULL ORDER BY visita DESC LIMIT 1
         ) uact ON TRUE
+        LEFT JOIN LATERAL (
+            SELECT numero_acta, motivo_anulacion, fecha_anulacion
+            FROM inspecciones_actas
+            WHERE expediente_id = e.id AND fecha_anulacion IS NOT NULL AND visita > COALESCE(uact.visita, 0)
+            ORDER BY fecha_anulacion DESC LIMIT 1
+        ) anu ON TRUE
         SQL;
 
     private const CAMPOS_ULTIMA_ACTA = <<<'SQL'
@@ -40,7 +52,10 @@ final readonly class QueryAsignacionInspeccionRepository implements AsignacionIn
         uact.visita AS ultima_acta_visita,
         uact.resultado AS ultima_acta_resultado,
         uact.fecha_limite_subsanacion,
-        uact.observaciones AS ultima_acta_observaciones
+        uact.observaciones AS ultima_acta_observaciones,
+        anu.numero_acta AS acta_anulada_numero,
+        anu.motivo_anulacion AS acta_anulada_motivo,
+        anu.fecha_anulacion AS acta_anulada_fecha
         SQL;
 
     private const NOMBRE_SOLICITANTE = "TRIM(CONCAT_WS(' ', p.apellido_paterno, p.apellido_materno, p.nombres))";
@@ -135,6 +150,15 @@ final readonly class QueryAsignacionInspeccionRepository implements AsignacionIn
             SELECT 1 AS si FROM expedientes e
             JOIN tipos_procedimiento_tupa tpt ON tpt.id = e.tipo_procedimiento_tupa_id
             WHERE e.id = ? AND {$this->esperaInspeccion()}
+            SQL, [$expedienteId]) !== null;
+    }
+
+    public function expedientePendienteDeResolucion(int $expedienteId): bool
+    {
+        return DB::selectOne(<<<SQL
+            SELECT 1 AS si FROM expedientes e
+            JOIN tipos_procedimiento_tupa tpt ON tpt.id = e.tipo_procedimiento_tupa_id
+            WHERE e.id = ? AND {$this->esperaInspeccion(sinDictamenFinal: false)}
             SQL, [$expedienteId]) !== null;
     }
 

@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Modules\Inspecciones\Presentation\Controllers;
 
+use App\Modules\Inspecciones\Application\UseCases\AnularActaUseCase;
 use App\Modules\Inspecciones\Application\UseCases\RegistrarActaUseCase;
 use App\Modules\Inspecciones\Domain\Contracts\ActaInspeccionRepositoryInterface;
 use App\Modules\Inspecciones\Domain\Exceptions\ActaNoEncontrada;
 use App\Modules\Inspecciones\Domain\ValueObjects\DatosActa;
 use App\Modules\Inspecciones\Domain\ValueObjects\EstadoChecklist;
+use App\Modules\Inspecciones\Presentation\Requests\AnularActaRequest;
 use App\Modules\Inspecciones\Presentation\Requests\RegistrarActaRequest;
 use DateTimeImmutable;
 use DateTimeZone;
@@ -99,6 +101,20 @@ final readonly class ActaInspeccionController
         }
 
         return response((string) $contenido, 200, $cabeceras);
+    }
+
+    // ── Jefe de ITSE ──────────────────────────────────────────────────────────
+
+    public function anular(int $actaId, AnularActaRequest $request, AnularActaUseCase $useCase): JsonResponse
+    {
+        $documento = $request->validated('documento');
+
+        return new JsonResponse($useCase->execute(
+            $actaId,
+            (string) $request->validated('motivo'),
+            is_string($documento) ? $documento : null,
+            $this->usuarioId($request),
+        ));
     }
 
     private function exigirAlcanceInspector(int $actaId, Request $request): void

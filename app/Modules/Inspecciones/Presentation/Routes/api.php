@@ -6,7 +6,7 @@ use App\Modules\Inspecciones\Presentation\Controllers\ActaInspeccionController;
 use App\Modules\Inspecciones\Presentation\Controllers\AsignacionInspeccionController;
 use Illuminate\Support\Facades\Route;
 
-// Jefe de ITSE: asigna, reprograma y reasigna inspectores
+// Jefe de ITSE: asigna, reprograma y reasigna inspectores; anula actas registradas con error
 Route::middleware(['auth:api', 'rol:ADMIN_MUNICIPALIDAD', 'permiso:jefe_itse'])->prefix('api/lf-itse/inspecciones')->group(function () {
     Route::get('por-inspeccionar/', [AsignacionInspeccionController::class, 'porInspeccionar']);
     Route::get('inspectores/', [AsignacionInspeccionController::class, 'inspectores']);
@@ -14,6 +14,7 @@ Route::middleware(['auth:api', 'rol:ADMIN_MUNICIPALIDAD', 'permiso:jefe_itse'])-
     Route::put('asignaciones/{pk}/', [AsignacionInspeccionController::class, 'actualizar'])->whereNumber('pk');
     Route::post('asignaciones/{pk}/reasignar/', [AsignacionInspeccionController::class, 'reasignar'])->whereNumber('pk');
     Route::get('expedientes/{expedienteId}/historial/', [AsignacionInspeccionController::class, 'historial'])->whereNumber('expedienteId');
+    Route::post('actas/{actaId}/anular/', [ActaInspeccionController::class, 'anular'])->whereNumber('actaId');
 });
 
 // Actas (solo lectura): la oficina de ITSE las necesita para emitir el certificado o denegarlo
