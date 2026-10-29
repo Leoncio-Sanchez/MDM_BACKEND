@@ -54,6 +54,9 @@ it('deniega licencia creando autorizacion improcedente tipo LF', function () {
         ->once()
         ->andReturnFalse();
 
+    $this->expedientes->shouldReceive('requiereAutorizacion')->once()->andReturnTrue();
+    $this->autorizaciones->shouldReceive('existe')->once()->andReturnFalse();
+
     $this->autorizaciones->shouldReceive('crear')
         ->once()
         ->withArgs(function (AutorizacionImprocedente $a) {

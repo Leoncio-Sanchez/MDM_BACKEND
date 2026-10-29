@@ -147,6 +147,15 @@ final readonly class EloquentExpedienteRepository implements ExpedienteRepositor
             ->exists();
     }
 
+    public function requiereAutorizacion(int $expedienteId, TipoAutorizacion $tipo): bool
+    {
+        return DB::table('expedientes as e')
+            ->join('tipos_procedimiento_tupa as tpt', 'tpt.id', '=', 'e.tipo_procedimiento_tupa_id')
+            ->where('e.id', $expedienteId)
+            ->where($tipo === TipoAutorizacion::ITSE ? 'tpt.requiere_itse' : 'tpt.requiere_lf', true)
+            ->exists();
+    }
+
     /**
      * @return array<int, array<string, mixed>>
      */

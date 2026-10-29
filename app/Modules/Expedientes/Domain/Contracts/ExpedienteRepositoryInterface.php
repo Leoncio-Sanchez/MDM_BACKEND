@@ -6,6 +6,7 @@ namespace App\Modules\Expedientes\Domain\Contracts;
 
 use App\Modules\Expedientes\Domain\Entities\Expediente;
 use App\Modules\Expedientes\Domain\ValueObjects\AnulacionExpediente;
+use App\Modules\Expedientes\Domain\ValueObjects\TipoAutorizacion;
 
 interface ExpedienteRepositoryInterface
 {
@@ -35,6 +36,9 @@ interface ExpedienteRepositoryInterface
     public function tieneLicencia(int $expedienteId): bool;
 
     public function tieneItse(int $expedienteId): bool;
+
+    /** ¿El procedimiento TUPA del expediente incluye esa autorización (requiere_lf / requiere_itse)? */
+    public function requiereAutorizacion(int $expedienteId, TipoAutorizacion $tipo): bool;
 
     /**
      * Búsqueda por filtro con joins y cálculo de autorizaciones pendientes.

@@ -63,7 +63,7 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         // Antes respondían 500: son datos inválidos del pedido
-        $exceptions->render(function (\App\Modules\Expedientes\Domain\Exceptions\ExpedienteInvalido|\App\Modules\Expedientes\Domain\Exceptions\SolicitanteNoValido|\App\Modules\Expedientes\Domain\Exceptions\TipoProcedimientoNoValido $e, Request $request) {
+        $exceptions->render(function (\App\Modules\Expedientes\Domain\Exceptions\ExpedienteInvalido|\App\Modules\Expedientes\Domain\Exceptions\DenegatoriaInvalida|\App\Modules\Expedientes\Domain\Exceptions\SolicitanteNoValido|\App\Modules\Expedientes\Domain\Exceptions\TipoProcedimientoNoValido $e, Request $request) {
             return response()->json(['error' => $e->getMessage()], 422);
         });
 

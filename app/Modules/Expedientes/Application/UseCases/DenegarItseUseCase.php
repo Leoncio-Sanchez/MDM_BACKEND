@@ -8,6 +8,7 @@ use App\Modules\Expedientes\Application\DTOs\DenegarItseDTO;
 use App\Modules\Expedientes\Domain\Contracts\AutorizacionImprocedenteRepositoryInterface;
 use App\Modules\Expedientes\Domain\Contracts\ExpedienteRepositoryInterface;
 use App\Modules\Expedientes\Domain\Entities\AutorizacionImprocedente;
+use App\Modules\Expedientes\Domain\Exceptions\DenegatoriaInvalida;
 use App\Modules\Expedientes\Domain\Exceptions\ExpedienteNoEncontrado;
 use App\Modules\Expedientes\Domain\Exceptions\ItseYaEmitidaError;
 use App\Modules\Expedientes\Domain\ValueObjects\TipoAutorizacion;
@@ -28,7 +29,14 @@ final readonly class DenegarItseUseCase
         $expediente->asegurarQueNoEstaAnulado();
 
         if ($this->expedientes->tieneItse($dto->expedienteId)) {
-            throw ItseYaEmitidaError::paraExpediente($dto->expedienteId);
+            throw ItseYaEmitidaError::paraExpediente($expediente->numeroExpediente);
+        }
+        if (! $this->expedientes->requiereAutorizacion($dto->expedienteId, TipoAutorizacion::ITSE)) {
+            throw DenegatoriaInvalida::noRequiere($expediente->numeroExpediente, TipoAutorizacion::ITSE);
+        }
+        // La denegatoria no se borra ni se repite: es la respuesta final al solicitante
+        if ($this->autorizaciones->existe($dto->expedienteId, TipoAutorizacion::ITSE)) {
+            throw DenegatoriaInvalida::yaRegistrada($expediente->numeroExpediente, TipoAutorizacion::ITSE);
         }
 
         $autorizacion = AutorizacionImprocedente::crear(

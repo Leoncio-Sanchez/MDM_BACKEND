@@ -8,8 +8,8 @@ use RuntimeException;
 
 final class ItseYaEmitidaError extends RuntimeException
 {
-    public static function paraExpediente(int $expedienteId): self
+    public static function paraExpediente(int $numeroExpediente): self
     {
-        return new self("El expediente {$expedienteId} ya tiene una ITSE emitida. Para declararla desfavorable primero debe eliminar la ITSE.");
+        return new self("El expediente N° {$numeroExpediente} ya tiene su certificado ITSE emitido: no se puede denegar.");
     }
 }
