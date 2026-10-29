@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Usuarios\Presentation\Resources;
 
+use App\Modules\Usuarios\Domain\Entities\UsuarioPerfil;
 use App\Modules\Usuarios\Infrastructure\Persistence\Models\UsuarioModel;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -27,12 +28,10 @@ final class UsuarioResource extends JsonResource
 
         $perfil = null;
         if ($u->perfil !== null) {
-            $perfil = [
-                'expedientes' => (bool) $u->perfil->expedientes,
-                'licencias' => (bool) $u->perfil->licencias,
-                'itse' => (bool) $u->perfil->itse,
-                'admin' => (bool) $u->perfil->admin,
-            ];
+            $perfil = [];
+            foreach (UsuarioPerfil::CASILLAS as $casilla) {
+                $perfil[$casilla] = (bool) $u->perfil->getAttribute($casilla);
+            }
         }
 
         return [

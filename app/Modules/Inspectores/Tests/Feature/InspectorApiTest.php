@@ -7,6 +7,7 @@ namespace App\Modules\Inspectores\Tests\Feature;
 use App\Modules\Seguridad\Domain\Contracts\TokenServiceInterface;
 use App\Modules\Seguridad\Domain\ValueObjects\AuthenticatedUser;
 use App\Modules\Usuarios\Infrastructure\Persistence\Models\UsuarioModel;
+use App\Modules\Usuarios\Infrastructure\Persistence\Models\UsuarioPerfilModel;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
@@ -42,9 +43,26 @@ final class InspectorApiTest extends TestCase
         $this->token = $tokenService->issue($authUser)->access;
     }
 
+    /**
+     * Inspector = usuario con la casilla es_inspector en su perfil.
+     *
+     * @param  array<string, mixed>  $datos
+     */
+    private function inspector(array $datos): UsuarioModel
+    {
+        $usuario = UsuarioModel::create($datos);
+        UsuarioPerfilModel::create([
+            'user_id' => $usuario->id, 'expedientes' => false, 'licencias' => false, 'itse' => false, 'admin' => false,
+            'es_inspector' => true, 'es_jefe_itse' => false, 'reportes_completos' => false,
+            'user_id_digitador' => 1, 'fecha_digitacion' => now(),
+        ]);
+
+        return $usuario;
+    }
+
     public function test_listar_inspectores_devuelve_200(): void
     {
-        UsuarioModel::create(\Tests\Fixtures\UsuarioAuth::datos([
+        $this->inspector(\Tests\Fixtures\UsuarioAuth::datos([
             'username' => 'inspector_carlos',
             'first_name' => 'Carlos',
             'last_name' => 'Sanchez',
@@ -78,7 +96,7 @@ final class InspectorApiTest extends TestCase
 
     public function test_obtener_inspector_por_id(): void
     {
-        $insp = UsuarioModel::create(\Tests\Fixtures\UsuarioAuth::datos([
+        $insp = $this->inspector(\Tests\Fixtures\UsuarioAuth::datos([
             'username' => 'inspector_detalle',
             'first_name' => 'Pedro',
             'password' => 'somehash',
@@ -94,7 +112,7 @@ final class InspectorApiTest extends TestCase
 
     public function test_buscar_inspectores(): void
     {
-        UsuarioModel::create(\Tests\Fixtures\UsuarioAuth::datos([
+        $this->inspector(\Tests\Fixtures\UsuarioAuth::datos([
             'username' => 'inspector_busqueda',
             'first_name' => 'Mariana',
             'password' => 'somehash',
@@ -111,7 +129,7 @@ final class InspectorApiTest extends TestCase
 
     public function test_actualizar_inspector(): void
     {
-        $insp = UsuarioModel::create(\Tests\Fixtures\UsuarioAuth::datos([
+        $insp = $this->inspector(\Tests\Fixtures\UsuarioAuth::datos([
             'username' => 'inspector_mod',
             'first_name' => 'Luis',
             'password' => 'somehash',
@@ -128,9 +146,10 @@ final class InspectorApiTest extends TestCase
         $this->assertSame('Luis Alberto Ramirez', $response->json('nombre_completo'));
     }
 
-    public function test_eliminar_inspector(): void
+    /** Ya no borra la cuenta: la desactiva (los usuarios no se eliminan) */
+    public function test_eliminar_inspector_lo_desactiva(): void
     {
-        $insp = UsuarioModel::create(\Tests\Fixtures\UsuarioAuth::datos([
+        $insp = $this->inspector(\Tests\Fixtures\UsuarioAuth::datos([
             'username' => 'inspector_eliminar',
             'password' => 'somehash',
             'is_active' => true,
@@ -140,6 +159,6 @@ final class InspectorApiTest extends TestCase
             ->deleteJson('/api/lf-itse/inspectores/'.$insp->id.'/');
 
         $response->assertStatus(204);
-        $this->assertNull(UsuarioModel::find($insp->id));
+        $this->assertFalse((bool) UsuarioModel::find($insp->id)?->is_active);
     }
 }

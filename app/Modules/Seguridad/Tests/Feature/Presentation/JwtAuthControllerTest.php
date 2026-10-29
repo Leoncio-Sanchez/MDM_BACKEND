@@ -196,7 +196,11 @@ final class JwtAuthControllerTest extends TestCase
             'id' => 1,
             'username' => 'admin',
             'role' => 'ADMIN_MUNICIPALIDAD',
-            'permisos' => ['expedientes' => true, 'licencias' => true, 'itse' => true, 'admin' => true],
+            'permisos' => [
+                'expedientes' => true, 'licencias' => true, 'itse' => true, 'admin' => true,
+                // Superusuario: jefe ITSE y reportes, pero no inspector (es una función, no un privilegio)
+                'inspector' => false, 'jefe_itse' => true, 'reportes' => true,
+            ],
         ], $data);
     }
 

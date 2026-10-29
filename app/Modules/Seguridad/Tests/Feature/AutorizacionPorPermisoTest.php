@@ -86,7 +86,10 @@ final class AutorizacionPorPermisoTest extends TestCase
         $this->actingAs($this->personal(superusuario: true), 'api')
             ->getJson('/api/auth/users/me/')
             ->assertOk()
-            ->assertJsonPath('permisos', ['expedientes' => true, 'licencias' => true, 'itse' => true, 'admin' => true]);
+            ->assertJsonPath('permisos', [
+                'expedientes' => true, 'licencias' => true, 'itse' => true, 'admin' => true,
+                'inspector' => false, 'jefe_itse' => true, 'reportes' => true,
+            ]);
     }
 
     public function test_me_devuelve_los_accesos_del_perfil(): void
@@ -94,7 +97,10 @@ final class AutorizacionPorPermisoTest extends TestCase
         $this->actingAs($this->personal(['admin' => true]), 'api')
             ->getJson('/api/auth/users/me/')
             ->assertOk()
-            ->assertJsonPath('permisos', ['expedientes' => false, 'licencias' => false, 'itse' => false, 'admin' => true]);
+            ->assertJsonPath('permisos', [
+                'expedientes' => false, 'licencias' => false, 'itse' => false, 'admin' => true,
+                'inspector' => false, 'jefe_itse' => false, 'reportes' => false,
+            ]);
     }
 
     public function test_quitar_un_acceso_aplica_de_inmediato(): void

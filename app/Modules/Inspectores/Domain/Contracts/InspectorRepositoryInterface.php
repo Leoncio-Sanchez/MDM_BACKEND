@@ -16,14 +16,17 @@ interface InspectorRepositoryInterface
     public function buscarPorId(int $id): ?UsuarioModel;
 
     /**
+     * Crea la cuenta con su perfil de inspector.
+     *
      * @param  array<string, mixed>  $datos
      */
-    public function crear(array $datos): UsuarioModel;
+    public function crear(array $datos, int $digitadorId): UsuarioModel;
 
     /**
      * @param  array<string, mixed>  $datos
      */
     public function actualizar(int $id, array $datos): ?UsuarioModel;
 
-    public function eliminar(int $id): bool;
+    /** Los usuarios no se borran: la cuenta queda inactiva. false si no es un inspector */
+    public function desactivar(int $id): bool;
 }

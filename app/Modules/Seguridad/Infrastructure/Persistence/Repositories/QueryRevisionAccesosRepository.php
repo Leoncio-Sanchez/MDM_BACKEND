@@ -20,7 +20,9 @@ final readonly class QueryRevisionAccesosRepository implements RevisionAccesosRe
             ->where(fn ($q) => $q
                 ->whereNull('p.id')
                 ->orWhere(fn ($s) => $s->where('p.expedientes', false)->where('p.licencias', false)
-                    ->where('p.itse', false)->where('p.admin', false)))
+                    ->where('p.itse', false)->where('p.admin', false)
+                    // Un inspector o un usuario solo de reportes sí tiene a qué entrar
+                    ->where('p.es_inspector', false)->where('p.reportes_completos', false)))
             ->orderBy('u.username')
             ->get(['u.id', 'u.username', 'u.first_name', 'u.last_name', 'p.id as perfil_id']);
 

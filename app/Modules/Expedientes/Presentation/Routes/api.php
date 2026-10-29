@@ -5,14 +5,18 @@ declare(strict_types=1);
 use App\Modules\Expedientes\Presentation\Controllers\ExpedienteController;
 use Illuminate\Support\Facades\Route;
 
+// Expedientes en riesgo de plazo (reporte): también para "reportes completos" (solo lectura)
+Route::middleware(['auth:api', 'rol:ADMIN_MUNICIPALIDAD', 'permiso:expedientes|licencias|itse|reportes'])->prefix('api/lf-itse')->group(function () {
+    Route::get('expedientes/pendientes/', [ExpedienteController::class, 'pendientes'])
+        ->name('expedientes.pendientes');
+});
+
 Route::middleware(['auth:api', 'rol:ADMIN_MUNICIPALIDAD', 'permiso:expedientes|licencias|itse,expedientes'])->prefix('api/lf-itse')->group(function () {
     // ── 7A Estáticas ──────────────────────────────────────────────────────────
     Route::get('expedientes/', [ExpedienteController::class, 'index']);
     Route::post('expedientes/', [ExpedienteController::class, 'store']);
 
     // ── 7B Endpoints SQL crudo + ORM ─────────────────────────────────────────
-    Route::get('expedientes/pendientes/', [ExpedienteController::class, 'pendientes'])
-        ->name('expedientes.pendientes');
     Route::get('expedientes/buscar/', [ExpedienteController::class, 'buscar'])
         ->name('expedientes.buscar');
     Route::get('expedientes/consulta/', [ExpedienteController::class, 'consulta'])

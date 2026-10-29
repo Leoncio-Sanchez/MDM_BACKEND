@@ -4,9 +4,13 @@ declare(strict_types=1);
 use App\Modules\ITSE\Presentation\Controllers\ItseController;
 use Illuminate\Support\Facades\Route;
 
+// Reporte de certificados por vencer: también lo consulta quien tiene "reportes completos" (solo lectura)
+Route::middleware(['auth:api', 'rol:ADMIN_MUNICIPALIDAD', 'permiso:itse|reportes'])->prefix('api/lf-itse')->group(function () {
+    Route::get('itse/por-renovar/', [ItseController::class, 'porRenovar']);
+});
+
 Route::middleware(['auth:api', 'rol:ADMIN_MUNICIPALIDAD', 'permiso:itse'])->prefix('api/lf-itse')->group(function () {
     // ── 6B estáticas (ANTES de las dinámicas con {pk}) ───────────────────────
-    Route::get('itse/por-renovar/', [ItseController::class, 'porRenovar']);
     Route::get('itse/consulta/', [ItseController::class, 'consulta']);
 
     // ── 6A estáticas ─────────────────────────────────────────────────────────
