@@ -66,7 +66,7 @@ it('crea un ITSE correctamente', function () {
         $mock->shouldReceive('existe')->andReturn(true);
     });
     $this->mock(AutorizacionImprocedenteReadRepositoryInterface::class, function ($mock) {
-        $mock->shouldReceive('existeParaExpedienteYTipo')->andReturn(false);
+        $mock->shouldReceive('existe')->with(Mockery::any(), 'ITSE')->andReturn(false);
     });
 
     $data = [

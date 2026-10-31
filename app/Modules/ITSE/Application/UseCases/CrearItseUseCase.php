@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Modules\ITSE\Application\UseCases;
 
 use App\Modules\ITSE\Application\DTOs\CrearItseDTO;
+use App\Modules\ITSE\Domain\Contracts\AutorizacionImprocedenteReadRepositoryInterface;
 use App\Modules\ITSE\Domain\Contracts\ExpedienteReadRepositoryInterface;
 use App\Modules\ITSE\Domain\Contracts\InspeccionReadRepositoryInterface;
 use App\Modules\ITSE\Domain\Contracts\ItseRepositoryInterface;
@@ -24,6 +25,7 @@ final readonly class CrearItseUseCase
         private PersonaReadRepositoryInterface $personas,
         private NivelRiesgoReadRepositoryInterface $niveles,
         private InspeccionReadRepositoryInterface $inspecciones,
+        private AutorizacionImprocedenteReadRepositoryInterface $improcedentes,
     ) {}
 
     public function execute(CrearItseDTO $dto): Itse
@@ -47,6 +49,11 @@ final readonly class CrearItseUseCase
 
             if ($this->expedientes->estaAnulado($dto->expedienteId)) {
                 throw ExpedienteNoValidoItse::anulado($dto->expedienteId);
+            }
+
+            // La denegatoria no se deshace: ese expediente ya no admite certificado
+            if ($this->improcedentes->existe($dto->expedienteId, 'ITSE')) {
+                throw ExpedienteNoValidoItse::denegado($dto->expedienteId);
             }
 
             // El certificado se sustenta en el acta Aprobada del inspector (D.S. N° 002-2018-PCM)

@@ -6,6 +6,6 @@ final class LicenciaDenegadaError extends \DomainException
 {
     public static function porExpediente(int $expedienteId): self
     {
-        return new self("El expediente {$expedienteId} tiene una autorización improcedente de tipo LF.");
+        return new self("El expediente con ID {$expedienteId} tiene registrada la denegatoria de la licencia: no se puede emitir una licencia sobre él.");
     }
 }

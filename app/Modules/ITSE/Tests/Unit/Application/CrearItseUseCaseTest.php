@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 use App\Modules\ITSE\Application\DTOs\CrearItseDTO;
 use App\Modules\ITSE\Application\UseCases\CrearItseUseCase;
+use App\Modules\ITSE\Domain\Contracts\AutorizacionImprocedenteReadRepositoryInterface;
 use App\Modules\ITSE\Domain\Contracts\ExpedienteReadRepositoryInterface;
 use App\Modules\ITSE\Domain\Contracts\InspeccionReadRepositoryInterface;
 use App\Modules\ITSE\Domain\Contracts\ItseRepositoryInterface;
@@ -23,7 +24,10 @@ beforeEach(function () {
     // Sin acta exigible: estos casos prueban las demás validaciones
     $this->inspecciones = Mockery::mock(InspeccionReadRepositoryInterface::class);
     $this->inspecciones->shouldReceive('situacion')->andReturn(null);
-    $this->useCase = new CrearItseUseCase($this->itses, $this->expedientes, $this->personas, $this->niveles, $this->inspecciones);
+    // Sin denegatoria registrada, salvo en el caso que la prueba
+    $this->improcedentes = Mockery::mock(AutorizacionImprocedenteReadRepositoryInterface::class);
+    $this->improcedentes->shouldReceive('existe')->with(Mockery::any(), 'ITSE')->andReturn(false)->byDefault();
+    $this->useCase = new CrearItseUseCase($this->itses, $this->expedientes, $this->personas, $this->niveles, $this->inspecciones, $this->improcedentes);
     
     DB::shouldReceive('transaction')->andReturnUsing(function ($callback) {
         return $callback();
@@ -56,3 +60,17 @@ it('lanza ExpedienteNoValidoItse si expediente no existe', function () {
     
     $this->useCase->execute($dto);
 })->throws(ExpedienteNoValidoItse::class);
+
+it('rechaza el certificado si el expediente tiene la denegatoria de ITSE y no lo crea', function () {
+    $dto = new CrearItseDTO(123, CarbonImmutable::now(), null, CarbonImmutable::now()->addYear(), 'A', 'B', 'C', 10.5, 20, 'R123', null, false, 1, 1, null, 1, 1, 1, 1);
+
+    $this->itses->shouldReceive('existeNumero')->andReturn(false);
+    $this->itses->shouldReceive('existeRecibo')->andReturn(false);
+    $this->expedientes->shouldReceive('existe')->with(1)->andReturn(true);
+    $this->expedientes->shouldReceive('estaAnulado')->with(1)->andReturn(false);
+    $this->improcedentes->shouldReceive('existe')->with(1, 'ITSE')->andReturn(true);
+    $this->itses->shouldNotReceive('crear');
+
+    expect(fn () => $this->useCase->execute($dto))
+        ->toThrow(ExpedienteNoValidoItse::class, 'denegatoria de ITSE');
+});

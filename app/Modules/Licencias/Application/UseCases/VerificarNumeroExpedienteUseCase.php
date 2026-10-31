@@ -23,8 +23,13 @@ final readonly class VerificarNumeroExpedienteUseCase {
             ];
         }
 
-        // Mock autorizacion improcedente - will be moved to its own module/repo later
-        // In the meantime, we skip the DB::table check to keep UseCase pure.
+        if ($this->expedientes->tieneAutorizacionImprocedente($expediente->id ?? 0, 'LF')) {
+            return [
+                'expediente_id' => $expediente->id,
+                'mensaje' => 'El expediente tiene registrada la denegatoria de la licencia: no se puede emitir.',
+                'se_puede_emitir_licencia' => false,
+            ];
+        }
 
         $licencia = $this->licencias->buscarPorExpedienteId($expediente->id ?? 0);
 

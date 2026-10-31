@@ -7,6 +7,7 @@ use App\Modules\Licencias\Domain\Contracts\ExpedienteReadRepositoryInterface;
 use App\Modules\Licencias\Domain\Contracts\LicenciaRepositoryInterface;
 use App\Modules\Licencias\Domain\Entities\Licencia;
 use App\Modules\Licencias\Domain\Exceptions\ExpedienteNoValido;
+use App\Modules\Licencias\Domain\Exceptions\LicenciaDenegadaError;
 use App\Modules\Licencias\Domain\Exceptions\LicenciaDuplicadaError;
 
 /** Payload completo tal como lo envía el formulario (lo que deja pasar CrearLicenciaRequest). */
@@ -38,6 +39,7 @@ it('crea la licencia con todos los datos del formulario', function () {
     $expedienteRepo = Mockery::mock(ExpedienteReadRepositoryInterface::class);
     $expedienteRepo->shouldReceive('buscarPorId')->with(1)->once()->andReturn((object) ['id' => 1]);
     $expedienteRepo->shouldReceive('estaAnulado')->with(1)->andReturn(false);
+    $expedienteRepo->shouldReceive('tieneAutorizacionImprocedente')->with(1, 'LF')->andReturn(false);
 
     $licenciaRepo = Mockery::mock(LicenciaRepositoryInterface::class);
     $licenciaRepo->shouldReceive('existeNumeroLicencia')->with(1001)->once()->andReturn(false);
@@ -85,6 +87,7 @@ it('lanza LicenciaDuplicadaError si el número ya existe y no intenta insertar',
     $expedienteRepo = Mockery::mock(ExpedienteReadRepositoryInterface::class);
     $expedienteRepo->shouldReceive('buscarPorId')->andReturn((object) ['id' => 1]);
     $expedienteRepo->shouldReceive('estaAnulado')->andReturn(false);
+    $expedienteRepo->shouldReceive('tieneAutorizacionImprocedente')->andReturn(false);
 
     $licenciaRepo = Mockery::mock(LicenciaRepositoryInterface::class);
     $licenciaRepo->shouldReceive('existeNumeroLicencia')->with(1001)->once()->andReturn(true);
@@ -94,4 +97,19 @@ it('lanza LicenciaDuplicadaError si el número ya existe y no intenta insertar',
 
     expect(fn () => $useCase->execute(CrearLicenciaDTO::fromArray(payloadLicencia())))
         ->toThrow(LicenciaDuplicadaError::class);
+});
+
+it('rechaza la licencia si el expediente tiene la denegatoria de licencia y no la crea', function () {
+    $expedienteRepo = Mockery::mock(ExpedienteReadRepositoryInterface::class);
+    $expedienteRepo->shouldReceive('buscarPorId')->with(1)->andReturn((object) ['id' => 1]);
+    $expedienteRepo->shouldReceive('estaAnulado')->with(1)->andReturn(false);
+    $expedienteRepo->shouldReceive('tieneAutorizacionImprocedente')->with(1, 'LF')->once()->andReturn(true);
+
+    $licenciaRepo = Mockery::mock(LicenciaRepositoryInterface::class);
+    $licenciaRepo->shouldNotReceive('crear');
+
+    $useCase = new CrearLicenciaUseCase($licenciaRepo, $expedienteRepo);
+
+    expect(fn () => $useCase->execute(CrearLicenciaDTO::fromArray(payloadLicencia())))
+        ->toThrow(LicenciaDenegadaError::class, 'denegatoria de la licencia');
 });
