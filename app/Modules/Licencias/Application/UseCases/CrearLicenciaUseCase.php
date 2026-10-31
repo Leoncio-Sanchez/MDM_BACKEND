@@ -6,6 +6,7 @@ use App\Modules\Licencias\Domain\Contracts\ExpedienteReadRepositoryInterface;
 use App\Modules\Licencias\Domain\Contracts\LicenciaRepositoryInterface;
 use App\Modules\Licencias\Domain\Entities\Licencia;
 use App\Modules\Licencias\Domain\Exceptions\ExpedienteNoValido;
+use App\Modules\Licencias\Domain\Exceptions\LicenciaDenegadaError;
 use App\Modules\Licencias\Domain\Exceptions\LicenciaDuplicadaError;
 use App\Modules\Licencias\Domain\Exceptions\ReciboPagoDuplicadoError;
 use Ramsey\Uuid\Uuid;
@@ -22,6 +23,10 @@ final readonly class CrearLicenciaUseCase {
             }
             if ($this->expedientes->estaAnulado($dto->expedienteId)) {
                 throw ExpedienteNoValido::anulado($dto->expedienteId);
+            }
+            // La denegatoria no se deshace: ese expediente ya no admite licencia
+            if ($this->expedientes->tieneAutorizacionImprocedente($dto->expedienteId, 'LF')) {
+                throw LicenciaDenegadaError::porExpediente($dto->expedienteId);
             }
         }
 

@@ -85,8 +85,7 @@ Se emite en `/admin/itse` sobre el expediente, indicando titular y conductor del
 
 - Exige un **acta Aprobada** vigente para expedientes recibidos desde la fecha configurada en
   `ITSE_ACTA_OBLIGATORIA_DESDE` (si está vacía, para todos).
-- No se emite sobre un expediente anulado.
-- **Pendiente**: hoy no se impide emitirlo sobre un expediente que ya tiene la denegatoria de ITSE.
+- No se emite sobre un expediente anulado ni sobre uno con la denegatoria de ITSE registrada.
 - Luego se puede registrar la notificación, inactivarlo (con motivo del catálogo de estados) y adjuntar archivos.
 - `/admin/itse/por-renovar` lista los certificados próximos a vencer.
 
@@ -95,9 +94,7 @@ Se emite en `/admin/itse` sobre el expediente, indicando titular y conductor del
 Se emite en `/admin/licencias-funcionamiento` sobre el expediente: tipo de licencia, titular, conductor (vacío =
 el titular conduce), nivel de riesgo, zonificación, giros y recibo de pago.
 
-- No se emite sobre un expediente anulado.
-- Al editar una licencia, el servidor rechaza un expediente con la licencia denegada. **Pendiente**: al emitirla
-  todavía no se controla.
+- No se emite ni se edita sobre un expediente anulado o con la denegatoria de licencia registrada.
 - El número de licencia y el recibo de pago no se repiten.
 - Después: notificación, inactivación con motivo y adjuntos.
 

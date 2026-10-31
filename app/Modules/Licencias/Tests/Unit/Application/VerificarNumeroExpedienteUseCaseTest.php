@@ -15,6 +15,7 @@ it('retorna que el expediente es válido', function () {
         ->with(12345, 2025)
         ->once()
         ->andReturn($expediente);
+    $expRepo->shouldReceive('tieneAutorizacionImprocedente')->with(1, 'LF')->andReturn(false);
 
     $licRepo = Mockery::mock(LicenciaRepositoryInterface::class);
     $licRepo->shouldReceive('buscarPorExpedienteId')
@@ -50,6 +51,7 @@ it('retorna false si el expediente ya tiene licencia', function () {
         ->with(12345, 2025)
         ->once()
         ->andReturn($expediente);
+    $expRepo->shouldReceive('tieneAutorizacionImprocedente')->with(1, 'LF')->andReturn(false);
 
     $licRepo = Mockery::mock(LicenciaRepositoryInterface::class);
     $licRepo->shouldReceive('buscarPorExpedienteId')
@@ -80,4 +82,19 @@ it('retorna que el expediente no existe', function () {
     $resultado = $useCase->execute($dto);
 
     expect($resultado['se_puede_emitir_licencia'])->toBeFalse();
+});
+
+it('retorna false si el expediente tiene la denegatoria de licencia', function () {
+    $expRepo = Mockery::mock(ExpedienteReadRepositoryInterface::class);
+    $expRepo->shouldReceive('buscarPorNumeroYAnio')->with(12345, 2025)->andReturn((object) ['id' => 1]);
+    $expRepo->shouldReceive('tieneAutorizacionImprocedente')->with(1, 'LF')->once()->andReturn(true);
+
+    $licRepo = Mockery::mock(LicenciaRepositoryInterface::class);
+    $licRepo->shouldNotReceive('buscarPorExpedienteId');
+
+    $resultado = (new VerificarNumeroExpedienteUseCase($licRepo, $expRepo))
+        ->execute(new VerificarExpedienteDTO(numero: '12345', anio: '2025'));
+
+    expect($resultado['se_puede_emitir_licencia'])->toBeFalse()
+        ->and($resultado['mensaje'])->toContain('denegatoria de la licencia');
 });

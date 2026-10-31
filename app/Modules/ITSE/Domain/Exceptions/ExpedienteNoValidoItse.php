@@ -22,4 +22,9 @@ final class ExpedienteNoValidoItse extends DomainException
     {
         return new self("El expediente con ID {$id} está anulado: no se puede emitir un certificado ITSE sobre él.");
     }
+
+    public static function denegado(int $id): self
+    {
+        return new self("El expediente con ID {$id} tiene registrada la denegatoria de ITSE: no se puede emitir un certificado sobre él.");
+    }
 }
