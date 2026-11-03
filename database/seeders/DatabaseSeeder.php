@@ -7,12 +7,20 @@ namespace Database\Seeders;
 use App\Modules\Seguridad\Infrastructure\Hashing\DjangoPbkdf2Hasher;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use RuntimeException;
 
 class DatabaseSeeder extends Seeder
 {
     /** Datos para desarrollo local: administrador + catálogos reales. */
     public function run(): void
     {
+        if (app()->environment('production')) {
+            throw new RuntimeException(
+                'DatabaseSeeder crea un administrador con contraseña conocida: no corre en producción. '
+                .'Use usuarios:administrador y luego db:seed --class=CatalogosSeeder (ver DEPLOY.md).',
+            );
+        }
+
         // Administrador local (contraseña de desarrollo: admin123). Contraseña en formato Django.
         DB::table('auth_user')->updateOrInsert(
             ['id' => 1],

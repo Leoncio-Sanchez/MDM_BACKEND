@@ -15,6 +15,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Solo la IP y el esquema. nginx-proxy deja pasar el X-Forwarded-Host que envíe el cliente, y
+        // aceptarlo permitiría falsear el dominio; el Host ya es el real porque enruta por él.
+        $middleware->trustProxies(headers: Request::HEADER_X_FORWARDED_FOR | Request::HEADER_X_FORWARDED_PROTO);
+
         $middleware->alias([
             'rol' => \App\Modules\Seguridad\Presentation\Middleware\VerificarRol::class,
             'permiso' => \App\Modules\Seguridad\Presentation\Middleware\VerificarPermiso::class,

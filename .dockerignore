@@ -1,0 +1,50 @@
+# Secretos y datos: nunca dentro de la imagen
+**/.env
+**/.env.*
+*.sql.gz
+storage/media
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/api-docs
+storage/app/private/*
+storage/app/public/*
+storage/pail
+
+# Se instalan o generan al construir
+vendor
+node_modules
+bootstrap/cache/*.php
+public/build
+public/hot
+
+# Control de versiones y CI
+.git
+.github
+.gitattributes
+.gitignore
+
+# Tests y herramientas de desarrollo
+tests
+app/Modules/*/Tests
+stubs
+phpunit.xml
+phpstan.neon
+pint.json
+package.json
+package-lock.json
+vite.config.js
+vite-module-loader.js
+.editorconfig
+.npmrc
+
+# Documentación y despliegue: no los usa la aplicación
+_docs
+*.md
+compose*.yaml
+compose*.yml
+gateway
+scripts
+Dockerfile
+.dockerignore

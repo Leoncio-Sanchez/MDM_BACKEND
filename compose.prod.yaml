@@ -1,0 +1,125 @@
+# Producción — Sistema LF-ITSE. Pasos en DEPLOY.md. No reemplaza a compose.yaml (Sail, desarrollo).
+#   docker compose -f compose.prod.yaml up -d --build
+#
+# Ningún servicio publica puertos: el tráfico entra por nginx-proxy, a través de la red externa "web".
+name: mdm
+
+x-logs: &logs
+  logging:
+    driver: json-file
+    options:
+      max-size: 10m
+      max-file: "5"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: produccion
+    image: mdm-backend:produccion
+    container_name: mdm_app
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    env_file: .env
+    environment:
+      # nginx-proxy y acme-companion
+      VIRTUAL_HOST: ${VIRTUAL_HOST:?Falta VIRTUAL_HOST en el .env}
+      VIRTUAL_PORT: ${VIRTUAL_PORT:-80}
+      LETSENCRYPT_HOST: ${LETSENCRYPT_HOST:?Falta LETSENCRYPT_HOST en el .env}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL:?Falta LETSENCRYPT_EMAIL en el .env}
+      # Sin estas la aplicación no debe arrancar
+      APP_KEY: ${APP_KEY:?Falta APP_KEY en el .env}
+      APP_URL: ${APP_URL:?Falta APP_URL en el .env}
+      JWT_SECRET: ${JWT_SECRET:?Falta JWT_SECRET en el .env}
+      TRUSTED_PROXIES: ${TRUSTED_PROXIES:?Falta TRUSTED_PROXIES en el .env (subred de la red web)}
+      DB_PASSWORD: ${DB_PASSWORD:?Falta DB_PASSWORD en el .env}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Falta REDIS_PASSWORD en el .env}
+    expose:
+      - "80"
+    volumes:
+      # Los adjuntos no están en la imagen: sobreviven a un rebuild
+      - media:/var/www/media
+    networks:
+      - interna
+      - web
+    depends_on:
+      pgsql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/up"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+    mem_limit: 1g
+    <<: *logs
+
+  pgsql:
+    image: postgres:16-alpine
+    container_name: mdm_pgsql
+    restart: unless-stopped
+    command: postgres -c shared_buffers=256MB -c effective_cache_size=768MB -c max_connections=50
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:?Falta DB_DATABASE en el .env}
+      POSTGRES_USER: ${DB_USERNAME:?Falta DB_USERNAME en el .env}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Falta DB_PASSWORD en el .env}
+    expose:
+      - "5432"
+    volumes:
+      - pgsql:/var/lib/postgresql/data
+    networks:
+      - interna
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -q -d \"$$POSTGRES_DB\" -U \"$$POSTGRES_USER\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    mem_limit: 1g
+    shm_size: 256m
+    <<: *logs
+
+  redis:
+    image: redis:7-alpine
+    container_name: mdm_redis
+    restart: unless-stopped
+    # La contraseña se lee dentro del contenedor para que no quede en los argumentos del proceso
+    command:
+      - sh
+      - -c
+      - exec redis-server --requirepass "$$REDISCLI_AUTH" --appendonly yes --maxmemory 200mb --maxmemory-policy allkeys-lru
+    environment:
+      REDISCLI_AUTH: ${REDIS_PASSWORD:?Falta REDIS_PASSWORD en el .env}
+    expose:
+      - "6379"
+    volumes:
+      - redis:/data
+    networks:
+      - interna
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep -q PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    mem_limit: 256m
+    <<: *logs
+
+networks:
+  # Sin salida a internet: solo el backend llega a la base de datos y a Redis
+  interna:
+    internal: true
+  # La crea el servidor; en ella está nginx-proxy
+  web:
+    external: true
+
+volumes:
+  pgsql:
+    name: mdm_pgsql_data
+  redis:
+    name: mdm_redis_data
+  media:
+    name: mdm_media
