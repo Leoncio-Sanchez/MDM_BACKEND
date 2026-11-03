@@ -10,6 +10,7 @@ Mantener al día cuando cambie el sistema.
 | [`FLUJO_DEL_TRAMITE.md`](FLUJO_DEL_TRAMITE.md) | Equipo y municipalidad | El trámite de principio a fin y las reglas de negocio |
 | [`API.md`](API.md) | Desarrolladores | Endpoints, accesos, errores y límites |
 | [`TECH_DEBT.md`](TECH_DEBT.md) | Desarrolladores | Deuda técnica registrada |
+| [`../DEPLOY.md`](../DEPLOY.md) | Administrador del servidor | Instalación, actualización y respaldos en producción |
 | [`../README.md`](../README.md) | Desarrolladores | Puesta en marcha, configuración y módulos |
 | [`../ARCHITECTURE.md`](../ARCHITECTURE.md) | Desarrolladores | Reglas de la arquitectura hexagonal |
 

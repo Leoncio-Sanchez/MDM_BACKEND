@@ -68,6 +68,8 @@ Variables propias del sistema (el resto son las estándar de Laravel; ver `.env.
 | `SUNAT_URL` | Consulta de RUC por la PIDE |
 | `MEDIA_DISK_ROOT` | Carpeta privada de adjuntos y fotos de actas (por defecto `storage/media`; nunca dentro de `public/`) |
 | `ITSE_ACTA_OBLIGATORIA_DESDE` | Fecha (AAAA-MM-DD) desde la que el certificado ITSE exige un acta **Aprobada**. Vacío = a todos los expedientes |
+| `CORS_ALLOWED_ORIGINS` | Dominios del frontend, separados por comas. Sin ella, en local se permite `http://localhost:5173` y en producción ninguno. `*` se ignora |
+| `TRUSTED_PROXIES` | IP o subred del proxy de confianza, para detectar HTTPS y la IP real del cliente. Vacía = ninguno |
 | `L5_SWAGGER_PUBLICO` | `true` publica `/api/documentation` fuera de `APP_ENV=local`. En producción debe quedar en `false` |
 
 ## Arquitectura
@@ -116,6 +118,7 @@ dominio se traducen a códigos HTTP en `bootstrap/app.php` (404 no encontrado, 4
 
 | Documento | Contenido |
 |---|---|
+| [`DEPLOY.md`](DEPLOY.md) | Instalación, migración, actualización y respaldos en producción con Docker |
 | [`_docs/PERFILES_Y_ACCESOS.md`](_docs/PERFILES_Y_ACCESOS.md) | Qué ve y hace cada perfil, y qué casillas marcar al crear cuentas |
 | [`_docs/FLUJO_DEL_TRAMITE.md`](_docs/FLUJO_DEL_TRAMITE.md) | El trámite de principio a fin: expediente, inspección, ITSE, licencia y ciudadano |
 | [`_docs/API.md`](_docs/API.md) | Endpoints agrupados por módulo, con el acceso que exige cada uno |
