@@ -9,6 +9,7 @@ use App\Modules\ITSE\Domain\Exceptions\ExpedienteNoValidoItse;
 use App\Modules\Licencias\Application\DTOs\CrearLicenciaDTO;
 use App\Modules\Licencias\Application\UseCases\CrearLicenciaUseCase;
 use App\Modules\Licencias\Domain\Exceptions\LicenciaDenegadaError;
+use App\Shared\Domain\Calendario;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -38,7 +39,7 @@ beforeEach(function () {
 $denegar = function (string $que) {
     $this->actingAs($this->user, 'api')
         ->postJson("/api/lf-itse/expedientes/{$this->expediente}/denegar-{$que}/", [
-            'fecha_rechazo' => now()->toDateString(), 'documento' => 'RG 015-2026', 'observaciones' => 'No subsanó',
+            'fecha_rechazo' => Calendario::hoy()->toDateString(), 'documento' => 'RG 015-2026', 'observaciones' => 'No subsanó',
         ])
         ->assertCreated();
 };

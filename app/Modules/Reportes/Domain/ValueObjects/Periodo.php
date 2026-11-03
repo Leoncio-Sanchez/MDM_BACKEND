@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Reportes\Domain\ValueObjects;
 
-use Carbon\CarbonImmutable;
+use App\Shared\Domain\Calendario;
 
 /** Rango de fechas de un reporte (Y-m-d, ambos inclusive). */
 final readonly class Periodo
@@ -17,7 +17,7 @@ final readonly class Periodo
     /** Sin fechas: el mes en curso */
     public static function oMesActual(?string $desde, ?string $hasta): self
     {
-        $hoy = CarbonImmutable::today();
+        $hoy = Calendario::hoy();
 
         return new self(
             $desde ?? $hoy->startOfMonth()->toDateString(),

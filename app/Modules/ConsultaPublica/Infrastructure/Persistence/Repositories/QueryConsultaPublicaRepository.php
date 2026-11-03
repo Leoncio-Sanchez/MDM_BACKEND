@@ -9,6 +9,7 @@ use App\Modules\ConsultaPublica\Domain\ValueObjects\AvanceInspeccion;
 use App\Modules\ConsultaPublica\Domain\ValueObjects\EstadoTramite;
 use App\Modules\ConsultaPublica\Domain\ValueObjects\TipoTramite;
 use App\Modules\ConsultaPublica\Domain\ValueObjects\TramitePublico;
+use App\Shared\Domain\Calendario;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
@@ -55,7 +56,7 @@ final readonly class QueryConsultaPublicaRepository implements ConsultaPublicaRe
                 (bool) $f->anulado,
             ),
             procedimiento: (string) $f->procedimiento,
-            fechaEmision: CarbonImmutable::parse($f->fecha_recepcion),
+            fechaEmision: CarbonImmutable::parse($f->fecha_recepcion)->setTimezone('America/Lima'),
             fechaVencimiento: CarbonImmutable::parse($f->fecha_vencimiento),
             inspeccion: AvanceInspeccion::desde(
                 itsePendiente: (bool) $f->requiere_itse && ! (bool) $f->tiene_itse && ! (bool) $f->itse_improcedente && ! (bool) $f->anulado,
@@ -86,7 +87,7 @@ final readonly class QueryConsultaPublicaRepository implements ConsultaPublicaRe
             return new TramitePublico(
                 tipo: TipoTramite::Licencia,
                 numero: (int) $f->numero_licencia,
-                estado: EstadoTramite::deAutorizacion((bool) $f->inactiva, $vencimiento, CarbonImmutable::today()),
+                estado: EstadoTramite::deAutorizacion((bool) $f->inactiva, $vencimiento, Calendario::hoy()),
                 nombreComercial: (string) $f->nombre_comercial,
                 giros: $this->giros('licencias_funcionamiento_giros', 'licencia_funcionamiento_id', (int) $f->id),
                 fechaEmision: CarbonImmutable::parse($f->fecha_emision),
@@ -114,7 +115,7 @@ final readonly class QueryConsultaPublicaRepository implements ConsultaPublicaRe
             return new TramitePublico(
                 tipo: TipoTramite::Itse,
                 numero: (int) $f->numero_itse,
-                estado: EstadoTramite::deAutorizacion((bool) $f->inactivo, $caducidad, CarbonImmutable::today()),
+                estado: EstadoTramite::deAutorizacion((bool) $f->inactivo, $caducidad, Calendario::hoy()),
                 nombreComercial: (string) $f->nombre_comercial,
                 giros: $this->giros('itse_giros', 'itse_id', (int) $f->id),
                 fechaEmision: CarbonImmutable::parse($f->fecha_expedicion),

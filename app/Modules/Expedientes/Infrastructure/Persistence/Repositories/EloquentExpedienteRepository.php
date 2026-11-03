@@ -12,6 +12,7 @@ use App\Modules\Expedientes\Domain\ValueObjects\TipoAutorizacion;
 use App\Modules\Expedientes\Infrastructure\Persistence\Models\AutorizacionImprocedenteModel;
 use App\Modules\Expedientes\Infrastructure\Persistence\Models\ExpedienteAnulacionModel;
 use App\Modules\Expedientes\Infrastructure\Persistence\Models\ExpedienteModel;
+use App\Shared\Domain\Calendario;
 use DateTimeImmutable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -115,7 +116,7 @@ final readonly class EloquentExpedienteRepository implements ExpedienteRepositor
     {
         $query = ExpedienteModel::query()
             ->where('numero_expediente', $numero)
-            ->whereYear('fecha_recepcion', $anio);
+            ->whereRaw("EXTRACT(YEAR FROM fecha_recepcion AT TIME ZONE 'America/Lima') = ?", [$anio]);
 
         if ($exceptoId !== null) {
             $query->where('id', '!=', $exceptoId);
@@ -127,7 +128,7 @@ final readonly class EloquentExpedienteRepository implements ExpedienteRepositor
     public function siguienteNumeroEnAnio(int $anio): int
     {
         $max = ExpedienteModel::query()
-            ->whereYear('fecha_recepcion', $anio)
+            ->whereRaw("EXTRACT(YEAR FROM fecha_recepcion AT TIME ZONE 'America/Lima') = ?", [$anio])
             ->max('numero_expediente');
 
         return ((int) $max) + 1;
@@ -164,7 +165,7 @@ final readonly class EloquentExpedienteRepository implements ExpedienteRepositor
         [$whereClause, $param] = match ($filtro) {
             'ID' => ['WHERE expedientes.id = ?', (int) $valor],
             'NUMERO' => ['WHERE expedientes.numero_expediente = ?', (int) $valor],
-            'FECHA_RECEPCION' => ['WHERE expedientes.fecha_recepcion::date = ?', (string) $valor],
+            'FECHA_RECEPCION' => ["WHERE (expedientes.fecha_recepcion AT TIME ZONE 'America/Lima')::date = ?", (string) $valor],
             'FECHA_VENCIMIENTO' => ['WHERE expedientes.fecha_vencimiento = ?', (string) $valor],
             'NOMBRE_SOLICITANTE' => [
                 "WHERE TRIM(\n".
@@ -244,7 +245,7 @@ SELECT
         WHEN t.requiere_itse = TRUE AND titse.id IS NOT NULL THEN FALSE
         ELSE TRUE
     END AS itse_pendiente,
-    (NOT t.anulado AND t.fecha_alerta <= CURRENT_DATE) AS mostrar_alerta
+    (NOT t.anulado AND t.fecha_alerta <= CAST(? AS DATE)) AS mostrar_alerta
 FROM ({$sqlInterna}) AS t
 LEFT JOIN licencias_funcionamiento lf
     ON t.id = lf.expediente_id
@@ -264,7 +265,7 @@ ORDER BY t.fecha_recepcion DESC
 SQL;
 
         /** @var array<int, \stdClass> $rows */
-        $rows = DB::select($sqlFinal, [$param]);
+        $rows = DB::select($sqlFinal, [Calendario::hoy()->toDateString(), $param]);
 
         return array_map(static fn (\stdClass $row): array => (array) $row, $rows);
     }
@@ -289,7 +290,7 @@ SELECT
     ) AS persona_nombre,
     texpedientes.licencia_pendiente,
     texpedientes.itse_pendiente,
-    e.fecha_alerta <= CURRENT_DATE AS mostrar_alerta
+    e.fecha_alerta <= CAST(? AS DATE) AS mostrar_alerta
 FROM (
     SELECT
         e.id,
@@ -339,7 +340,7 @@ ORDER BY e.fecha_alerta DESC
 SQL;
 
         /** @var array<int, \stdClass> $rows */
-        $rows = DB::select($sql);
+        $rows = DB::select($sql, [Calendario::hoy()->toDateString()]);
 
         return array_map(static fn (\stdClass $row): array => (array) $row, $rows);
     }

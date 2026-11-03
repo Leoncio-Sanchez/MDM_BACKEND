@@ -27,6 +27,9 @@ final readonly class CrearExpedienteDTO
             ? $data['fecha_recepcion']
             : new DateTimeImmutable((string) ($data['fecha_recepcion'] ?? 'now'), new \DateTimeZone('America/Lima'));
 
+        // El año del número y el plazo se calculan con el día de Lima, aunque llegue en otra zona
+        $fechaRecepcion = $fechaRecepcion->setTimezone(new \DateTimeZone('America/Lima'));
+
         return new self(
             numeroExpediente: isset($data['numero_expediente']) ? (int) $data['numero_expediente'] : null,
             fechaRecepcion: $fechaRecepcion,

@@ -64,7 +64,7 @@ final class ListarPorRenovarItseUseCaseTest extends TestCase
 
     public function test_sin_fechas_lista_los_que_vencen_en_los_proximos_30_dias(): void
     {
-        CarbonImmutable::setTestNow('2026-10-28');
+        CarbonImmutable::setTestNow('2026-10-28 12:00:00');
         $itses = Mockery::mock(ItseRepositoryInterface::class);
 
         $itses->shouldReceive('listarPorRenovar')
@@ -81,7 +81,7 @@ final class ListarPorRenovarItseUseCaseTest extends TestCase
 
     public function test_dias_cambia_el_rango_desde_hoy(): void
     {
-        CarbonImmutable::setTestNow('2026-10-28');
+        CarbonImmutable::setTestNow('2026-10-28 12:00:00');
         $itses = Mockery::mock(ItseRepositoryInterface::class);
 
         $itses->shouldReceive('listarPorRenovar')

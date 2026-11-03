@@ -36,7 +36,7 @@ final readonly class ActaInspeccionController
 
         $datos = new DatosActa(
             numeroActa: (string) $request->validated('numero_acta'),
-            fechaVisita: (new DateTimeImmutable((string) $request->validated('fecha_visita')))
+            fechaVisita: (new DateTimeImmutable((string) $request->validated('fecha_visita'), new DateTimeZone('America/Lima')))
                 ->setTimezone(new DateTimeZone((string) config('app.timezone'))),
             areaM2: (float) $request->validated('area_m2'),
             aforo: (int) $request->validated('aforo'),

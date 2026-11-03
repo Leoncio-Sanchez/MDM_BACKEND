@@ -14,6 +14,7 @@ use App\Modules\Inspecciones\Domain\Exceptions\AsignacionNoEncontrada;
 use App\Modules\Inspecciones\Domain\ValueObjects\DatosActa;
 use App\Modules\Inspecciones\Domain\ValueObjects\ResultadoActa;
 use DateTimeImmutable;
+use DateTimeZone;
 use Illuminate\Http\UploadedFile;
 
 /**
@@ -68,7 +69,7 @@ final readonly class RegistrarActaUseCase
                 throw ActaInvalida::faltaPlazo();
             }
             $fechaLimite = $this->diasHabiles
-                ->calcularFechaVencimiento($datos->fechaVisita->setTime(0, 0), (int) $datos->plazoSubsanacionDias)
+                ->calcularFechaVencimiento($datos->fechaVisita->setTimezone(new DateTimeZone('America/Lima'))->setTime(0, 0), (int) $datos->plazoSubsanacionDias)
                 ->format('Y-m-d');
         }
 

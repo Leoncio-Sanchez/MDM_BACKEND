@@ -8,6 +8,7 @@ use App\Modules\Configuracion\Domain\Contracts\ConfiguracionRepositoryInterface;
 use App\Modules\Reportes\Domain\Contracts\GeneradorPdfInterface;
 use App\Modules\Reportes\Domain\Contracts\InformesRepositoryInterface;
 use App\Modules\Reportes\Domain\Exceptions\InformeInvalido;
+use App\Shared\Domain\Calendario;
 use Carbon\CarbonImmutable;
 
 /**
@@ -39,7 +40,7 @@ final readonly class GenerarInformeLicenciasUseCase
         if ($inicio->day !== 1 || $hasta !== $inicio->endOfMonth()->toDateString()) {
             throw InformeInvalido::noEsMesCompleto();
         }
-        if ($inicio->greaterThan(CarbonImmutable::today())) {
+        if ($inicio->greaterThan(Calendario::hoy())) {
             throw InformeInvalido::mesFuturo();
         }
 

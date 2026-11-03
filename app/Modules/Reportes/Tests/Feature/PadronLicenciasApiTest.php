@@ -106,8 +106,8 @@ it('arma el padrón y el resumen con el tiempo promedio y el cumplimiento del pl
 });
 
 it('sin fechas usa el mes en curso y sin licencias no inventa promedios', function () {
-    CarbonImmutable::setTestNow('2026-10-28');
-    \Illuminate\Support\Carbon::setTestNow('2026-10-28');
+    CarbonImmutable::setTestNow('2026-10-28 12:00:00');
+    \Illuminate\Support\Carbon::setTestNow('2026-10-28 12:00:00');
 
     $r = $this->actingAs(($this->personal)(['licencias' => true]), 'api')->getJson(URL_PADRON)->assertOk()->json();
 

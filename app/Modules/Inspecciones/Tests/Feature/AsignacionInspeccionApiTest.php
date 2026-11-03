@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\User;
+use App\Shared\Domain\Calendario;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\Fixtures\Registros;
@@ -64,7 +65,7 @@ it('lista los expedientes que esperan inspección, con el local sugerido', funct
 });
 
 it('asigna un inspector y lo muestra en la bandeja del inspector', function () {
-    $hoy = now()->toDateString();
+    $hoy = Calendario::hoy()->toDateString();
     ($this->asignar)($this->exp701, $this->carlos, ['fecha_programada' => $hoy, 'indicaciones' => '  Llevar luxómetro '])
         ->assertCreated()
         ->assertJson([
@@ -119,7 +120,7 @@ it('rechaza inspectores desactivados o sin la casilla, y fechas pasadas', functi
     DB::table('auth_user')->where('id', $this->maria->id)->update(['is_active' => false]);
     ($this->asignar)($this->exp701, $this->maria)->assertStatus(422);
 
-    ($this->asignar)($this->exp701, $this->carlos, ['fecha_programada' => now()->subDay()->toDateString()])
+    ($this->asignar)($this->exp701, $this->carlos, ['fecha_programada' => Calendario::hoy()->subDay()->toDateString()])
         ->assertUnprocessable()
         ->assertJsonValidationErrors(['fecha_programada']);
     ($this->asignar)($this->exp701, $this->carlos, ['direccion' => '   '])
@@ -161,7 +162,7 @@ it('reasigna dejando constancia de la asignación anterior', function () {
 
 it('reprograma la visita y corrige el local sin cambiar de inspector', function () {
     $id = ($this->asignar)($this->exp701, $this->carlos)->json('id');
-    $manana = now()->addDay()->toDateString();
+    $manana = Calendario::hoy()->addDay()->toDateString();
 
     $this->actingAs($this->jefe, 'api')
         ->putJson(URL_INSPECCIONES."asignaciones/{$id}/", [

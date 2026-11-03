@@ -37,6 +37,7 @@ use App\Modules\Expedientes\Presentation\Resources\ExpedienteBusquedaResource;
 use App\Modules\Expedientes\Presentation\Resources\ExpedienteListResource;
 use App\Modules\Expedientes\Presentation\Resources\ExpedientePendienteResource;
 use App\Modules\Expedientes\Presentation\Resources\ExpedienteResource;
+use App\Shared\Domain\Calendario;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -227,7 +228,7 @@ final class ExpedienteController extends Controller
     {
         try {
             $data = $request->validate([
-                'fecha_rechazo' => ['required', 'date', 'before_or_equal:today'],
+                'fecha_rechazo' => ['required', 'date', 'before_or_equal:'.Calendario::hoy()->toDateString()],
                 'documento' => ['required', 'string', 'max:100'],
                 'observaciones' => ['required', 'string', 'max:1000'],
             ]);
@@ -259,7 +260,7 @@ final class ExpedienteController extends Controller
     {
         try {
             $data = $request->validate([
-                'fecha_rechazo' => ['required', 'date', 'before_or_equal:today'],
+                'fecha_rechazo' => ['required', 'date', 'before_or_equal:'.Calendario::hoy()->toDateString()],
                 'documento' => ['required', 'string', 'max:100'],
                 'observaciones' => ['required', 'string', 'max:1000'],
             ]);

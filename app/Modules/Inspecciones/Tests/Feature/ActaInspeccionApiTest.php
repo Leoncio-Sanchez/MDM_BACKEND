@@ -67,6 +67,13 @@ beforeEach(function () {
         ->post(URL_ACTAS.'mi-bandeja/'.($asignacion ?? $this->asignacion).'/acta/', $datos, ['Accept' => 'application/json']);
 });
 
+it('calcula el plazo de subsanación desde el día de la visita en Lima', function (string $fechaVisita) {
+    // Lunes 26, 20:00 en Lima: en UTC ya sería martes y el plazo vencería un día después
+    ($this->registrar)($this->carlos, ($this->acta)([
+        'fecha_visita' => $fechaVisita, 'extintores' => 'NO_CUMPLE', 'observaciones' => 'Extintor vencido', 'plazo_subsanacion_dias' => 3,
+    ]))->assertCreated()->assertJson(['fecha_limite_subsanacion' => '2026-10-29']);
+})->with(['en UTC' => '2026-10-27T01:00:00Z', 'con su zona' => '2026-10-26T20:00:00-05:00', 'sin zona' => '2026-10-26T20:00:00']);
+
 it('registra un acta conforme: queda aprobada con sus fotos y sale de la bandeja', function () {
     $acta = ($this->registrar)($this->carlos, ($this->acta)())
         ->assertCreated()

@@ -8,6 +8,7 @@ use App\Modules\Inspecciones\Domain\Contracts\AsignacionInspeccionRepositoryInte
 use App\Modules\Inspecciones\Domain\Exceptions\AsignacionNoEncontrada;
 use App\Modules\Inspecciones\Domain\Exceptions\ExpedienteYaAsignado;
 use App\Modules\Inspecciones\Domain\ValueObjects\DatosAsignacion;
+use App\Shared\Domain\Calendario;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 
@@ -92,7 +93,7 @@ final readonly class QueryAsignacionInspeccionRepository implements AsignacionIn
                 e.numero_expediente,
                 e.fecha_recepcion,
                 e.fecha_vencimiento,
-                e.fecha_alerta <= CURRENT_DATE AS mostrar_alerta,
+                e.fecha_alerta <= CAST(? AS DATE) AS mostrar_alerta,
                 tpt.nombre AS procedimiento,
                 {$solicitante} AS solicitante,
                 COALESCE(lf.nombre_comercial, '') AS sugerido_nombre_comercial,
@@ -124,7 +125,7 @@ final readonly class QueryAsignacionInspeccionRepository implements AsignacionIn
             ORDER BY (a.id IS NULL) DESC, e.fecha_vencimiento, e.numero_expediente
             SQL;
 
-        return $this->filas(DB::select($sql));
+        return $this->filas(DB::select($sql, [Calendario::hoy()->toDateString()]));
     }
 
     public function inspectoresDisponibles(): array

@@ -145,7 +145,7 @@ it('lista los expedientes improcedentes de cada tipo por separado', function () 
 });
 
 it('sin fechas usa el mes en curso', function () {
-    CarbonImmutable::setTestNow('2026-10-28');
+    CarbonImmutable::setTestNow('2026-10-28 12:00:00');
 
     $this->actingAs($this->registrador, 'api')
         ->getJson(URL_REPORTES.'improcedentes/licencias/')

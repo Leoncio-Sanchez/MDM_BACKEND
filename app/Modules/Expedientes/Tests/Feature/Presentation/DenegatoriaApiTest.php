@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\User;
+use App\Shared\Domain\Calendario;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\Fixtures\Registros;
@@ -38,7 +39,7 @@ beforeEach(function () {
 
     $this->denegar = fn (User $quien, int $expediente, string $que, array $cambios = []) => $this->actingAs($quien, 'api')
         ->postJson("/api/lf-itse/expedientes/{$expediente}/denegar-{$que}/", array_merge([
-            'fecha_rechazo' => now()->toDateString(),
+            'fecha_rechazo' => Calendario::hoy()->toDateString(),
             'documento' => 'RES. 045-2026-GDE',
             'observaciones' => 'Reinspección desaprobada: no subsanó lo observado.',
         ], $cambios));
@@ -73,7 +74,7 @@ it('cada oficina deniega lo suyo y la fecha no puede ser futura', function () {
     ($this->denegar)($this->itse, $this->expediente, 'licencia')->assertForbidden();
     ($this->denegar)($this->licencias, $this->expediente, 'licencia')->assertCreated()->assertJson(['tipo_autorizacion' => 'LF']);
 
-    ($this->denegar)($this->itse, $this->expediente, 'itse', ['fecha_rechazo' => now()->addDay()->toDateString()])
+    ($this->denegar)($this->itse, $this->expediente, 'itse', ['fecha_rechazo' => Calendario::hoy()->addDay()->toDateString()])
         ->assertStatus(400)
         ->assertJsonStructure(['fecha_rechazo']);
 });

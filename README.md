@@ -109,6 +109,8 @@ dominio se traducen a códigos HTTP en `bootstrap/app.php` (404 no encontrado, 4
 
 ### Base de datos
 
+- Las fechas se guardan en UTC, como en el sistema heredado, y la zona global de la aplicación no se cambia. Para "hoy" se
+  usa `App\Shared\Domain\Calendario::hoy()`, y los días de un `TIMESTAMPTZ` se calculan con `America/Lima`.
 - La migración `2026_01_01_000000_crear_esquema_produccion` recrea el esquema heredado de Django. Sirve para
   instalaciones nuevas y para los tests; sobre la base existente no cambia nada.
 - Las migraciones posteriores agregan tablas nuevas (anulaciones, asignaciones, actas, acompañantes, cuentas de

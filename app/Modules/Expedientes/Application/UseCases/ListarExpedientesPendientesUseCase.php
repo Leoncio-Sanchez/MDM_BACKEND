@@ -6,6 +6,7 @@ namespace App\Modules\Expedientes\Application\UseCases;
 
 use App\Modules\Expedientes\Domain\Contracts\ExpedienteRepositoryInterface;
 use App\Modules\Expedientes\Domain\Services\CalculadoraDiasHabilesService;
+use App\Shared\Domain\Calendario;
 use DateTimeImmutable;
 
 final readonly class ListarExpedientesPendientesUseCase
@@ -19,7 +20,7 @@ final readonly class ListarExpedientesPendientesUseCase
     public function execute(): array
     {
         $filas = $this->expedientes->listarPendientes();
-        $hoy = new DateTimeImmutable('today');
+        $hoy = Calendario::hoy();
 
         foreach ($filas as &$fila) {
             $vencimiento = new DateTimeImmutable((string) $fila['fecha_vencimiento']);
