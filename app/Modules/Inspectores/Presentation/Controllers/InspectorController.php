@@ -10,6 +10,7 @@ use App\Modules\Inspectores\Application\UseCases\CrearInspectorUseCase;
 use App\Modules\Inspectores\Application\UseCases\DesactivarInspectorUseCase;
 use App\Modules\Inspectores\Application\UseCases\ListarInspectoresUseCase;
 use App\Modules\Inspectores\Application\UseCases\ObtenerInspectorUseCase;
+use App\Modules\Usuarios\Domain\ReglaContrasena;
 use App\Modules\Usuarios\Presentation\Resources\UsuarioResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -53,6 +54,9 @@ final class InspectorController extends Controller
         if (empty($datos['username'])) {
             return response()->json(['error' => 'El username es requerido.'], 400);
         }
+        if (! ReglaContrasena::cumple($datos['password'] ?? null)) {
+            return response()->json(['error' => ReglaContrasena::MENSAJE], 400);
+        }
 
         $inspector = $this->crearInspector->execute($datos, (int) $request->user()?->getAuthIdentifier());
 
@@ -78,6 +82,11 @@ final class InspectorController extends Controller
             'email',
             'is_active',
         ]);
+
+        // Sin contraseña se conserva la actual
+        if (! empty($datos['password']) && ! ReglaContrasena::cumple($datos['password'])) {
+            return response()->json(['error' => ReglaContrasena::MENSAJE], 400);
+        }
 
         $inspector = $this->actualizarInspector->execute($pk, $datos);
         if (! $inspector) {

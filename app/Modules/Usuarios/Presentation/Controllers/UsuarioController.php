@@ -12,6 +12,7 @@ use App\Modules\Usuarios\Application\UseCases\CrearUsuarioUseCase;
 use App\Modules\Usuarios\Application\UseCases\EliminarUsuarioUseCase;
 use App\Modules\Usuarios\Application\UseCases\ListarUsuariosUseCase;
 use App\Modules\Usuarios\Application\UseCases\ObtenerUsuarioUseCase;
+use App\Modules\Usuarios\Domain\ReglaContrasena;
 use App\Modules\Usuarios\Presentation\Resources\UsuarioResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -53,6 +54,9 @@ final class UsuarioController extends Controller
 
         if (empty($datos['username'])) {
             return response()->json(['error' => 'El username es requerido.'], 400);
+        }
+        if (! ReglaContrasena::cumple($datos['password'] ?? null)) {
+            return response()->json(['error' => ReglaContrasena::MENSAJE], 400);
         }
 
         $perfilDatos = $request->input('perfil');

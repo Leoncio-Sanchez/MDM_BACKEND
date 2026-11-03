@@ -67,7 +67,7 @@ describe('administración de usuarios', function () {
         $admin = ($this->usuario)(['admin' => true]);
 
         $this->actingAs($admin, 'api')
-            ->postJson('/api/lf-itse/usuarios', ['username' => 'jefe', 'perfil' => ['es_jefe_itse' => true]])
+            ->postJson('/api/lf-itse/usuarios', ['username' => 'jefe', 'password' => 'clave-segura-123', 'perfil' => ['es_jefe_itse' => true]])
             ->assertUnprocessable()
             ->assertJson(['error' => 'El jefe de ITSE necesita también el acceso de ITSE.']);
         expect(DB::table('auth_user')->where('username', 'jefe')->exists())->toBeFalse();

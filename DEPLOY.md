@@ -169,7 +169,8 @@ a SQL y se quita `transaction_timeout`, que la 16 no conoce. Si `psql` falla, na
 
 ```bash
 dcp exec -T pgsql sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"' <<'SQL'
-SELECT count(*) AS personas_sin_sexo FROM personas WHERE sexo IS NULL OR trim(sexo) = '';
+SELECT count(*) AS personas_con_sexo_no_valido FROM personas WHERE upper(trim(sexo)) NOT IN ('M', 'F', 'X');
+SELECT count(*) AS personas_con_tipo_no_valido FROM personas WHERE tipo_persona NOT IN ('N', 'J');
 SELECT count(*) AS numeros_repetidos_en_un_anio FROM (SELECT 1 FROM expedientes
   GROUP BY numero_expediente, EXTRACT(YEAR FROM fecha_recepcion AT TIME ZONE 'America/Lima') HAVING count(*) > 1) r;
 SELECT count(*) AS personal_sin_perfil FROM auth_user u
@@ -184,7 +185,8 @@ Todo debe dar 0 filas o 0. Si no:
 
 | Resultado | Efecto | Qué hacer |
 |---|---|---|
-| `personas_sin_sexo` | La lista de personas responde **500** (comprobado) | Decidir con la municipalidad con qué valor completarlo |
+| `personas_con_sexo_no_valido` | Se muestran como "prefiero no decir" (`X`), y ese valor se guarda si alguien edita la persona | Decidir con la municipalidad si se completan |
+| `personas_con_tipo_no_valido` | La lista de personas responde **500** | Corregirlas antes de abrir el sistema |
 | `numeros_repetidos_en_un_anio` | El número deja de identificar al expediente de ese año | Revisar cada caso con Mesa de Partes |
 | `personal_sin_perfil` | Esa cuenta entra sin accesos | Asignarlos en Usuarios y Permisos |
 | Fila con `monto` | La copia tiene esa columna, que el código no conoce, como obligatoria y sin valor por defecto: crear un procedimiento TUPA fallaría | Decidir antes de abrir el sistema |
@@ -264,7 +266,7 @@ mes con datos. Mantenga Django detenido, pero disponible, hasta terminar: es la 
 | 413 al subir un archivo | Falta el archivo de `vhost.d` (ver sección 1) |
 | 502 o 503 de `nginx-proxy` | `mdm_app` no está en la red `web`, o sigue arrancando: `dcp ps`, `dcp logs app` |
 | El navegador informa un error de CORS | `CORS_ALLOWED_ORIGINS` no incluye el dominio exacto del frontend, con `https://` |
-| La lista de personas responde 500 tras importar | Hay personas sin sexo (sección 4, paso 3) |
+| La lista de personas responde 500 tras importar | Hay personas con un tipo no válido (sección 4, paso 3) |
 | Login responde 500 | Revisar Redis: sin él fallan los límites de intentos. `/up` responde 200 de todos modos, porque no revisa Redis ni la base |
 | Todos reciben 429 a la vez | `TRUSTED_PROXIES` no coincide con la subred de `web` |
 
