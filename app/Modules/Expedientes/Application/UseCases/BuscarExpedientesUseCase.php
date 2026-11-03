@@ -7,6 +7,7 @@ namespace App\Modules\Expedientes\Application\UseCases;
 use App\Modules\Expedientes\Application\DTOs\BuscarExpedientesDTO;
 use App\Modules\Expedientes\Domain\Contracts\ExpedienteRepositoryInterface;
 use App\Modules\Expedientes\Domain\Services\CalculadoraDiasHabilesService;
+use App\Shared\Domain\Calendario;
 use DateTimeImmutable;
 use InvalidArgumentException;
 
@@ -38,7 +39,7 @@ final readonly class BuscarExpedientesUseCase
         }
 
         $filas = $this->expedientes->buscarPorFiltro($filtro, $dto->valor);
-        $hoy = new DateTimeImmutable('today');
+        $hoy = Calendario::hoy();
 
         foreach ($filas as &$fila) {
             $vencimiento = new DateTimeImmutable((string) $fila['fecha_vencimiento']);

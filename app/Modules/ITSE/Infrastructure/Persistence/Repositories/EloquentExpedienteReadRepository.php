@@ -21,7 +21,7 @@ final class EloquentExpedienteReadRepository implements ExpedienteReadRepository
     public function buscarPorNumeroYAnio(int $numero, int $anio): ?\stdClass
     {
         $model = ExpedienteReadModel::where('numero_expediente', $numero)
-            ->whereYear('fecha_recepcion', $anio)
+            ->whereRaw("EXTRACT(YEAR FROM fecha_recepcion AT TIME ZONE 'America/Lima') = ?", [$anio])
             ->first();
             
         return $model ? (object) $model->toArray() : null;

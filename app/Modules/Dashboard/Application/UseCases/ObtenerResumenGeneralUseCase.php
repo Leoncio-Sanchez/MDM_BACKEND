@@ -6,7 +6,7 @@ namespace App\Modules\Dashboard\Application\UseCases;
 
 use App\Modules\Dashboard\Domain\Contracts\ResumenRepositoryInterface;
 use App\Modules\Dashboard\Domain\ValueObjects\ResumenGeneral;
-use Carbon\CarbonImmutable;
+use App\Shared\Domain\Calendario;
 
 final readonly class ObtenerResumenGeneralUseCase
 {
@@ -17,6 +17,6 @@ final readonly class ObtenerResumenGeneralUseCase
 
     public function execute(): ResumenGeneral
     {
-        return $this->resumenes->resumen(CarbonImmutable::today(), self::DIAS_ALERTA_ITSE);
+        return $this->resumenes->resumen(Calendario::hoy(), self::DIAS_ALERTA_ITSE);
     }
 }

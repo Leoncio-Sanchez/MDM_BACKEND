@@ -6,6 +6,7 @@ namespace App\Modules\ITSE\Application\UseCases;
 use App\Modules\ITSE\Application\DTOs\PorRenovarItseDTO;
 use App\Modules\ITSE\Domain\Contracts\ItseRepositoryInterface;
 use App\Modules\ITSE\Domain\Entities\Itse;
+use App\Shared\Domain\Calendario;
 use Carbon\CarbonImmutable;
 
 final readonly class ListarPorRenovarItseUseCase
@@ -22,7 +23,7 @@ final readonly class ListarPorRenovarItseUseCase
      */
     public function execute(PorRenovarItseDTO $dto): array
     {
-        $desde = $dto->fechaDesde !== null ? CarbonImmutable::parse($dto->fechaDesde) : CarbonImmutable::today();
+        $desde = $dto->fechaDesde !== null ? CarbonImmutable::parse($dto->fechaDesde) : Calendario::hoy();
         $hasta = $dto->fechaHasta !== null ? CarbonImmutable::parse($dto->fechaHasta) : $desde->addDays($dto->dias);
 
         return $this->itses->listarPorRenovar(

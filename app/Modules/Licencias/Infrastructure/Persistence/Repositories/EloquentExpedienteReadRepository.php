@@ -17,6 +17,8 @@ final readonly class EloquentExpedienteReadRepository implements ExpedienteReadR
     }
 
     public function buscarPorNumeroYAnio(int $numero, int $anio): ?object {
-        return ExpedienteReadModel::query()->where('numero', $numero)->whereYear('fecha_ingreso', $anio)->first();
+        return ExpedienteReadModel::query()->where('numero_expediente', $numero)
+            ->whereRaw("EXTRACT(YEAR FROM fecha_recepcion AT TIME ZONE 'America/Lima') = ?", [$anio])
+            ->first();
     }
 }

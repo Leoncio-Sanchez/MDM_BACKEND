@@ -93,6 +93,7 @@ dcp exec app php artisan db:seed --class=CatalogosSeeder --force
 ### Comprobar
 
 ```bash
+curl -s -o /dev/null -w '%{http_code}\n' https://DOMINIO/                    # 404
 curl -s -o /dev/null -w '%{http_code}\n' https://DOMINIO/up                  # 200
 curl -s -o /dev/null -w '%{http_code}\n' https://DOMINIO/api/documentation   # 404
 ```
@@ -132,7 +133,112 @@ volúmenes y no se tocan. Un cambio en el `.env` se aplica con `dcp up -d`. El c
 Confirme la ruta con `docker volume inspect mdm_media -f '{{.Mountpoint}}'`. Las copias quedan en el mismo servidor: hay
 que sincronizarlas a otro equipo.
 
-## 4. Cómo funciona detrás de `nginx-proxy`
+## 4. Importar los datos del sistema anterior (Django)
+
+**Este procedimiento no está probado con datos reales**, porque no se dispone de una copia de producción. Se ensayó con
+`BD/2026.sql`, que solo trae catálogos, 4 personas y ningún expediente, más un expediente y un adjunto de prueba. Vea
+[qué falta probar](#qué-falta-probar) antes de usarlo, y ensáyelo primero en otro equipo con una copia real.
+
+Reemplaza a "Migrar y crear el administrador" de la sección 1: la base debe estar **vacía**. Si ya se migró o se usó para
+una demo, no restaure encima. Los dumps tienen datos de ciudadanos: guárdelos fuera del repositorio, con `chmod 600`.
+
+### 1. Sacar la copia del sistema anterior
+
+Detenga antes las escrituras en Django, para que la base y los adjuntos queden iguales:
+
+```bash
+pg_dump -Fc --no-owner --no-acl -d BASE_DE_DJANGO -f lf_itse.dump
+tar -C RUTA_DE_MEDIA_ROOT -czf lf_itse_media.tgz .
+```
+
+### 2. Restaurar la base
+
+```bash
+dcp up -d pgsql redis
+dcp exec -T pgsql sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\dt"'     # "Did not find any relations."
+docker run --rm -i postgres:17-alpine pg_restore -f - --no-owner --no-acl < lf_itse.dump \
+  | grep -av '^SET transaction_timeout' \
+  | dcp exec -T pgsql sh -c 'psql -q -v ON_ERROR_STOP=1 --single-transaction -U "$POSTGRES_USER" -d "$POSTGRES_DB"'
+```
+
+El contenedor `postgres:17-alpine` debe tener una versión igual o mayor que el `pg_dump` que creó la copia: `mdm_pgsql` es
+PostgreSQL 16 y no lee directamente una copia hecha con la 17 (`unsupported version in file header`). Por eso se convierte
+a SQL y se quita `transaction_timeout`, que la 16 no conoce. Si `psql` falla, nada queda aplicado.
+
+### 3. Revisar los datos antes de migrar
+
+```bash
+dcp exec -T pgsql sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"' <<'SQL'
+SELECT count(*) AS personas_con_sexo_no_valido FROM personas WHERE upper(trim(sexo)) NOT IN ('M', 'F', 'X');
+SELECT count(*) AS personas_con_tipo_no_valido FROM personas WHERE tipo_persona NOT IN ('N', 'J');
+SELECT count(*) AS numeros_repetidos_en_un_anio FROM (SELECT 1 FROM expedientes
+  GROUP BY numero_expediente, EXTRACT(YEAR FROM fecha_recepcion AT TIME ZONE 'America/Lima') HAVING count(*) > 1) r;
+SELECT count(*) AS personal_sin_perfil FROM auth_user u
+  WHERE is_staff AND NOT EXISTS (SELECT 1 FROM usuarios_perfiles p WHERE p.user_id = u.id);
+SELECT table_name, column_name FROM information_schema.columns
+  WHERE table_schema = 'public' AND table_name = 'tipos_procedimiento_tupa' AND column_name = 'monto'
+    AND is_nullable = 'NO' AND column_default IS NULL;
+SQL
+```
+
+Todo debe dar 0 filas o 0. Si no:
+
+| Resultado | Efecto | Qué hacer |
+|---|---|---|
+| `personas_con_sexo_no_valido` | Se muestran como "prefiero no decir" (`X`), y ese valor se guarda si alguien edita la persona | Decidir con la municipalidad si se completan |
+| `personas_con_tipo_no_valido` | La lista de personas responde **500** | Corregirlas antes de abrir el sistema |
+| `numeros_repetidos_en_un_anio` | El número deja de identificar al expediente de ese año | Revisar cada caso con Mesa de Partes |
+| `personal_sin_perfil` | Esa cuenta entra sin accesos | Asignarlos en Usuarios y Permisos |
+| Fila con `monto` | La copia tiene esa columna, que el código no conoce, como obligatoria y sin valor por defecto: crear un procedimiento TUPA fallaría | Decidir antes de abrir el sistema |
+
+### 4. Migrar y levantar
+
+```bash
+dcp up -d
+dcp exec app php artisan migrate --force
+```
+
+Las migraciones detectan la base existente: no recrean las tablas heredadas, solo agregan las nuevas. **No corra
+`CatalogosSeeder`**: los catálogos ya vienen en la copia. Las cuentas conservan su contraseña, porque Laravel lee el formato
+de Django. Con un `JWT_SECRET` nuevo, todos deben volver a iniciar sesión. `usuarios:administrador` solo hace falta si nadie conoce una cuenta de
+administrador heredada; no tendrá el id 1, y no es un problema porque ese id ya existe.
+
+### 5. Copiar los adjuntos
+
+Con el `.tgz` descomprimido en una carpeta `media_django`:
+
+```bash
+dcp exec app id     # debe mostrar uid=82; si no, cambie 82 en el comando siguiente
+docker run --rm -v mdm_media:/destino -v "$PWD/media_django":/origen:ro alpine:3.20 \
+  sh -c 'cp -a /origen/. /destino/ && chown -R 82:82 /destino'
+```
+
+`ruta_archivo` se resuelve desde `/var/www/media`. Este comando lista los que no se encuentran y no debe mostrar nada:
+
+```bash
+dcp exec -T pgsql sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -tA -c "SELECT ruta_archivo FROM expedientes_archivos UNION ALL SELECT ruta_archivo FROM itse_archivos UNION ALL SELECT ruta_archivo FROM licencias_funcionamiento_archivos"' \
+  | dcp exec -T app sh -c 'while IFS= read -r r; do test -f "/var/www/media/$r" || echo "FALTA: $r"; done'
+```
+
+### 6. Comprobar
+
+Haga las comprobaciones de la sección 1 y además, con una cuenta heredada: compare con Django los totales de expedientes,
+licencias e ITSE, abra un trámite antiguo de cada tipo, descargue un adjunto de cada tipo y genere el informe en PDF de un
+mes con datos. Mantenga Django detenido, pero disponible, hasta terminar: es la forma de volver atrás.
+
+### Qué falta probar
+
+| Falta | Por qué importa |
+|---|---|
+| Una copia real de producción | `BD/2026.sql` no tiene expedientes, licencias ni ITSE. No se sabe si los datos reales cumplen las reglas nuevas |
+| Adjuntos reales | No hay ninguno disponible. El ensayo usó una ruta `expedientes/ID/UUID.pdf`: si Django guardó otro formato en `ruta_archivo`, la comprobación del paso 5 lo mostrará |
+| Iniciar sesión con una cuenta real | Se probó un hash con el formato de Django, creado para el ensayo |
+| Datos en `inspectores`, `itse_inspectores` y `auditlog_logentry` | Están en `BD/2026.sql` y este sistema no las usa: se conservan, pero no aparecen en pantalla ni pasan a las actas nuevas. No están en `BD/data-production` |
+| El esquema real | `BD/2026.sql` y `BD/data-production` no coinciden entre sí. El código coincide con `data-production`, y `2026.sql` tiene además columnas y tablas de más |
+| Tiempo, disco y memoria | Con el volumen real, para saber cuánto dura el corte |
+| Restaurar un respaldo posterior | Sección 3, ya con los datos importados |
+
+## 5. Cómo funciona detrás de `nginx-proxy`
 
 - **IP real y HTTPS.** Laravel acepta `X-Forwarded-For` y `X-Forwarded-Proto` solo si el pedido viene de `TRUSTED_PROXIES`.
   Sin esa variable, no detecta HTTPS y todos los usuarios comparten un solo límite de intentos. Si la red `web` se
@@ -153,13 +259,14 @@ que sincronizarlas a otro equipo.
 - **Colas y tareas programadas.** El código no despacha trabajos, no envía correos y `routes/console.php` no programa
   tareas, así que no hay servicios `worker` ni `scheduler`. Si se agregan, hay que crearlos.
 
-## 5. Problemas frecuentes
+## 6. Problemas frecuentes
 
 | Síntoma | Causa |
 |---|---|
 | 413 al subir un archivo | Falta el archivo de `vhost.d` (ver sección 1) |
 | 502 o 503 de `nginx-proxy` | `mdm_app` no está en la red `web`, o sigue arrancando: `dcp ps`, `dcp logs app` |
 | El navegador informa un error de CORS | `CORS_ALLOWED_ORIGINS` no incluye el dominio exacto del frontend, con `https://` |
+| La lista de personas responde 500 tras importar | Hay personas con un tipo no válido (sección 4, paso 3) |
 | Login responde 500 | Revisar Redis: sin él fallan los límites de intentos. `/up` responde 200 de todos modos, porque no revisa Redis ni la base |
 | Todos reciben 429 a la vez | `TRUSTED_PROXIES` no coincide con la subred de `web` |
 

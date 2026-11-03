@@ -6,6 +6,7 @@ namespace App\Modules\Usuarios\Application\UseCases;
 
 use App\Modules\Seguridad\Domain\Contracts\PasswordHasherInterface;
 use App\Modules\Usuarios\Domain\Contracts\UsuarioRepositoryInterface;
+use App\Modules\Usuarios\Domain\ReglaContrasena;
 
 final readonly class CambiarPasswordUseCase
 {
@@ -38,11 +39,11 @@ final readonly class CambiarPasswordUseCase
             ];
         }
 
-        if (mb_strlen($password) < 6) {
+        if (! ReglaContrasena::cumple($password)) {
             return [
                 'success' => false,
                 'status' => 400,
-                'data' => ['error' => 'La contraseña debe tener al menos 6 caracteres.'],
+                'data' => ['error' => ReglaContrasena::MENSAJE],
             ];
         }
 

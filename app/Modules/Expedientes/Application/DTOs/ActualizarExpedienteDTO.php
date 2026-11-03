@@ -27,6 +27,9 @@ final readonly class ActualizarExpedienteDTO
             ? $data['fecha_recepcion']
             : new DateTimeImmutable((string) ($data['fecha_recepcion'] ?? 'now'), new \DateTimeZone('America/Lima'));
 
+        // El año del número y el plazo se calculan con el día de Lima, aunque llegue en otra zona
+        $fechaRecepcion = $fechaRecepcion->setTimezone(new \DateTimeZone('America/Lima'));
+
         return new self(
             expedienteId: $expedienteId,
             numeroExpediente: (int) $data['numero_expediente'],

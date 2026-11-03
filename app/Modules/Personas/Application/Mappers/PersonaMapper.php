@@ -18,7 +18,8 @@ final class PersonaMapper
         return new Persona(
             id: $model->id,
             tipoPersona: TipoPersona::from($model->tipo_persona),
-            sexo: Sexo::from($model->sexo),
+            // Un dato heredado vacío o desconocido no debe impedir listar a la persona
+            sexo: Sexo::tryFrom(strtoupper(trim($model->sexo))) ?? Sexo::PrefieroNoDecir,
             apellidoPaterno: $model->apellido_paterno,
             apellidoMaterno: $model->apellido_materno,
             nombres: $model->nombres,

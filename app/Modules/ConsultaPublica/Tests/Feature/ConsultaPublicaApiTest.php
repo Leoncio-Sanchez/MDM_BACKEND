@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Modules\ConsultaPublica\Infrastructure\Providers\ConsultaPublicaServiceProvider;
+use App\Shared\Domain\Calendario;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
@@ -83,8 +84,8 @@ it('muestra un ITSE vencido o inactivado', function () {
     $titular = ($this->persona)('12345678');
     DB::table('itse')->insert(Registros::itse([
         'numero_itse' => 601, 'titular_id' => $titular,
-        'fecha_expedicion' => now()->subYears(2)->subDay()->toDateString(),
-        'fecha_caducidad' => now()->subDay()->toDateString(),
+        'fecha_expedicion' => Calendario::hoy()->subYears(2)->subDay()->toDateString(),
+        'fecha_caducidad' => Calendario::hoy()->subDay()->toDateString(),
     ]));
     $inactivo = DB::table('itse')->insertGetId(Registros::itse(['numero_itse' => 602, 'titular_id' => $titular]));
     $clausura = DB::table('estados')->insertGetId(Registros::estado(['nombre' => 'CLAUSURA', 'esta_activo' => false]));

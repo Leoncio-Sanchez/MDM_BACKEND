@@ -98,6 +98,19 @@ final class UsuarioApiTest extends TestCase
         $this->assertStringStartsWith('pbkdf2_sha256$', $created->password);
     }
 
+    public function test_crear_usuario_exige_el_minimo_de_contrasena(): void
+    {
+        foreach ([[], ['password' => ''], ['password' => '12345'], ['password' => '      '], ['password' => ['clave123']]] as $clave) {
+            $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
+                ->postJson('/api/lf-itse/usuarios/', ['username' => 'corta', ...$clave]);
+
+            $response->assertStatus(400);
+            $this->assertSame('La contraseña debe tener al menos 6 caracteres.', $response->json('error'));
+        }
+
+        $this->assertDatabaseMissing('auth_user', ['username' => 'corta']);
+    }
+
     public function test_obtener_detalle_usuario_devuelve_200(): void
     {
         $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
