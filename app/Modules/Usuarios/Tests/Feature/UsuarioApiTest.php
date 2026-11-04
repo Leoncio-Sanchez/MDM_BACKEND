@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Usuarios\Tests\Feature;
 
+use App\Modules\Seguridad\Domain\Contracts\PasswordHasherInterface;
 use App\Modules\Seguridad\Domain\Contracts\TokenServiceInterface;
 use App\Modules\Seguridad\Domain\ValueObjects\AuthenticatedUser;
 use App\Modules\Usuarios\Infrastructure\Persistence\Models\UsuarioModel;
@@ -76,7 +77,7 @@ final class UsuarioApiTest extends TestCase
         $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
             ->postJson('/api/lf-itse/usuarios/', [
                 'username' => 'nuevo_usuario',
-                'password' => 'clave123',
+                'password' => 'clave12345',
                 'first_name' => 'Juan',
                 'last_name' => 'Perez',
                 'email' => 'juan@muni.gob.pe',
@@ -100,12 +101,12 @@ final class UsuarioApiTest extends TestCase
 
     public function test_crear_usuario_exige_el_minimo_de_contrasena(): void
     {
-        foreach ([[], ['password' => ''], ['password' => '12345'], ['password' => '      '], ['password' => ['clave123']]] as $clave) {
+        foreach ([[], ['password' => ''], ['password' => '123456789'], ['password' => '          '], ['password' => ['clave123']]] as $clave) {
             $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
                 ->postJson('/api/lf-itse/usuarios/', ['username' => 'corta', ...$clave]);
 
             $response->assertStatus(400);
-            $this->assertSame('La contraseña debe tener al menos 6 caracteres.', $response->json('error'));
+            $this->assertSame('La contraseña debe tener al menos 10 caracteres.', $response->json('error'));
         }
 
         $this->assertDatabaseMissing('auth_user', ['username' => 'corta']);
@@ -177,12 +178,42 @@ final class UsuarioApiTest extends TestCase
     {
         $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
             ->patchJson('/api/lf-itse/usuarios/1/cambiar-password/', [
-                'password' => '123',
-                'password_confirm' => '123',
+                'password' => '123456789',
+                'password_confirm' => '123456789',
             ]);
 
         $response->assertStatus(400);
-        $this->assertSame('La contraseña debe tener al menos 6 caracteres.', $response->json('error'));
+        $this->assertSame('La contraseña debe tener al menos 10 caracteres.', $response->json('error'));
+    }
+
+    public function test_una_contrasena_heredada_corta_sigue_entrando_y_se_conserva_al_editar(): void
+    {
+        $hash = app(PasswordHasherInterface::class)->hash('corta1');
+        $usuario = UsuarioModel::create(\Tests\Fixtures\UsuarioAuth::datos([
+            'username' => 'heredado', 'password' => $hash, 'is_staff' => true, 'is_active' => true,
+        ]));
+
+        $this->postJson('/api/auth/jwt/create/', ['username' => 'heredado', 'password' => 'corta1'])
+            ->assertOk()->assertJsonStructure(['access']);
+
+        $this->withHeader('Authorization', 'Bearer '.$this->token)
+            ->putJson('/api/lf-itse/usuarios/'.$usuario->id.'/', ['first_name' => 'NUEVO'])
+            ->assertOk();
+
+        $usuario->refresh();
+        $this->assertSame('NUEVO', $usuario->first_name);
+        $this->assertSame($hash, $usuario->password);
+    }
+
+    public function test_el_minimo_acepta_exactamente_diez_caracteres(): void
+    {
+        $this->withHeader('Authorization', 'Bearer '.$this->token)
+            ->postJson('/api/lf-itse/usuarios/', ['username' => 'diez', 'password' => '1234567890'])
+            ->assertStatus(201);
+
+        $this->withHeader('Authorization', 'Bearer '.$this->token)
+            ->patchJson('/api/lf-itse/usuarios/1/cambiar-password/', ['password' => '0987654321', 'password_confirm' => '0987654321'])
+            ->assertOk();
     }
 
     public function test_obtener_menus_usuario_devuelve_estructura_completa(): void

@@ -83,7 +83,7 @@ final class InspectorApiTest extends TestCase
         $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
             ->postJson('/api/lf-itse/inspectores/', [
                 'username' => 'inspector_nuevo',
-                'password' => 'clave1234',
+                'password' => 'clave12345',
                 'first_name' => 'Roberto',
                 'last_name' => 'Gomez',
                 'email' => 'roberto@muni.gob.pe',
@@ -183,15 +183,15 @@ final class InspectorApiTest extends TestCase
 
     public function test_la_contrasena_del_inspector_exige_el_minimo(): void
     {
-        $mensaje = ['error' => 'La contraseña debe tener al menos 6 caracteres.'];
+        $mensaje = ['error' => 'La contraseña debe tener al menos 10 caracteres.'];
         $pedir = $this->withHeader('Authorization', 'Bearer '.$this->token);
 
         $pedir->postJson('/api/lf-itse/inspectores/', ['username' => 'sin_clave'])->assertStatus(400)->assertExactJson($mensaje);
-        $pedir->postJson('/api/lf-itse/inspectores/', ['username' => 'corta', 'password' => '12345'])->assertStatus(400)->assertExactJson($mensaje);
+        $pedir->postJson('/api/lf-itse/inspectores/', ['username' => 'corta', 'password' => '123456789'])->assertStatus(400)->assertExactJson($mensaje);
         $this->assertDatabaseMissing('auth_user', ['username' => 'corta']);
 
         $inspector = UsuarioModel::create(\Tests\Fixtures\UsuarioAuth::datos(['username' => 'insp_clave', 'password' => 'hash-anterior']));
-        $pedir->putJson('/api/lf-itse/inspectores/'.$inspector->id.'/', ['password' => '12345'])->assertStatus(400)->assertExactJson($mensaje);
+        $pedir->putJson('/api/lf-itse/inspectores/'.$inspector->id.'/', ['password' => '123456789'])->assertStatus(400)->assertExactJson($mensaje);
         $this->assertSame('hash-anterior', $inspector->refresh()->password);
     }
 }
