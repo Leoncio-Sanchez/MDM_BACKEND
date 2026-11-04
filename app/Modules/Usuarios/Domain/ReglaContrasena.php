@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Modules\Usuarios\Domain;
 
-/** Largo mínimo de la contraseña de una cuenta de personal o de inspector. */
+/**
+ * Largo mínimo al crear o cambiar la contraseña de una cuenta de personal o de inspector.
+ * El login no la aplica: las cuentas con una contraseña más corta siguen entrando.
+ */
 final class ReglaContrasena
 {
-    public const MINIMO = 6;
+    public const MINIMO = 10;
 
     public const MENSAJE = 'La contraseña debe tener al menos '.self::MINIMO.' caracteres.';
 
